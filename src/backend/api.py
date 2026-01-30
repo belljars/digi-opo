@@ -5,6 +5,7 @@ tutkinto
 link
 """
 
+from ast import keyword
 from fastapi import FastAPI
 import sqlite3
 from pydantic import BaseModel
@@ -51,3 +52,24 @@ def get_ammatti(ammatti_id: int):
     else:
         return {"error": "Ammatti not found"}
     
+@app.get("/ammatit/tutkinto/{tutkinto}", response_model=List[Ammatti]) # hae ammatit tutkinnon perusteella
+def get_ammatit_tutkinto(tutkinto: str):
+    conn = db_yhteys()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, ammatti, tutkinto, link FROM ammatit WHERE tutkinto = ?", (tutkinto,))
+    rows = cursor.fetchall()
+    ammatit = [Ammatti(id=row[0], ammatti=row[1], tutkinto=row[2], link=row[3]) for row in rows]
+    conn.close()
+    return ammatit
+
+@app.get("/ammatit/search/{keyword}", response_model=List[Ammatti]) # hae ammatit avainsanan perusteella
+def search_ammatit(keyword: str):
+    conn = db_yhteys()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, ammatti, tutkinto, link FROM ammatit WHERE ammatti LIKE ?", ('%' + keyword + '%',))
+    rows = cursor.fetchall()
+    ammatit = [Ammatti(id=row[0], ammatti=row[1], tutkinto=row[2], link=row[3]) for row in rows]
+    conn.close()
+    return ammatit
+ 
+ 
