@@ -32,7 +32,6 @@ digi-opo/
 │   ├── db/
 │   └── api/
 ├── README.md
-├── CONTRIBUTING.md
 └── LICENSE
 ```
 
