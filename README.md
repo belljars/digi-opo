@@ -31,7 +31,6 @@ digi-opo/
 │   ├── logic/
 │   ├── db/
 │   └── api/
-├── docs/
 ├── README.md
 ├── CONTRIBUTING.md
 └── LICENSE
