@@ -2,7 +2,6 @@
   "name": "digi-opo",
   "version": "0.1.0",
   "private": true,
-  "description": "TypeScript-first starter for digi-opo",
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check": "tsc --noEmit --project tsconfig.json"
