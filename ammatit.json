@@ -1,0 +1,124 @@
+{
+  "tutkinnot": [
+    {
+      "nimi": "Puhtaus- ja kiinteistöpalvelualan perustutkinto",
+      "desc": "Puhtaus- ja kiinteistöpalvelualan perustutkinnon suorittanut osaa toimia asiakaskohteessa puhtaus- ja kiinteistöpalvelualan työtehtävissä ja asiakaspalvelutilanteissa asiakaskohteen palvelusopimuksen mukaisesti. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan kiinteistönhoitoon, kotityöpalveluihin tai toimitilahuoltoon osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Kiinteistönhoitaja",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9723361/tekstikappale/9723355"
+        },
+        {
+          "nimi": "Kotityöpalvelujen osaamisala",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9723361/tekstikappale/9723356"
+        },
+        {
+        "nimi": "Toimitilahuoltaja",
+        "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9723361/tekstikappale/9723357"
+        }
+      ]
+    },
+    {
+      "nimi": "Liiketoiminnan perustutkinto",
+      "desc": "Liiketoiminnan perustutkinnon suorittanut osaa toimia asiakaspalvelu- ja myyntitehtävissä, markkinointitehtävissä, taloushallinnon tehtävissä, henkilöstöhallinnon tehtävissä, yritystoiminnan tehtävissä tai logistiikan tehtävissä. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan asiakaspalveluun ja myyntiin, markkinointiin, taloushallintoon, henkilöstöhallintoon, yritystoimintaan tai logistiikkaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Merkonomi",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9720962/tiedot"
+        }
+      ]
+    },
+    {
+      "nimi": "Kone- ja tuotantotekniikan perustutkinto",
+      "desc": "Kone- ja tuotantotekniikan perustutkinnon suorittanut osaa toimia kone- ja tuotantotekniikan tehtävissä, kuten koneiden käyttö, huolto, asennus ja testaus. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan kone- ja tuotantotekniikkaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Koneistaja",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719736"
+        },
+        {
+          "nimi": "Levyseppähitsaaja",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719736"
+        },
+        {
+          "nimi": "Koneautomaatioasentaja",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719737"
+        },
+        {
+          "nimi": "Koneasentaja",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719737"
+        },
+        {
+          "nimi": "Kumituotevalmistaja",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719738"
+        },
+        {
+          "nimi": "Muovituotevalmistaja",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719739"
+        }
+      ]
+    },
+    {
+      "nimi": "Pintakäsittelyalan perustutkinto",
+      "desc": "Pintakäsittelyalan perustutkinnon suorittanut osaa toimia pintakäsittelyalan tehtävissä, kuten maalaus, pinnoitus, korroosiosuojaus ja pintakäsittelyprosessien hallinta. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan pintakäsittelyyn osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Lattianpäällystäjä",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9710485/tekstikappale/9710480"
+        },
+        {
+          "nimi": "Maalari",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9710485/tekstikappale/9710479"
+        },
+        {
+          "nimi": "Pintakäsittelijä",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9710485/tekstikappale/9710481"
+        }
+      ]
+    },
+    {
+      "nimi": "Ajoneuvoalan perustutkinto",
+      "desc": "Ajoneuvoalan perustutkinnon suorittanut osaa toimia ajoneuvoalan tehtävissä, kuten ajoneuvojen huolto, korjaus, myynti ja asiakaspalvelu. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan ajoneuvoalaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Automaalari",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919034"
+        },
+        {
+          "nimi": "Varaisamyyjä",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919033"
+        },
+        {
+          "nimi": "Automekaanikko",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
+        },
+        {
+          "nimi": "Ajoneuvomyyjä",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919033"
+        },
+        {
+          "nimi": "Pienkonemekaanikko",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
+        },
+        {
+          "nimi": "Autokorimekaanikko",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
+        },
+        {
+          "nimi": "Diagnoosimekaanikko",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
+        },
+        {
+          "nimi": "Hyötyajoneuvomekaanikko",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
+        },
+        {
+          "nimi": "Huoltomyyjä",
+          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919033"
+        }
+      ]
+    }
+  ]
+}
+
+https://www.alansmilitaria.co.uk/upload/images/shopprod/11196/reichsmarine-photo-album---hindenburg-reinhard-heydrich_11196_pic4_size2.jpg
