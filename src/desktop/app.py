@@ -1,5 +1,3 @@
-"""Desktop entrypoint for digi-opo using pywebview."""
-
 from __future__ import annotations
 
 import json
@@ -66,7 +64,7 @@ def _import_from_json(conn: sqlite3.Connection) -> None:
     try:
         data = json.loads(raw_text)
     except json.JSONDecodeError:
-        # Handle trailing junk after the JSON payload.
+        # Käsittelee JSON-payloadin jälkeiset roskat.
         decoder = json.JSONDecoder()
         data, _ = decoder.raw_decode(raw_text.lstrip())
 
