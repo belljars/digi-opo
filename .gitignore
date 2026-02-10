@@ -201,6 +201,9 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# Built UI artifact copied for pywebview local file access
+src/ui/main.js
+
 # Marimo
 marimo/_static/
 marimo/_lsp/

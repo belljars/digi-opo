@@ -1,33 +1,17 @@
-:root {
-  color-scheme: light;
-  font-family: "IBM Plex Sans", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  --bg: #eef2f7;
-  --card: #ffffff;
-  --ink: #1a2433;
-  --muted: #5b6c84;
-  --accent: #2d6cdf;
-  --accent-soft: #e6eefc;
-  --border: #d6e1f0;
-}
-
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 60%);
-  color: var(--ink);
+  font-family: system-ui, sans-serif;
 }
 
 .app {
   max-width: 1100px;
   margin: 2rem auto;
   padding: 1.5rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(28, 42, 70, 0.08);
+  border: 1px solid currentColor;
 }
 
 .header {
@@ -45,14 +29,11 @@ body {
 
 .header p {
   margin: 0;
-  color: var(--muted);
 }
 
 .badge {
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  border: 1px solid currentColor;
   font-weight: 600;
   font-size: 0.85rem;
 }
@@ -65,10 +46,8 @@ body {
 }
 
 .panel {
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border: 1px solid currentColor;
   padding: 1rem;
-  background: #f9fbff;
 }
 
 .panel-list {
@@ -77,23 +56,8 @@ body {
   gap: 0.75rem;
 }
 
-.search {
-  display: grid;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.search input {
-  padding: 0.55rem 0.7rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  font-size: 0.95rem;
-}
-
 .count {
   font-size: 0.85rem;
-  color: var(--muted);
 }
 
 .list {
@@ -108,24 +72,11 @@ body {
 .list button {
   width: 100%;
   text-align: left;
-  border: 1px solid transparent;
-  background: #ffffff;
+  border: 1px solid currentColor;
+  background: transparent;
   padding: 0.6rem 0.7rem;
-  border-radius: 10px;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.list button:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.list button.active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  font-weight: 600;
 }
 
 .detail h2 {
@@ -134,19 +85,13 @@ body {
 
 .detail p {
   line-height: 1.6;
-  color: var(--muted);
 }
 
 .detail ul {
   padding-left: 1rem;
 }
 
-.detail a {
-  color: var(--accent);
-}
-
 .empty {
-  color: var(--muted);
   font-style: italic;
 }
 

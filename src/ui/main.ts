@@ -34,15 +34,35 @@ declare global {
 const listEl = document.getElementById("tutkinto-list");
 const detailEl = document.getElementById("detail");
 const countEl = document.getElementById("count");
-const searchInput = document.getElementById("search-input") as HTMLInputElement | null;
-
 let activeId: number | null = null;
-let searchTimer: number | null = null;
 
 function setCount(count: number): void {
   if (countEl) {
     countEl.textContent = `${count} tutkintoa`;
   }
+}
+
+function getApi(): Api | null {
+  return window.pywebview?.api ?? null;
+}
+
+async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
+  const start = Date.now();
+  return new Promise((resolve) => {
+    const tick = (): void => {
+      const api = getApi();
+      if (api) {
+        resolve(api);
+        return;
+      }
+      if (Date.now() - start >= timeoutMs) {
+        resolve(null);
+        return;
+      }
+      window.requestAnimationFrame(tick);
+    };
+    tick();
+  });
 }
 
 function renderList(items: TutkintoListItem[]): void {
@@ -100,7 +120,7 @@ function renderDetail(detail: TutkintoDetail): void {
 }
 
 async function selectTutkinto(id: number): Promise<void> {
-  const api = window.pywebview?.api;
+  const api = getApi();
   if (!api) {
     renderEmpty("Pywebview API ei ole käytettävissä.");
     return;
@@ -125,12 +145,7 @@ function refreshActiveStyles(): void {
   });
 }
 
-async function loadInitial(): Promise<void> {
-  const api = window.pywebview?.api;
-  if (!api) {
-    renderEmpty("Pywebview API ei ole käytettävissä.");
-    return;
-  }
+async function loadInitial(api: Api): Promise<void> {
   renderEmpty("Ladataan...");
   const items = await api.list_tutkinnot();
   renderList(items);
@@ -141,36 +156,19 @@ async function loadInitial(): Promise<void> {
   }
 }
 
-async function runSearch(query: string): Promise<void> {
-  const api = window.pywebview?.api;
+async function init(): Promise<void> {
+  const api = await waitForApi();
   if (!api) {
+    renderEmpty("Pywebview API ei ole käytettävissä.");
     return;
   }
-  const items = await api.search_tutkinnot(query);
-  renderList(items);
-  if (items.length > 0 && (activeId === null || !items.some((item) => item.id === activeId))) {
-    await selectTutkinto(items[0].id);
-  } else if (items.length === 0) {
-    renderEmpty("Ei osumia.");
-  }
-}
-
-function setupSearch(): void {
-  if (!searchInput) {
-    return;
-  }
-  searchInput.addEventListener("input", (event) => {
-    const value = (event.target as HTMLInputElement).value;
-    if (searchTimer) {
-      window.clearTimeout(searchTimer);
-    }
-    searchTimer = window.setTimeout(() => {
-      void runSearch(value);
-    }, 250);
-  });
+  await loadInitial(api);
 }
 
 window.addEventListener("pywebviewready", () => {
-  setupSearch();
-  void loadInitial();
+  void init();
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  void init();
 });

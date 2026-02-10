@@ -18,10 +18,6 @@
 
       <section class="workspace">
         <aside class="panel panel-list">
-          <label class="search">
-            <span>Haku</span>
-            <input id="search-input" type="search" placeholder="Hae tutkintoja..." />
-          </label>
           <div id="count" class="count"></div>
           <ul id="tutkinto-list" class="list"></ul>
         </aside>
@@ -32,7 +28,7 @@
       </section>
     </main>
 
-    <!-- Build TypeScript first so dist/ui/main.js exists -->
-    <script type="module" src="../../dist/ui/main.js"></script>
+    <!-- Build TypeScript first so dist/ui/main.js exists, then copy to src/ui/main.js -->
+    <script type="module" src="./main.js"></script>
   </body>
 </html>
