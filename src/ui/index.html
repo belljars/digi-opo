@@ -8,14 +8,31 @@
   </head>
   <body>
     <main class="app">
-      <h1>digi-opo</h1>
-      <p>Ura- ja ammattivertailun prototyyppi (TypeScript ensin).</p>
-      <section id="app-root"></section>
-      <p id="php-status" class="status">PHP-yhteys: tarkistetaan...</p>
+      <header class="header">
+        <div>
+          <h1>digi-opo</h1>
+          <p>Paikallinen tutkintopankki (TypeScript + pywebview).</p>
+        </div>
+        <div class="badge">MVP</div>
+      </header>
+
+      <section class="workspace">
+        <aside class="panel panel-list">
+          <label class="search">
+            <span>Haku</span>
+            <input id="search-input" type="search" placeholder="Hae tutkintoja..." />
+          </label>
+          <div id="count" class="count"></div>
+          <ul id="tutkinto-list" class="list"></ul>
+        </aside>
+
+        <section class="panel panel-detail">
+          <div id="detail" class="detail"></div>
+        </section>
+      </section>
     </main>
 
     <!-- Build TypeScript first so dist/ui/main.js exists -->
     <script type="module" src="../../dist/ui/main.js"></script>
-    <script src="./legacy.js" defer></script>
   </body>
 </html>
