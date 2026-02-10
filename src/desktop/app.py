@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 from pathlib import Path
 
 import webview
@@ -27,7 +28,7 @@ def _source_json_path() -> Path:
 
 
 def _connect_db() -> sqlite3.Connection:
-    conn = sqlite3.connect(_db_path())
+    conn = sqlite3.connect(_db_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
@@ -110,31 +111,35 @@ def _ensure_data(conn: sqlite3.Connection) -> None:
 class Api:
     def __init__(self) -> None:
         self._conn = _connect_db()
+        self._lock = threading.Lock()
         _ensure_data(self._conn)
 
     def list_tutkinnot(self) -> list[dict[str, str | int]]:
-        rows = self._conn.execute(
-            "SELECT id, nimi FROM tutkinnot ORDER BY nimi;"
-        ).fetchall()
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT id, nimi FROM tutkinnot ORDER BY nimi;"
+            ).fetchall()
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
     def get_tutkinto(self, tutkinto_id: int) -> dict | None:
-        row = self._conn.execute(
-            "SELECT id, nimi, desc FROM tutkinnot WHERE id = ?;",
-            (tutkinto_id,),
-        ).fetchone()
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT id, nimi, desc FROM tutkinnot WHERE id = ?;",
+                (tutkinto_id,),
+            ).fetchone()
         if row is None:
             return None
 
-        nimikkeet = self._conn.execute(
-            """
-            SELECT nimi, linkki
-            FROM tutkintonimikkeet
-            WHERE tutkinto_id = ?
-            ORDER BY nimi;
-            """,
-            (tutkinto_id,),
-        ).fetchall()
+        with self._lock:
+            nimikkeet = self._conn.execute(
+                """
+                SELECT nimi, linkki
+                FROM tutkintonimikkeet
+                WHERE tutkinto_id = ?
+                ORDER BY nimi;
+                """,
+                (tutkinto_id,),
+            ).fetchall()
         return {
             "id": row["id"],
             "nimi": row["nimi"],
@@ -145,27 +150,28 @@ class Api:
             ],
         }
 
-    def search_tutkinnot(self, query: str) -> list[dict[str, str | int]]:
-        term = f"%{query.strip()}%"
-        if term == "%%":
+    def search_tutkinnot(self, query: str | None) -> list[dict[str, str | int]]:
+        if not query or not str(query).strip():
             return self.list_tutkinnot()
-        rows = self._conn.execute(
-            """
-            SELECT DISTINCT t.id, t.nimi
-            FROM tutkinnot t
-            LEFT JOIN tutkintonimikkeet n ON n.tutkinto_id = t.id
-            WHERE t.nimi LIKE ? OR t.desc LIKE ? OR n.nimi LIKE ?
-            ORDER BY t.nimi;
-            """,
-            (term, term, term),
-        ).fetchall()
+        term = f"%{str(query).strip()}%"
+        with self._lock:
+            rows = self._conn.execute(
+                """
+                SELECT DISTINCT t.id, t.nimi
+                FROM tutkinnot t
+                LEFT JOIN tutkintonimikkeet n ON n.tutkinto_id = t.id
+                WHERE t.nimi LIKE ? OR t.desc LIKE ? OR n.nimi LIKE ?
+                ORDER BY t.nimi;
+                """,
+                (term, term, term),
+            ).fetchall()
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
 
 def main() -> None:
     api = Api()
     webview.create_window("digi-opo", _ui_index_path(), js_api=api, width=1024, height=768)
-    webview.start()
+    webview.start(gui="qt")
 
 
 if __name__ == "__main__":

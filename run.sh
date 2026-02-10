@@ -10,4 +10,5 @@ fi
 pip install -r requirements.txt
 
 npm run build
+cp dist/ui/main.js src/ui/main.js
 python3 src/desktop/app.py
