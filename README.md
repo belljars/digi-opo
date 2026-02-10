@@ -1,86 +1,60 @@
-# digi-opo — Project Documentation Guide
+# digi-opo — Työpöytä-MVP
 
-## Overview
+## Yleiskuvaus
 
-**digi-opo** is a standalone desktop application for career exploration that uses a simple two-card comparison model. The app is designed to aggregate global preference data from user decisions without requiring individual user accounts. The documentation below describes goals, architecture, usage, data models, and structure recommendations for Markdown documentation.
+**digi-opo** on paikallinen työpöytäsovellus suomalaisiin tutkintoihin ja niiden tutkintonimikkeisiin tutustumiseen. Sovellus käyttää Python-pohjaista (pywebview) taustaa ja TypeScript-UI:ta, ja tallentaa datan SQLiteen käyttäen lähteenä `ammatit.json`-tiedostoa.
 
----
+## Mitä se tekee nyt (MVP)
 
-## Purpose and Vision
-
-### Purpose
-
-* Provide a low-friction way to explore and compare careers (ammatit) using paired comparisons.
-* Collect and display global preference statistics, preserving user anonymity.
-
-### Vision
-
-* A minimal-friction user experience that helps users discover careers by comparing options.
-* Career data and aggregated results are prioritized; educational qualifications (tutkinnot) are structured as supporting metadata.
+- Tuo `ammatit.json`-datan paikalliseen SQLite-tietokantaan (`data/ammatit.db`) ensimmäisellä ajolla.
+- Listaa kaikki tutkinnot ja näyttää yksityiskohdat + tutkintonimikkeet.
+- Toimii täysin offline-tilassa paikallisella käyttöliittymällä.
 
 ---
 
-## Project Structure
-
-Below is an example repository layout:
+## Projektin rakenne
 
 ```
 digi-opo/
 ├── src/
-│   ├── ui/
-│   ├── logic/
-│   ├── db/
-│   └── api/
+│   ├── ui/         # HTML/CSS/TS UI
+│   └── desktop/    # pywebview app + API
+├── ammatit.json
+├── run.sh
 ├── README.md
 └── LICENSE
 ```
 
-
----
-
-## Technology Stack
+## Teknologiat
 
 | Component     | Technology (example)     |
 | ------------- | ------------------------ |
-| Backend Logic | Node.js / Python         |
-| Database      | SQLite                   |
+| Taustalogiikka | Python (pywebview)       |
+| UI            | TypeScript + HTML + CSS   |
+| Tietokanta    | SQLite                    |
 
 ---
 
-## Required languages to use:
+## Pakolliset kielet:
 - Python
 - JavaScript
 - TypeScript
 - HTML
 - CSS
 
-With the most focus on TypeScript for this project.
+Painotus tässä projektissa on TypeScriptissä.
 
+## Ajaminen paikallisesti
 
----
+```bash
+./run.sh
+```
 
-## Key Concepts
+Huom:
+- `run.sh` kääntää TypeScriptin, kopioi käännetyn UI:n tiedostoon `src/ui/main.js` ja käynnistää työpöytäsovelluksen.
+- Arch Linuxissa pywebview tarvitsee Qt:n (PyQt6 + QtWebEngine). Tämä asennetaan `requirements.txt`:n kautta, mutta järjestelmän Qt-kirjastot on silti oltava asennettuina.
 
-### Core Entities
+## Nykyinen datamalli (minimi)
 
-**Ammatti**
-
-* Unique identifier
-* Name
-* One representative image
-* Primary color (for consistent UI)
-* External career reference (e.g., ePerusteet link)
-
-**Tutkinto**
-
-* Academic qualification
-* One-to-many relationship with ammatit
-
-**Tags**
-
-* Multiple categorical descriptors applied to ammatit
-
-**Results**
-
-* Aggregated global preference data (no user accounts)
-
+- `tutkinnot`-taulu: `id`, `nimi`, `desc`
+- `tutkintonimikkeet`-taulu: `id`, `tutkinto_id`, `nimi`, `linkki`
