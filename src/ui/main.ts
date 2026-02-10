@@ -23,18 +23,11 @@ type Api = {
   search_tutkinnot: (query: string) => Promise<TutkintoListItem[]>;
 };
 
-declare global {
-  interface Window {
-    pywebview?: {
-      api: Api;
-    };
-  }
-}
-
 const listEl = document.getElementById("tutkinto-list");
 const detailEl = document.getElementById("detail");
 const countEl = document.getElementById("count");
 let activeId: number | null = null;
+let allItems: TutkintoListItem[] = [];
 
 function setCount(count: number): void {
   if (countEl) {
@@ -147,10 +140,10 @@ function refreshActiveStyles(): void {
 
 async function loadInitial(api: Api): Promise<void> {
   renderEmpty("Ladataan...");
-  const items = await api.list_tutkinnot();
-  renderList(items);
-  if (items.length > 0) {
-    await selectTutkinto(items[0].id);
+  allItems = await api.list_tutkinnot();
+  renderList(allItems);
+  if (allItems.length > 0) {
+    await selectTutkinto(allItems[0].id);
   } else {
     renderEmpty("Ei tutkintoja.");
   }

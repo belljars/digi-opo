@@ -203,6 +203,7 @@ cython_debug/
 
 # Built UI artifact copied for pywebview local file access
 src/ui/main.js
+src/ui/quiz.js
 
 # Marimo
 marimo/_static/
