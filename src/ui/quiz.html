@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>digi-opo — vertailu</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div>
+          <h1>digi-opo</h1>
+          <p>Kahden kortin vertailu.</p>
+        </div>
+        <div class="header-actions">
+          <a class="header-link" href="./index.html">Takaisin listaan</a>
+          <div class="badge">MVP</div>
+        </div>
+      </header>
+
+      <section class="panel panel-quiz">
+        <header class="quiz-header">
+          <h2>Kahden kortin vertailu</h2>
+          <div class="quiz-meta">
+            <span id="quiz-count"></span>
+            <button id="quiz-skip" type="button">Vaihda pari</button>
+          </div>
+        </header>
+        <div class="quiz-cards">
+          <button id="quiz-left" class="quiz-card" type="button"></button>
+          <button id="quiz-right" class="quiz-card" type="button"></button>
+        </div>
+        <div class="quiz-history">
+          <h3>Viimeisimmät valinnat</h3>
+          <ul id="quiz-history" class="history"></ul>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./quiz.js"></script>
+  </body>
+</html>

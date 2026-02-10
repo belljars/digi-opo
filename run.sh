@@ -11,4 +11,5 @@ pip install -r requirements.txt
 
 npm run build
 cp dist/ui/main.js src/ui/main.js
+cp dist/ui/quiz.js src/ui/quiz.js
 python3 src/desktop/app.py

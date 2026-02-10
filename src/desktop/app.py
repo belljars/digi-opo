@@ -167,6 +167,27 @@ class Api:
             ).fetchall()
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
+    def list_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
+        with self._lock:
+            rows = self._conn.execute(
+                """
+                SELECT n.id, n.nimi, n.linkki, n.tutkinto_id, t.nimi AS tutkinto_nimi
+                FROM tutkintonimikkeet n
+                JOIN tutkinnot t ON t.id = n.tutkinto_id
+                ORDER BY n.nimi;
+                """
+            ).fetchall()
+        return [
+            {
+                "id": row["id"],
+                "nimi": row["nimi"],
+                "linkki": row["linkki"],
+                "tutkinto_id": row["tutkinto_id"],
+                "tutkinto_nimi": row["tutkinto_nimi"],
+            }
+            for row in rows
+        ]
+
 
 def main() -> None:
     api = Api()
