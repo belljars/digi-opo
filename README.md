@@ -6,7 +6,7 @@
 
 ## Mitä se tekee nyt (MVP)
 
-- Tuo `ammatit.json`-datan paikalliseen SQLite-tietokantaan (`data/ammatit.db`) ensimmäisellä ajolla.
+- Tuo `ammatit.json`-datan paikalliseen SQLite-tietokantaan (`data/tutkinnot.db`) ensimmäisellä ajolla.
 - Listaa kaikki tutkinnot ja näyttää yksityiskohdat + tutkintonimikkeet.
 - Toimii täysin offline-tilassa paikallisella käyttöliittymällä.
 
