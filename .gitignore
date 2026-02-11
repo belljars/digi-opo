@@ -209,3 +209,5 @@ src/ui/quiz.js
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+node_modules/
