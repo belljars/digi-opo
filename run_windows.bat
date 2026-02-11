@@ -44,20 +44,20 @@ if errorlevel 1 exit /b %errorlevel%
 call npm run build
 if errorlevel 1 exit /b %errorlevel%
 
-if not exist "dist\ui\main.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\main.js
+if not exist "dist\ui\scripts\main.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\main.js
   exit /b 1
 )
 
-if not exist "dist\ui\quiz.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\quiz.js
+if not exist "dist\ui\scripts\quiz.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\quiz.js
   exit /b 1
 )
 
-copy /Y dist\ui\main.js src\ui\main.js >nul
+copy /Y dist\ui\scripts\main.js src\ui\scripts\main.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
-copy /Y dist\ui\quiz.js src\ui\quiz.js >nul
+copy /Y dist\ui\scripts\quiz.js src\ui\scripts\quiz.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
 "%VENV_PY%" src\desktop\app.py

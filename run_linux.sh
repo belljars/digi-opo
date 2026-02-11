@@ -10,6 +10,6 @@ fi
 pip install -r requirements.txt
 
 npm run build
-cp dist/ui/main.js src/ui/main.js
-cp dist/ui/quiz.js src/ui/quiz.js
+cp dist/ui/scripts/main.js src/ui/scripts/main.js
+cp dist/ui/scripts/quiz.js src/ui/scripts/quiz.js
 python3 src/desktop/app.py

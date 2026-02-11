@@ -20,7 +20,7 @@ digi-opo/
 │   ├── ui/         # HTML/CSS/TS UI
 │   └── desktop/    # pywebview app + API
 ├── ammatit.json
-├── run.sh
+├── run_linux.sh
 ├── README.md
 └── LICENSE
 ```
@@ -47,14 +47,18 @@ Painotus tässä projektissa on TypeScriptissä.
 ## Ajaminen paikallisesti
 
 ```bash
-./run.sh
+./run_linux.sh
 ```
 
 Huom:
-- `run.sh` kääntää TypeScriptin, kopioi käännetyn UI:n tiedostoon `src/ui/main.js` ja käynnistää työpöytäsovelluksen.
+- `run_linux.sh` kääntää TypeScriptin, kopioi käännetyn UI:n tiedostoon `src/ui/scripts/main.js` ja `src/ui/scripts/quiz.js` ja käynnistää työpöytäsovelluksen.
 - Arch Linuxissa pywebview tarvitsee Qt:n (PyQt6 + QtWebEngine). Tämä asennetaan `requirements.txt`:n kautta, mutta järjestelmän Qt-kirjastot on silti oltava asennettuina.
 
 ## Nykyinen datamalli (minimi)
 
 - `tutkinnot`-taulu: `id`, `nimi`, `desc`
 - `tutkintonimikkeet`-taulu: `id`, `tutkinto_id`, `nimi`, `linkki`
+
+
+
+

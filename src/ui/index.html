@@ -1,21 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="fi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>digi-opo</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles/styles.css" />
   </head>
   <body>
     <main class="app">
       <header class="header">
         <div>
           <h1>digi-opo</h1>
-          <p>Paikallinen tutkintopankki (TypeScript + pywebview).</p>
-        </div>
-        <div class="header-actions">
-          <a class="header-link" href="./quiz.html">Avaa vertailu</a>
-          <div class="badge">MVP</div>
         </div>
       </header>
 
@@ -31,7 +26,7 @@
       </section>
     </main>
 
-    <!-- Build TypeScript first so dist/ui/main.js exists, then copy to src/ui/main.js -->
-    <script type="module" src="./main.js"></script>
+    <!-- Rakenna TypeScript ensin joten dist/ui/scripts/main.js on olemassa, sitten kopioi se src/ui/scripts/main.js -->
+    <script type="module" src="./scripts/main.js"></script>
   </body>
 </html>
