@@ -10,7 +10,7 @@ import webview
 
 def _ui_index_path() -> str:
     project_root = Path(__file__).resolve().parents[2]
-    return str(project_root / "src" / "ui" / "index.html")
+    return str(project_root / "src" / "ui" / "home.html")
 
 
 def _db_path() -> Path:
