@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+﻿# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class
@@ -211,3 +211,9 @@ marimo/_lsp/
 __marimo__/
 
 node_modules/
+# TypeScript build output
+# Compiled JS is emitted to dist/ (already ignored above).
+# Keep explicit copied UI artifacts ignored.
+
+opintopolut.js
+layout.js

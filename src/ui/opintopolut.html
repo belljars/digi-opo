@@ -6,28 +6,22 @@
     <title>digi-opo - opintopolut</title>
     <link rel="stylesheet" href="./styles/styles.css" />
   </head>
-  <body>
+  <body data-page="opintopolut" data-subtitle="Erilaiset opintopolut">
     <main class="app">
-      <header class="header">
-        <div>
-          <h1>digi-opo</h1>
-          <p>Erilaiset opintopolut</p>
-        </div>
-        <div class="header-actions">
-          <a class="header-link" href="./home.html">Etusivulle</a>
-          <div class="badge">MVP</div>
-        </div>
-      </header>
+      <div id="app-header"></div>
 
       <section class="panel">
-        <div class="detail">
-          <h2>Tulossa</h2>
-          <p>
-            Tähän näkymään kootaan erilaisia opintopolkuja ja esimerkkejä siitä,
-            miten tutkintoja voi yhdistää. Lisää sisältöä tulossa pian.
-          </p>
+        <div class="detail opintopolut-detail">
+          <h2>Erilaiset opintopolut</h2>
+          <p id="opintopolut-status" class="empty">Ladataan...</p>
+          <div id="opintopolut-list" class="opintopolut-grid"></div>
         </div>
       </section>
+
+      <footer id="app-footer" class="site-footer"></footer>
     </main>
+
+    <script type="module" src="./scripts/layout.js"></script>
+    <script type="module" src="./scripts/opintopolut.js"></script>
   </body>
 </html>
