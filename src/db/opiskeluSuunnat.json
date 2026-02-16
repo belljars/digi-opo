@@ -1,0 +1,40 @@
+{
+    "opiskeluSuunnat": [
+        {
+        "id": 1,
+        "nimi": "Lukio",
+        "desc": "Lukio on yleissivistävä toisen asteen koulutus, jossa opiskellaan laajasti eri oppiaineita kuten kieliä, matematiikkaa, luonnontieteitä, yhteiskuntaoppia ja taideaineita. Opiskelun tavoitteena on rakentaa vahva tiedollinen perusta, kehittää ajattelu- ja opiskelutaitoja sekä valmistautua ylioppilastutkintoon. Lukio sopii erityisesti niille, jotka haluavat pitää jatko-opintovaihtoehtonsa avoimina, sillä lukion jälkeen voi hakea sekä yliopistoon että ammattikorkeakouluun. Opinnoissa painottuu itsenäinen työskentely, kurssimuotoisuus ja oman opintopolun suunnittelu.",
+        "kenelle": "- Haluat pitää monta jatko-opintovaihtoehtoa auki\n- Pidät teoriapainotteisesta opiskelusta\n- Tavoittelet ylioppilastutkintoa"
+        },
+        {
+        "id": 2,
+        "nimi": "Ammattikoulu",
+        "desc": "Ammattikoulu tarjoaa ammatillista koulutusta, jossa opitaan käytännön työelämässä tarvittavia taitoja ja suoritetaan ammatillinen perustutkinto. Opinnot koostuvat sekä oppilaitoksessa tapahtuvasta opiskelusta että työpaikoilla suoritettavista jaksoista, joissa osaamista harjoitellaan oikeissa työtehtävissä. Koulutus valmistaa suoraan ammattiin ja antaa valmiudet työllistyä nopeasti valmistumisen jälkeen. Samalla se mahdollistaa myös jatko-opinnot esimerkiksi ammattikorkeakoulussa. Ammattikoulu on hyvä valinta, jos haluat oppia tekemällä, kehittää kädentaitoja tai suuntautua selkeästi tietylle alalle.",
+        "kenelle": "- Haluat oppia käytännön tekemisen kautta\n- Tiedät jo kiinnostavan alan\n- Haluat työelämään nopeasti tai jatkaa myöhemmin korkeakouluun"
+        },
+        {
+        "id": 3,
+        "nimi": "TUVA",
+        "desc": "TUVA eli tutkintokoulutukseen valmentava koulutus on tarkoitettu nuorille, jotka tarvitsevat lisäaikaa, tukea tai varmuutta ennen siirtymistä tutkintotavoitteiseen koulutukseen. TUVA-opinnoissa vahvistetaan esimerkiksi opiskelutaitoja, perusopetuksen tietoja, suomen tai ruotsin kielen taitoa sekä arjenhallintaa. Koulutuksen aikana tutustutaan erilaisiin koulutusvaihtoehtoihin ja ammatteihin, jotta oma jatkopolku selkiytyy. Tavoitteena on, että opiskelija löytää itselleen sopivan suunnan ja saa riittävät valmiudet siirtyä lukioon tai ammatilliseen koulutukseen.",
+        "kenelle": "- Et vielä tiedä, haetko lukioon vai ammattikouluun\n- Tarvitset lisävalmiuksia opiskeluun\n- Haluat vahvistaa arjen, opintojen ja urasuunnittelun taitoja"
+        },
+        {
+        "id": 4,
+        "nimi": "TELMA",
+        "desc": "TELMA eli työhön ja itsenäiseen elämään valmentava koulutus on suunnattu opiskelijoille, jotka tarvitsevat erityistä tai vaativaa erityistä tukea opinnoissaan. Koulutuksessa harjoitellaan työelämävalmiuksia, toimintakykyä, vuorovaikutustaitoja sekä itsenäisessä elämässä tarvittavia arjen taitoja. Opiskelu etenee yksilöllisesti opiskelijan omien tavoitteiden ja vahvuuksien mukaan, ja siihen sisältyy usein käytännönläheistä tekemistä sekä työelämään tutustumista. TELMAn tavoitteena on tukea opiskelijan osallisuutta, itsenäistymistä ja mahdollisuuksia löytää sopivia jatkopolkuja työelämään tai muihin palveluihin.",
+        "kenelle": "- Tarvitset paljon yksilöllistä tukea opinnoissa\n- Tavoittelet valmiuksia työelämään ja arkeen\n- Haluat edetä omassa tahdissa"
+        },
+        {
+        "id": 5,
+        "nimi": "Yliopisto",
+        "desc": "Yliopisto tarjoaa tieteellistä korkeakoulutusta, jossa opiskelu perustuu tutkimukseen ja kriittiseen ajatteluun. Opinnoissa perehdytään syvällisesti oman alan teoriaan, käsitteisiin ja tutkimusmenetelmiin, ja opiskelijaa kannustetaan itsenäiseen tiedonhakuun sekä analyyttiseen työskentelyyn. Tutkintopolku etenee yleensä kandidaatin tutkinnosta maisterin tutkintoon, ja joillakin aloilla suoraan ylempään tutkintoon. Yliopisto-opinnot valmentavat asiantuntija-, kehittämis- ja tutkimustehtäviin sekä antavat hyvän pohjan myös kansainvälisiin uramahdollisuuksiin.",
+        "kenelle": "- Olet kiinnostunut syvällisestä teoriasta ja tutkimuksesta\n- Tavoittelet asiantuntija- tai tutkimusuraa\n- Olet valmis pitkäjänteiseen opiskeluun"
+        },
+        {
+        "id": 6,
+        "nimi": "AMK",
+        "desc": "Ammattikorkeakoulu (AMK) tarjoaa käytännönläheistä korkeakoulutusta, jossa teoria yhdistyy tiiviisti työelämän tarpeisiin. Opinnot sisältävät usein projekteja, harjoittelua, yritysyhteistyötä ja soveltavaa kehittämistyötä, joiden avulla osaamista rakennetaan konkreettisissa tilanteissa. Tavoitteena on valmistua asiantuntijaksi, joka osaa soveltaa tietoa käytäntöön ja kehittää oman alansa toimintaa. AMK-tutkinto antaa hyvät valmiudet siirtyä suoraan työelämään, ja sen jälkeen on mahdollista jatkaa opintoja esimerkiksi ylempään AMK-tutkintoon tai joissain tapauksissa yliopistoon.",
+        "kenelle": "- Haluat käytännönläheisen korkeakoulutuksen\n- Kiinnostavat projektit, harjoittelut ja työelämäverkostot\n- Tavoittelet asiantuntijatehtäviä omalla alalla"
+        }
+    ]
+}
