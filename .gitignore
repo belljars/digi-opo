@@ -202,8 +202,7 @@ cython_debug/
 .cursorindexingignore
 
 # Built UI artifact copied for pywebview local file access
-src/ui/main.js
-src/ui/quiz.js
+
 
 # Marimo
 marimo/_static/
@@ -215,5 +214,7 @@ node_modules/
 # Compiled JS is emitted to dist/ (already ignored above).
 # Keep explicit copied UI artifacts ignored.
 
-opintopolut.js
-layout.js
+src/ui/scripts/layout.js
+src/ui/scripts/main.js
+src/ui/scripts/opintopolut.js
+src/ui/scripts/quiz.js
