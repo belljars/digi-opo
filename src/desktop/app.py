@@ -210,6 +210,7 @@ class Api:
         return [
             {
                 "id": int(item.get("id", 0)),
+                "img": str(item.get("img", "")).strip(),
                 "nimi": str(item.get("nimi", "")).strip(),
                 "desc": str(item.get("desc", "")).strip(),
                 "kenelle": str(item.get("kenelle", "")).strip(),

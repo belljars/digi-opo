@@ -2,6 +2,7 @@ export {};
 
 type OpiskeluSuunta = {
   id: number;
+  img: string;
   nimi: string;
   desc: string;
   kenelle: string;
@@ -69,6 +70,14 @@ function renderItems(items: OpiskeluSuunta[]): void {
       const title = document.createElement("h3");
       title.textContent = item.nimi;
 
+      const image = document.createElement("img");
+      image.className = "card-image";
+      image.src = item.img;
+      image.alt = `${item.nimi} kuva`;
+      image.addEventListener("error", () => {
+        image.style.display = "none";
+      });
+
       const desc = document.createElement("p");
       desc.textContent = item.desc;
 
@@ -86,7 +95,7 @@ function renderItems(items: OpiskeluSuunta[]): void {
         })
       );
 
-      card.append(title, desc, subheading, list);
+      card.append(title, image, desc, subheading, list);
       return card;
     })
   );

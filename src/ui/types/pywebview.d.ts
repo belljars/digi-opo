@@ -22,6 +22,7 @@ type TutkintoDetail = {
 
 type OpiskeluSuunta = {
   id: number;
+  img: string;
   nimi: string;
   desc: string;
   kenelle: string;
