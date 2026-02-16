@@ -25,6 +25,11 @@ def _source_json_path() -> Path:
     return project_root / "ammatit.json"
 
 
+def _opiskelu_suunnat_json_path() -> Path:
+    project_root = Path(__file__).resolve().parents[2]
+    return project_root / "src" / "db" / "opiskeluSuunnat.json"
+
+
 def _connect_db() -> sqlite3.Connection:
     conn = sqlite3.connect(_db_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
@@ -184,6 +189,33 @@ class Api:
                 "tutkinto_nimi": row["tutkinto_nimi"],
             }
             for row in rows
+        ]
+
+    def list_opiskelu_suunnat(self) -> list[dict[str, str | int]]:
+        source_path = _opiskelu_suunnat_json_path()
+        if not source_path.exists():
+            raise FileNotFoundError(f"Missing source data: {source_path}")
+
+        raw_text = source_path.read_text(encoding="utf-8")
+        try:
+            data = json.loads(raw_text)
+        except json.JSONDecodeError:
+            decoder = json.JSONDecoder()
+            data, _ = decoder.raw_decode(raw_text.lstrip())
+
+        opiskelu_suunnat = data.get("opiskeluSuunnat", [])
+        if not isinstance(opiskelu_suunnat, list):
+            raise ValueError("opiskeluSuunnat.json missing 'opiskeluSuunnat' list")
+
+        return [
+            {
+                "id": int(item.get("id", 0)),
+                "nimi": str(item.get("nimi", "")).strip(),
+                "desc": str(item.get("desc", "")).strip(),
+                "kenelle": str(item.get("kenelle", "")).strip(),
+            }
+            for item in opiskelu_suunnat
+            if str(item.get("nimi", "")).strip()
         ]
 
 

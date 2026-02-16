@@ -6,16 +6,9 @@
     <title>digi-opo</title>
     <link rel="stylesheet" href="./styles/styles.css" />
   </head>
-  <body>
+  <body data-page="index" data-subtitle="Amis tutkintopankki">
     <main class="app">
-      <header class="header">
-        <div>
-          <h1>digi-opo</h1>
-        </div>
-        <div class="header-actions">
-          <a class="header-link" href="./home.html">Etusivulle</a>
-        </div>
-      </header>
+      <div id="app-header"></div>
 
       <section class="workspace">
         <aside class="panel panel-list">
@@ -27,9 +20,11 @@
           <div id="detail" class="detail"></div>
         </section>
       </section>
+
+      <footer id="app-footer" class="site-footer"></footer>
     </main>
 
-    <!-- Rakenna TypeScript ensin joten dist/ui/scripts/main.js on olemassa, sitten kopioi se src/ui/scripts/main.js -->
+    <script type="module" src="./scripts/layout.js"></script>
     <script type="module" src="./scripts/main.js"></script>
   </body>
 </html>

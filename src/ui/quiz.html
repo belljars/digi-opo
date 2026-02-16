@@ -1,23 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="fi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>digi-opo - vertailu</title>
     <link rel="stylesheet" href="./styles/styles.css" />
   </head>
-  <body>
+  <body data-page="quiz" data-subtitle="Kahden kortin vertailu">
     <main class="app">
-      <header class="header">
-        <div>
-          <h1>digi-opo</h1>
-          <p>Kahden kortin vertailu.</p>
-        </div>
-        <div class="header-actions">
-          <a class="header-link" href="./home.html">Etusivulle</a>
-          <div class="badge">MVP</div>
-        </div>
-      </header>
+      <div id="app-header"></div>
 
       <section class="panel panel-quiz">
         <header class="quiz-header">
@@ -36,8 +27,11 @@
           <ul id="quiz-history" class="history"></ul>
         </div>
       </section>
+
+      <footer id="app-footer" class="site-footer"></footer>
     </main>
 
+    <script type="module" src="./scripts/layout.js"></script>
     <script type="module" src="./scripts/quiz.js"></script>
   </body>
 </html>

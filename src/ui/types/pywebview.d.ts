@@ -20,11 +20,19 @@ type TutkintoDetail = {
   tutkintonimikkeet: { nimi: string; linkki: string | null }[];
 };
 
+type OpiskeluSuunta = {
+  id: number;
+  nimi: string;
+  desc: string;
+  kenelle: string;
+};
+
 type PywebviewApi = {
   list_tutkinnot: () => Promise<TutkintoListItem[]>;
   get_tutkinto: (id: number) => Promise<TutkintoDetail | null>;
   search_tutkinnot: (query: string) => Promise<TutkintoListItem[]>;
   list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
+  list_opiskelu_suunnat: () => Promise<OpiskeluSuunta[]>;
 };
 
 declare global {
