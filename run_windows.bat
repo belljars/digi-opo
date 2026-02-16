@@ -54,10 +54,26 @@ if not exist "dist\ui\scripts\quiz.js" (
   exit /b 1
 )
 
+if not exist "dist\ui\scripts\layout.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\layout.js
+  exit /b 1
+)
+
+if not exist "dist\ui\scripts\opintopolut.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\opintopolut.js
+  exit /b 1
+)
+
 copy /Y dist\ui\scripts\main.js src\ui\scripts\main.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
 copy /Y dist\ui\scripts\quiz.js src\ui\scripts\quiz.js >nul
+if errorlevel 1 exit /b %errorlevel%
+
+copy /Y dist\ui\scripts\layout.js src\ui\scripts\layout.js >nul
+if errorlevel 1 exit /b %errorlevel%
+
+copy /Y dist\ui\scripts\opintopolut.js src\ui\scripts\opintopolut.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
 "%VENV_PY%" src\desktop\app.py
