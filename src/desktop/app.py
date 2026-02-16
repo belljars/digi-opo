@@ -27,7 +27,7 @@ def _source_json_path() -> Path:
 
 def _opiskelu_suunnat_json_path() -> Path:
     project_root = Path(__file__).resolve().parents[2]
-    return project_root / "src" / "db" / "opiskeluSuunnat.json"
+    return project_root / "src" / "data" / "opiskeluSuunnat.json"
 
 
 def _connect_db() -> sqlite3.Connection:
