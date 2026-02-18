@@ -47,6 +47,13 @@ Linux:
 ./run_linux.sh
 ```
 
+Makefile-komennot:
+
+```bash
+make check
+make run
+```
+
 NixOS (suositus):
 
 ```bash
