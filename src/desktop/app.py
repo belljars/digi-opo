@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sqlite3
 import threading
@@ -37,6 +38,23 @@ def _connect_db() -> sqlite3.Connection:
     return conn
 
 
+def _parse_json_payload(raw_text: str, source_name: str) -> dict:
+    try:
+        data = json.loads(raw_text)
+    except json.JSONDecodeError:
+        # Käsittelee JSON-payloadin jälkeiset roskat.
+        decoder = json.JSONDecoder()
+        data, _ = decoder.raw_decode(raw_text.lstrip())
+
+    if not isinstance(data, dict):
+        raise ValueError(f"{source_name} root payload must be an object")
+    return data
+
+
+def _sha256(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
 def _ensure_schema(conn: sqlite3.Connection) -> None:
     conn.execute(
         """
@@ -58,57 +76,82 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         );
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS app_meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+        """
+    )
 
 
-def _import_from_json(conn: sqlite3.Connection) -> None:
+def _import_tutkinnot(conn: sqlite3.Connection, tutkinnot: list) -> None:
+    for tutkinto in tutkinnot:
+        nimi = str(tutkinto.get("nimi", "")).strip()
+        desc = str(tutkinto.get("desc", "")).strip()
+        if not nimi:
+            continue
+        cursor = conn.execute(
+            "INSERT INTO tutkinnot (nimi, desc) VALUES (?, ?);",
+            (nimi, desc),
+        )
+        tutkinto_id = cursor.lastrowid
+        nimikkeet = tutkinto.get("tutkintonimikkeet", []) or []
+        if not isinstance(nimikkeet, list):
+            nimikkeet = []
+        for nimike in nimikkeet:
+            nimike_nimi = str(nimike.get("nimi", "")).strip()
+            linkki = str(nimike.get("linkki", "")).strip() or None
+            if not nimike_nimi:
+                continue
+            conn.execute(
+                """
+                INSERT INTO tutkintonimikkeet (tutkinto_id, nimi, linkki)
+                VALUES (?, ?, ?);
+                """,
+                (tutkinto_id, nimike_nimi, linkki),
+            )
+
+
+def _get_meta(conn: sqlite3.Connection, key: str) -> str | None:
+    row = conn.execute("SELECT value FROM app_meta WHERE key = ?;", (key,)).fetchone()
+    return row["value"] if row else None
+
+
+def _set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
+    conn.execute(
+        """
+        INSERT INTO app_meta (key, value)
+        VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value;
+        """,
+        (key, value),
+    )
+
+
+def _ensure_data(conn: sqlite3.Connection) -> None:
+    _ensure_schema(conn)
     source_path = _source_json_path()
     if not source_path.exists():
         raise FileNotFoundError(f"Missing source data: {source_path}")
 
     raw_text = source_path.read_text(encoding="utf-8")
-    try:
-        data = json.loads(raw_text)
-    except json.JSONDecodeError:
-        # Käsittelee JSON-payloadin jälkeiset roskat.
-        decoder = json.JSONDecoder()
-        data, _ = decoder.raw_decode(raw_text.lstrip())
-
+    data = _parse_json_payload(raw_text, "ammatit.json")
     tutkinnot = data.get("tutkinnot", [])
     if not isinstance(tutkinnot, list):
         raise ValueError("ammatit.json missing 'tutkinnot' list")
 
-    with conn:
-        for tutkinto in tutkinnot:
-            nimi = str(tutkinto.get("nimi", "")).strip()
-            desc = str(tutkinto.get("desc", "")).strip()
-            if not nimi:
-                continue
-            cursor = conn.execute(
-                "INSERT INTO tutkinnot (nimi, desc) VALUES (?, ?);",
-                (nimi, desc),
-            )
-            tutkinto_id = cursor.lastrowid
-            nimikkeet = tutkinto.get("tutkintonimikkeet", []) or []
-            for nimike in nimikkeet:
-                nimike_nimi = str(nimike.get("nimi", "")).strip()
-                linkki = str(nimike.get("linkki", "")).strip() or None
-                if not nimike_nimi:
-                    continue
-                conn.execute(
-                    """
-                    INSERT INTO tutkintonimikkeet (tutkinto_id, nimi, linkki)
-                    VALUES (?, ?, ?);
-                    """,
-                    (tutkinto_id, nimike_nimi, linkki),
-                )
+    source_hash = _sha256(raw_text)
+    total = conn.execute("SELECT COUNT(*) AS total FROM tutkinnot;").fetchone()["total"]
+    current_hash = _get_meta(conn, "ammatit_json_sha256")
 
-
-def _ensure_data(conn: sqlite3.Connection) -> None:
-    _ensure_schema(conn)
-    cursor = conn.execute("SELECT COUNT(*) AS total FROM tutkinnot;")
-    total = cursor.fetchone()["total"]
-    if total == 0:
-        _import_from_json(conn)
+    if total == 0 or current_hash != source_hash:
+        with conn:
+            conn.execute("DELETE FROM tutkintonimikkeet;")
+            conn.execute("DELETE FROM tutkinnot;")
+            _import_tutkinnot(conn, tutkinnot)
+            _set_meta(conn, "ammatit_json_sha256", source_hash)
 
 
 class Api:
@@ -197,27 +240,36 @@ class Api:
             raise FileNotFoundError(f"Missing source data: {source_path}")
 
         raw_text = source_path.read_text(encoding="utf-8")
-        try:
-            data = json.loads(raw_text)
-        except json.JSONDecodeError:
-            decoder = json.JSONDecoder()
-            data, _ = decoder.raw_decode(raw_text.lstrip())
+        data = _parse_json_payload(raw_text, "opiskeluSuunnat.json")
 
         opiskelu_suunnat = data.get("opiskeluSuunnat", [])
         if not isinstance(opiskelu_suunnat, list):
             raise ValueError("opiskeluSuunnat.json missing 'opiskeluSuunnat' list")
 
-        return [
-            {
-                "id": int(item.get("id", 0)),
-                "img": str(item.get("img", "")).strip(),
-                "nimi": str(item.get("nimi", "")).strip(),
-                "desc": str(item.get("desc", "")).strip(),
-                "kenelle": str(item.get("kenelle", "")).strip(),
-            }
-            for item in opiskelu_suunnat
-            if str(item.get("nimi", "")).strip()
-        ]
+        items: list[dict[str, str | int]] = []
+        for item in opiskelu_suunnat:
+            if not isinstance(item, dict):
+                continue
+            nimi = str(item.get("nimi", "")).strip()
+            if not nimi:
+                continue
+
+            raw_id = item.get("id", 0)
+            try:
+                item_id = int(raw_id)
+            except (TypeError, ValueError):
+                item_id = 0
+
+            items.append(
+                {
+                    "id": item_id,
+                    "img": str(item.get("img", "")).strip(),
+                    "nimi": nimi,
+                    "desc": str(item.get("desc", "")).strip(),
+                    "kenelle": str(item.get("kenelle", "")).strip(),
+                }
+            )
+        return items
 
 
 def main() -> None:
