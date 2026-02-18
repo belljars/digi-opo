@@ -1,64 +1,82 @@
-# digi-opo — Työpöytä-MVP
+# digi-opo — Työpöytäsovellus
 
 ## Yleiskuvaus
 
-**digi-opo** on paikallinen työpöytäsovellus suomalaisiin tutkintoihin ja niiden tutkintonimikkeisiin tutustumiseen. Sovellus käyttää Python-pohjaista (pywebview) taustaa ja TypeScript-UI:ta, ja tallentaa datan SQLiteen käyttäen lähteenä `ammatit.json`-tiedostoa.
+**digi-opo** on paikallinen pywebview-työpöytäsovellus suomalaisten tutkintojen selailuun.
 
-## Mitä se tekee nyt (MVP)
+Sovellus sisältää tällä hetkellä neljä näkymää:
+- `Etusivu` (`src/ui/home.html`)
+- `Tutkintopankki` (`src/ui/index.html`)
+- `Opintopolut` (`src/ui/opintopolut.html`)
+- `Vertailu` (`src/ui/quiz.html`)
 
-- Tuo `ammatit.json`-datan paikalliseen SQLite-tietokantaan (`data/tutkinnot.db`) ensimmäisellä ajolla.
-- Listaa kaikki tutkinnot ja näyttää yksityiskohdat + tutkintonimikkeet.
-- Toimii täysin offline-tilassa paikallisella käyttöliittymällä.
+## Mitä sovellus tekee nyt
 
----
+- Alustaa SQLite-tietokannan tiedostoon `data/tutkinnot.db`.
+- Tuo `ammatit.json`-datan tietokantaan, jos `tutkinnot`-taulu on tyhjä.
+- Näyttää tutkintolistan ja valitun tutkinnon tutkintonimikkeet.
+- Mahdollistaa kahden tutkintonimikkeen korttivertailun (`Vertailu`).
+- Lataa `Opintopolut`-näkymän sisällön tiedostosta `src/data/opiskeluSuunnat.json`.
 
-## Projektin rakenne
-
-```
-digi-opo/
-├── src/
-│   ├── ui/         # HTML/CSS/TS UI
-│   └── desktop/    # pywebview app + API
-├── ammatit.json
-├── run_linux.sh
-├── README.md
-└── LICENSE
-```
+Huomio:
+- API:ssa on myös `search_tutkinnot`, mutta sitä ei tällä hetkellä käytetä UI:ssa.
+- Repossa voi olla vanhoja tietokantatiedostoja (esim. `data/ammatit.db`), mutta appi käyttää `data/tutkinnot.db`-tiedostoa.
 
 ## Teknologiat
 
-| Component     | Technology (example)     |
-| ------------- | ------------------------ |
-| Taustalogiikka | Python (pywebview)       |
-| UI            | TypeScript + HTML + CSS   |
-| Tietokanta    | SQLite                    |
+- Python + `pywebview`
+- PyQt6 + Qt WebEngine
+- TypeScript + HTML + CSS
+- SQLite
 
----
+## Vaatimukset
 
-## Pakolliset kielet:
-- Python
-- JavaScript
-- TypeScript
-- HTML
-- CSS
+- Python 3
+- Node.js + npm
+- Linuxissa Qt-riippuvuudet järjestelmätasolla
+- Windowsissa ajoskripti tukee Pythonia 3.11/3.12
 
-Painotus tässä projektissa on TypeScriptissä.
+Python-riippuvuudet asennetaan tiedostosta `requirements.txt`.
+TypeScript buildataan komennolla `npm run build`.
 
 ## Ajaminen paikallisesti
+
+Linux:
 
 ```bash
 ./run_linux.sh
 ```
 
-Huom:
-- `run_linux.sh` kääntää TypeScriptin, kopioi käännetyn UI:n tiedostoon `src/ui/scripts/main.js` ja `src/ui/scripts/quiz.js` ja käynnistää työpöytäsovelluksen.
-- Arch Linuxissa pywebview tarvitsee Qt:n (PyQt6 + QtWebEngine). Tämä asennetaan `requirements.txt`:n kautta, mutta järjestelmän Qt-kirjastot on silti oltava asennettuina.
+Windows:
 
-## Nykyinen datamalli (minimi)
+```bat
+run_windows.bat
+```
 
-- `tutkinnot`-taulu: `id`, `nimi`, `desc`
-- `tutkintonimikkeet`-taulu: `id`, `tutkinto_id`, `nimi`, `linkki`
+Skriptit tekevät nämä vaiheet:
+1. Luo `.venv` (tarvittaessa)
+2. Asentaa Python-riippuvuudet
+3. Ajaa TypeScript-buildin (`npm run build`)
+4. Kopioi buildatut JS-tiedostot `dist/ui/scripts/` -> `src/ui/scripts/`
+5. Käynnistää appin (`python3 src/desktop/app.py` / `.venv\\Scripts\\python.exe src\\desktop\\app.py`)
 
+## Projektin rakenne
 
+```text
+digi-opo/
+├── src/
+│   ├── desktop/          # pywebview app + Python API
+│   ├── ui/               # HTML/CSS/TS näkymät
+│   └── data/             # opintopolkujen JSON-data
+├── data/                 # SQLite-tiedostot
+├── ammatit.json          # tutkintojen lähdedata
+├── run_linux.sh
+├── run_windows.bat
+├── requirements.txt
+├── package.json
+└── README.md
+```
 
+## Lisenssi
 
+Katso `LICENSE`.
