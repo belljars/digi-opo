@@ -13,7 +13,7 @@ Sovellus sisältää tällä hetkellä neljä näkymää:
 ## Mitä sovellus tekee nyt
 
 - Alustaa SQLite-tietokannan tiedostoon `data/tutkinnot.db`.
-- Tuo `ammatit.json`-datan tietokantaan, jos `tutkinnot`-taulu on tyhjä.
+- Tuo `ammatit.json`-datan tietokantaan ensimmäisellä ajolla ja päivittää sisällön automaattisesti, jos lähde-JSON muuttuu.
 - Näyttää tutkintolistan ja valitun tutkinnon tutkintonimikkeet.
 - Mahdollistaa kahden tutkintonimikkeen korttivertailun (`Vertailu`).
 - Lataa `Opintopolut`-näkymän sisällön tiedostosta `src/data/opiskeluSuunnat.json`.
@@ -46,6 +46,17 @@ Linux:
 ```bash
 ./run_linux.sh
 ```
+
+NixOS (suositus):
+
+```bash
+nix --extra-experimental-features "nix-command flakes" develop path:.
+./run_linux.sh
+```
+
+Huom:
+- Nix shellissa `run_linux.sh` ei luo `.venv`:iä eikä aja `pip install`, vaan käyttää Nixin Python-paketteja.
+- Projektiin on lisätty `flake.nix` ja `shell.nix`, joten myös `nix-shell` toimii.
 
 Windows:
 

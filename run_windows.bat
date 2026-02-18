@@ -2,6 +2,8 @@
 setlocal
 
 set "PY_LAUNCHER="
+echo [INFO] Aloitetaan digi-opo Windows-kaynnistys.
+echo [INFO] Etsitaan tuettu Python-versio (3.12 tai 3.11)...
 
 where py >nul 2>nul
 if %errorlevel%==0 (
@@ -20,9 +22,18 @@ if not defined PY_LAUNCHER (
   exit /b 1
 )
 
+echo [INFO] Kaytetaan Python-launcheria: %PY_LAUNCHER%
+
 if not exist ".venv\Scripts\python.exe" (
   echo [INFO] Luodaan Windows-virtuaaliymparisto .venv kansioon kayttaen komentoa: %PY_LAUNCHER%...
   %PY_LAUNCHER% -m venv .venv --clear
+  if errorlevel 1 (
+    echo [VIRHE] Virtuaaliympariston luonti epaonnistui.
+    exit /b %errorlevel%
+  )
+)
+if exist ".venv\Scripts\python.exe" (
+  echo [INFO] Virtuaaliymparisto loytyi: .venv\Scripts\python.exe
 )
 
 if not exist ".venv\Scripts\python.exe" (
@@ -36,11 +47,17 @@ set "VENV_PY=.venv\Scripts\python.exe"
 if errorlevel 1 (
   echo [INFO] Luodaan .venv uudelleen tuetulla Python-versiolla...
   %PY_LAUNCHER% -m venv .venv --clear
+  if errorlevel 1 (
+    echo [VIRHE] .venv:n uudelleenluonti epaonnistui.
+    exit /b %errorlevel%
+  )
 )
 
+echo [INFO] Asennetaan Python-riippuvuudet: "%VENV_PY%" -m pip install -r requirements.txt
 "%VENV_PY%" -m pip install -r requirements.txt
 if errorlevel 1 exit /b %errorlevel%
 
+echo [INFO] Ajetaan TypeScript-build: npm run build
 call npm run build
 if errorlevel 1 exit /b %errorlevel%
 
@@ -64,6 +81,7 @@ if not exist "dist\ui\scripts\opintopolut.js" (
   exit /b 1
 )
 
+echo [INFO] Kopioidaan buildatut JavaScript-tiedostot kansioon src\ui\scripts.
 copy /Y dist\ui\scripts\main.js src\ui\scripts\main.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
@@ -76,4 +94,5 @@ if errorlevel 1 exit /b %errorlevel%
 copy /Y dist\ui\scripts\opintopolut.js src\ui\scripts\opintopolut.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
+echo [INFO] Kaynnistetaan sovellus: "%VENV_PY%" src\desktop\app.py
 "%VENV_PY%" src\desktop\app.py
