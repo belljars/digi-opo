@@ -26,8 +26,13 @@ type Api = {
 const listEl = document.getElementById("tutkinto-list");
 const detailEl = document.getElementById("detail");
 const countEl = document.getElementById("count");
+const searchInput = document.getElementById("tutkinto-search") as
+  | HTMLInputElement
+  | null;
 let activeId: number | null = null;
 let allItems: TutkintoListItem[] = [];
+let searchTimeout: number | null = null;
+let activeApi: Api | null = null;
 
 function setCount(count: number): void {
   if (countEl) {
@@ -138,6 +143,39 @@ function refreshActiveStyles(): void {
   });
 }
 
+function scheduleSearch(query: string): void {
+  if (searchTimeout) {
+    window.clearTimeout(searchTimeout);
+  }
+  searchTimeout = window.setTimeout(() => {
+    void runSearch(query);
+  }, 250);
+}
+
+async function runSearch(rawQuery: string): Promise<void> {
+  if (!activeApi) {
+    renderEmpty("Pywebview API ei ole käytettävissä.");
+    return;
+  }
+  renderEmpty("Haetaan...");
+  const query = rawQuery.trim();
+  const items = query
+    ? await activeApi.search_tutkinnot(query)
+    : await activeApi.list_tutkinnot();
+  renderList(items);
+  if (items.length === 0) {
+    activeId = null;
+    renderEmpty(query ? "Ei hakutuloksia." : "Ei tutkintoja.");
+    return;
+  }
+  const stillActive = items.some((item) => item.id === activeId);
+  if (!stillActive) {
+    await selectTutkinto(items[0].id);
+  } else if (activeId !== null) {
+    refreshActiveStyles();
+  }
+}
+
 async function loadInitial(api: Api): Promise<void> {
   renderEmpty("Ladataan...");
   allItems = await api.list_tutkinnot();
@@ -155,7 +193,13 @@ async function init(): Promise<void> {
     renderEmpty("Pywebview API ei ole käytettävissä.");
     return;
   }
+  activeApi = api;
   await loadInitial(api);
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      scheduleSearch(searchInput.value);
+    });
+  }
 }
 
 window.addEventListener("pywebviewready", () => {
