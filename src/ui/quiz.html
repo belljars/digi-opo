@@ -3,28 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>digi-opo - vertailu</title>
+    <title>digi-opo - opintopolku</title>
     <link rel="stylesheet" href="./styles/styles.css" />
   </head>
-  <body data-page="quiz" data-subtitle="Kahden kortin vertailu">
+  <body data-page="quiz" data-subtitle="Opintopolku-kysely">
     <main class="app">
       <div id="app-header"></div>
 
       <section class="panel panel-quiz">
         <header class="quiz-header">
-          <h2>Kahden kortin vertailu</h2>
+          <h2>Opintopolku-kysely</h2>
           <div class="quiz-meta">
-            <span id="quiz-count"></span>
-            <button id="quiz-skip" type="button">Vaihda pari</button>
+            <span id="quiz-progress"></span>
+            <span id="quiz-status"></span>
           </div>
         </header>
-        <div class="quiz-cards">
-          <button id="quiz-left" class="quiz-card" type="button"></button>
-          <button id="quiz-right" class="quiz-card" type="button"></button>
-        </div>
-        <div class="quiz-history">
-          <h3>Viimeisimmat valinnat</h3>
-          <ul id="quiz-history" class="history"></ul>
+
+        <div class="quiz-body">
+          <div id="quiz-loading" class="quiz-loading">Ladataan...</div>
+
+          <form id="quiz-form" class="quiz-form" hidden>
+            <h3 id="quiz-question"></h3>
+            <div id="quiz-options" class="quiz-options"></div>
+            <div class="quiz-actions">
+              <button id="quiz-next" type="button" disabled>Seuraava</button>
+            </div>
+          </form>
+
+          <section id="quiz-results" class="quiz-results" hidden>
+            <h3>Sinulle sopivin vaihtoehto</h3>
+            <div id="quiz-top" class="quiz-result-card"></div>
+            <h4>Myös tämä voi sopia</h4>
+            <div id="quiz-runner-up" class="quiz-result-card secondary"></div>
+            <div class="quiz-actions">
+              <button id="quiz-restart" type="button">Aloita alusta</button>
+            </div>
+          </section>
         </div>
       </section>
 

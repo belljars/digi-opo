@@ -31,6 +31,11 @@ def _opiskelu_suunnat_json_path() -> Path:
     return project_root / "src" / "data" / "opiskeluSuunnat.json"
 
 
+def _opintopolku_quiz_json_path() -> Path:
+    project_root = Path(__file__).resolve().parents[2]
+    return project_root / "src" / "data" / "opintopolkuQuiz.json"
+
+
 def _connect_db() -> sqlite3.Connection:
     conn = sqlite3.connect(_db_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
@@ -270,6 +275,17 @@ class Api:
                 }
             )
         return items
+
+    def get_opintopolku_quiz(self) -> dict:
+        source_path = _opintopolku_quiz_json_path()
+        if not source_path.exists():
+            raise FileNotFoundError(f"Missing source data: {source_path}")
+
+        raw_text = source_path.read_text(encoding="utf-8")
+        data = _parse_json_payload(raw_text, "opintopolkuQuiz.json")
+        if not isinstance(data, dict):
+            raise ValueError("opintopolkuQuiz.json root payload must be an object")
+        return data
 
 
 def main() -> None:

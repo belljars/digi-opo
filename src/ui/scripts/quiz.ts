@@ -1,38 +1,100 @@
 export {};
 
-type TutkintonimikeItem = {
-  id: number;
-  nimi: string;
-  linkki: string | null;
-  tutkinto_id: number;
-  tutkinto_nimi: string;
+type QuizPath = {
+  id: string;
+  label: string;
+  summary: string;
 };
+
+type QuizOption = {
+  id: string;
+  text: string;
+  score: Record<string, number>;
+};
+
+type QuizQuestion = {
+  id: string;
+  text: string;
+  type: "single";
+  options: QuizOption[];
+};
+
+type QuizScoring = {
+  scale: string;
+  tieBreakers: string[];
+  minAnswers: number;
+};
+
+type QuizMeta = {
+  id: string;
+  title: string;
+  language: string;
+  version: number;
+  estimatedMinutes: number;
+};
+
+type QuizData = {
+  meta: QuizMeta;
+  paths: QuizPath[];
+  scoring: QuizScoring;
+  questions: QuizQuestion[];
+};
+
+type Answer = {
+  questionId: string;
+  optionId: string;
+};
+
+const quizLoadingEl = document.getElementById("quiz-loading");
+const quizFormEl = document.getElementById("quiz-form") as HTMLFormElement | null;
+const quizQuestionEl = document.getElementById("quiz-question");
+const quizOptionsEl = document.getElementById("quiz-options");
+const quizNextEl = document.getElementById("quiz-next") as HTMLButtonElement | null;
+const quizProgressEl = document.getElementById("quiz-progress");
+const quizStatusEl = document.getElementById("quiz-status");
+const quizResultsEl = document.getElementById("quiz-results");
+const quizTopEl = document.getElementById("quiz-top");
+const quizRunnerUpEl = document.getElementById("quiz-runner-up");
+const quizRestartEl = document.getElementById("quiz-restart") as HTMLButtonElement | null;
 
 type Api = {
-  list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
+  get_opintopolku_quiz: () => Promise<QuizData>;
 };
 
-type QuizResult = {
-  voittaja: string;
-  haviaja: string;
-  aikaleima: string;
-};
+let quizData: QuizData | null = null;
+let currentIndex = 0;
+let answers: Answer[] = [];
+let selectedOptionId: string | null = null;
 
-const quizLeftEl = document.getElementById("quiz-left") as HTMLButtonElement | null;
-const quizRightEl = document.getElementById("quiz-right") as HTMLButtonElement | null;
-const quizCountEl = document.getElementById("quiz-count");
-const quizHistoryEl = document.getElementById("quiz-history");
-const quizSkipEl = document.getElementById("quiz-skip") as HTMLButtonElement | null;
-let allItems: TutkintonimikeItem[] = [];
-let currentPair: { left: TutkintonimikeItem; right: TutkintonimikeItem } | null = null;
-let currentWinner: TutkintonimikeItem | null = null;
-let currentWinnerSide: "left" | "right" | null = null;
-const quizHistory: QuizResult[] = [];
-
-function setQuizCount(): void {
-  if (quizCountEl) {
-    quizCountEl.textContent = `Vertailuja: ${quizHistory.length}`;
+function setStatus(message: string): void {
+  if (quizStatusEl) {
+    quizStatusEl.textContent = message;
   }
+}
+
+function setLoading(loading: boolean): void {
+  if (quizLoadingEl) {
+    quizLoadingEl.hidden = !loading;
+  }
+}
+
+function showForm(show: boolean): void {
+  if (quizFormEl) {
+    quizFormEl.hidden = !show;
+  }
+}
+
+function showResults(show: boolean): void {
+  if (quizResultsEl) {
+    quizResultsEl.hidden = !show;
+  }
+}
+
+function setProgress(): void {
+  if (!quizProgressEl || !quizData) {
+    return;
+  }
+  quizProgressEl.textContent = `Kysymys ${currentIndex + 1}/${quizData.questions.length}`;
 }
 
 function getApi(): Api | null {
@@ -58,176 +120,203 @@ async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
   });
 }
 
-function renderQuizHistory(): void {
-  if (!quizHistoryEl) {
-    return;
-  }
-  quizHistoryEl.replaceChildren(
-    ...quizHistory.map((entry) => {
-      const li = document.createElement("li");
-      const time = new Date(entry.aikaleima).toLocaleTimeString("fi-FI", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-      li.textContent = `${entry.voittaja} > ${entry.haviaja} (${time})`;
-      return li;
-    })
-  );
-  setQuizCount();
-}
-
-function renderCard(cardEl: HTMLButtonElement, item: TutkintonimikeItem | null): void {
-  cardEl.replaceChildren();
-  if (!item) {
-    cardEl.disabled = true;
-    cardEl.textContent = "Ei dataa.";
-    return;
-  }
-
-  cardEl.disabled = false;
-  cardEl.dataset.id = String(item.id);
-
-  const title = document.createElement("h3");
-  title.textContent = item.nimi;
-
-  const desc = document.createElement("p");
-  desc.textContent = item.tutkinto_nimi;
-
-  cardEl.append(title, desc);
-  if (item.linkki) {
-    const link = document.createElement("a");
-    link.href = item.linkki;
-    link.textContent = "Lisätiedot";
-    link.target = "_blank";
-    link.rel = "noreferrer";
-    cardEl.append(link);
+function clearOptions(): void {
+  if (quizOptionsEl) {
+    quizOptionsEl.replaceChildren();
   }
 }
 
-function setQuizLoading(message: string): void {
-  if (quizLeftEl) {
-    quizLeftEl.disabled = true;
-    quizLeftEl.textContent = message;
-  }
-  if (quizRightEl) {
-    quizRightEl.disabled = true;
-    quizRightEl.textContent = message;
+function setNextEnabled(enabled: boolean): void {
+  if (quizNextEl) {
+    quizNextEl.disabled = !enabled;
   }
 }
 
-function pickOpponent(items: TutkintonimikeItem[], excludeId: number | null): TutkintonimikeItem | null {
-  const candidates =
-    excludeId === null ? items : items.filter((item) => item.id !== excludeId);
-  if (candidates.length === 0) {
+function findCurrentQuestion(): QuizQuestion | null {
+  if (!quizData) {
     return null;
   }
-  return candidates[Math.floor(Math.random() * candidates.length)];
+  return quizData.questions[currentIndex] ?? null;
 }
 
-function pickPair(items: TutkintonimikeItem[]): [TutkintonimikeItem, TutkintonimikeItem] | null {
-  if (items.length < 2) {
-    return null;
-  }
-  const pool = items;
-  let left = pool[Math.floor(Math.random() * pool.length)];
-  let right = left;
-  let attempts = 0;
-  while (right === left && attempts < 20) {
-    right = pool[Math.floor(Math.random() * pool.length)];
-    attempts += 1;
-  }
-  if (right === left) {
-    return null;
-  }
-  return [left, right];
-}
-
-async function loadQuizPair(keepWinner = false): Promise<void> {
-  if (!quizLeftEl || !quizRightEl) {
+function renderQuestion(): void {
+  const question = findCurrentQuestion();
+  if (!quizData || !question || !quizQuestionEl) {
     return;
   }
-  setQuizLoading("Ladataan...");
-  if (keepWinner && currentWinner) {
-    const opponent = pickOpponent(allItems, currentWinner.id);
-    if (!opponent) {
-      setQuizLoading("Tarvitaan vähintään kaksi tutkintonimikettä.");
+  selectedOptionId = null;
+  quizQuestionEl.textContent = question.text;
+  clearOptions();
+  setNextEnabled(false);
+  setProgress();
+
+  question.options.forEach((option) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "quiz-option";
+    button.textContent = option.text;
+    button.addEventListener("click", () => {
+      selectedOptionId = option.id;
+      setNextEnabled(true);
+      if (quizOptionsEl) {
+        const optionButtons = quizOptionsEl.querySelectorAll(".quiz-option");
+        optionButtons.forEach((btn) => btn.classList.remove("is-selected"));
+        button.classList.add("is-selected");
+      }
+    });
+    quizOptionsEl?.append(button);
+  });
+
+  if (quizNextEl) {
+    quizNextEl.textContent =
+      currentIndex === quizData.questions.length - 1 ? "Näytä tulos" : "Seuraava";
+  }
+}
+
+function computeScores(): Array<{ path: QuizPath; score: number }> {
+  if (!quizData) {
+    return [];
+  }
+  const scores: Record<string, number> = {};
+  quizData.paths.forEach((path) => {
+    scores[path.id] = 0;
+  });
+
+  answers.forEach((answer) => {
+    const question = quizData?.questions.find((q) => q.id === answer.questionId);
+    const option = question?.options.find((opt) => opt.id === answer.optionId);
+    if (!option) {
       return;
     }
-    const winnerSide = currentWinnerSide ?? "left";
-    const left = winnerSide === "left" ? currentWinner : opponent;
-    const right = winnerSide === "left" ? opponent : currentWinner;
-    currentPair = { left, right };
-    renderCard(quizLeftEl, left);
-    renderCard(quizRightEl, right);
-    return;
-  }
-
-  const pair = pickPair(allItems);
-  if (!pair) {
-    setQuizLoading("Tarvitaan vähintään kaksi tutkintonimikettä.");
-    return;
-  }
-  const [left, right] = pair;
-
-  currentPair = { left, right };
-  currentWinner = null;
-  currentWinnerSide = null;
-  renderCard(quizLeftEl, left);
-  renderCard(quizRightEl, right);
-}
-
-function recordQuizResult(voittaja: TutkintonimikeItem, haviaja: TutkintonimikeItem): void {
-  quizHistory.unshift({
-    voittaja: voittaja.nimi,
-    haviaja: haviaja.nimi,
-    aikaleima: new Date().toISOString()
+    Object.entries(option.score).forEach(([pathId, value]) => {
+      if (scores[pathId] === undefined) {
+        scores[pathId] = 0;
+      }
+      scores[pathId] += value;
+    });
   });
-  if (quizHistory.length > 6) {
-    quizHistory.pop();
-  }
-  renderQuizHistory();
+
+  return quizData.paths.map((path) => ({ path, score: scores[path.id] ?? 0 }));
 }
 
-async function handleQuizChoice(selected: "left" | "right"): Promise<void> {
-  if (!currentPair) {
+function rankScores(items: Array<{ path: QuizPath; score: number }>):
+  Array<{ path: QuizPath; score: number }> {
+  if (!quizData) {
+    return items;
+  }
+  const tieOrder = quizData.scoring.tieBreakers;
+  return items.slice().sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
+    }
+    const aIndex = tieOrder.indexOf(a.path.id);
+    const bIndex = tieOrder.indexOf(b.path.id);
+    const safeA = aIndex === -1 ? 999 : aIndex;
+    const safeB = bIndex === -1 ? 999 : bIndex;
+    return safeA - safeB;
+  });
+}
+
+function renderResultCard(target: HTMLElement | null, item: { path: QuizPath; score: number } | null): void {
+  if (!target || !item) {
     return;
   }
-  const voittaja = selected === "left" ? currentPair.left : currentPair.right;
-  const haviaja = selected === "left" ? currentPair.right : currentPair.left;
-  recordQuizResult(voittaja, haviaja);
-  currentWinner = voittaja;
-  currentWinnerSide = selected;
-  await loadQuizPair(true);
+  target.replaceChildren();
+  const title = document.createElement("h4");
+  title.textContent = item.path.label;
+  const summary = document.createElement("p");
+  summary.textContent = item.path.summary;
+  const score = document.createElement("span");
+  score.className = "quiz-score";
+  score.textContent = `Pisteet: ${item.score}`;
+  target.append(title, summary, score);
 }
 
-async function init(): Promise<void> {
-  const api = await waitForApi();
-  if (!api) {
-    setQuizLoading("Pywebview API ei ole käytettävissä.");
+function showResultsView(): void {
+  if (!quizData) {
     return;
   }
-  setQuizLoading("Ladataan...");
-  allItems = await api.list_tutkintonimikkeet();
-  await loadQuizPair();
-  renderQuizHistory();
+  const scores = rankScores(computeScores());
+  const top = scores[0] ?? null;
+  const runnerUp = scores[1] ?? null;
+
+  renderResultCard(quizTopEl, top);
+  renderResultCard(quizRunnerUpEl, runnerUp);
+
+  showForm(false);
+  showResults(true);
+  setStatus("Valmis");
 }
 
-window.addEventListener("pywebviewready", () => {
-  void init();
+function storeAnswer(questionId: string, optionId: string): void {
+  const existingIndex = answers.findIndex((answer) => answer.questionId === questionId);
+  if (existingIndex >= 0) {
+    answers[existingIndex] = { questionId, optionId };
+    return;
+  }
+  answers.push({ questionId, optionId });
+}
+
+function handleNext(): void {
+  const question = findCurrentQuestion();
+  if (!quizData || !question || !selectedOptionId) {
+    return;
+  }
+  storeAnswer(question.id, selectedOptionId);
+  if (currentIndex >= quizData.questions.length - 1) {
+    showResultsView();
+    return;
+  }
+  currentIndex += 1;
+  renderQuestion();
+}
+
+function resetQuiz(): void {
+  currentIndex = 0;
+  answers = [];
+  selectedOptionId = null;
+  showResults(false);
+  showForm(true);
+  renderQuestion();
+  setStatus("");
+}
+
+async function loadQuiz(): Promise<void> {
+  setLoading(true);
+  setStatus("");
+
+  try {
+    const api = await waitForApi();
+    if (!api) {
+      setStatus("Pywebview API ei ole käytettävissä.");
+      showForm(false);
+      return;
+    }
+    const data = await api.get_opintopolku_quiz();
+    if (!data.questions || data.questions.length === 0) {
+      throw new Error("quiz-empty");
+    }
+    quizData = data;
+    resetQuiz();
+  } catch {
+    setStatus("Kyselyn lataus epaonnistui.");
+    showForm(false);
+  } finally {
+    setLoading(false);
+  }
+}
+
+quizNextEl?.addEventListener("click", () => {
+  handleNext();
+});
+
+quizRestartEl?.addEventListener("click", () => {
+  if (!quizData) {
+    return;
+  }
+  resetQuiz();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  void init();
-});
-
-quizLeftEl?.addEventListener("click", () => {
-  void handleQuizChoice("left");
-});
-
-quizRightEl?.addEventListener("click", () => {
-  void handleQuizChoice("right");
-});
-
-quizSkipEl?.addEventListener("click", () => {
-  void loadQuizPair();
+  void loadQuiz();
 });

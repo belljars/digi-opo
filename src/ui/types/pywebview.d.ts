@@ -34,6 +34,7 @@ type PywebviewApi = {
   search_tutkinnot: (query: string) => Promise<TutkintoListItem[]>;
   list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
   list_opiskelu_suunnat: () => Promise<OpiskeluSuunta[]>;
+  get_opintopolku_quiz: () => Promise<unknown>;
 };
 
 declare global {
