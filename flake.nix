@@ -13,7 +13,7 @@
         pip
         setuptools
         wheel
-        typing_extensions
+        typing-extensions
         pywebview
         pyqt6
         pyqt6-webengine
