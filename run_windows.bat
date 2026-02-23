@@ -94,5 +94,5 @@ if errorlevel 1 exit /b %errorlevel%
 copy /Y dist\ui\scripts\opintopolut.js src\ui\scripts\opintopolut.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
-echo [INFO] Kaynnistetaan sovellus: "%VENV_PY%" src\desktop\app.py
-"%VENV_PY%" src\desktop\app.py
+echo [INFO] Kaynnistetaan sovellus: "%VENV_PY%" src\app\app.py
+"%VENV_PY%" src\app\app.py
