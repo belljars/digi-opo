@@ -5,15 +5,15 @@
 **digi-opo** on paikallinen pywebview-työpöytäsovellus suomalaisten tutkintojen selailuun.
 
 Sovellus sisältää tällä hetkellä neljä näkymää:
-- `Etusivu` (`src/ui/home.html`)
-- `Tutkintopankki` (`src/ui/index.html`)
-- `Opintopolut` (`src/ui/opintopolut.html`)
-- `Vertailu` (`src/ui/quiz.html`)
+- `Etusivu` (`src/ui/pages/home.html`)
+- `Tutkintopankki` (`src/ui/pages/index.html`)
+- `Opintopolut` (`src/ui/pages/opintopolut.html`)
+- `Vertailu` (`src/ui/pages/quiz.html`)
 
 ## Mitä sovellus tekee nyt
 
 - Alustaa SQLite-tietokannan tiedostoon `data/tutkinnot.db`.
-- Tuo `ammatit.json`-datan tietokantaan ensimmäisellä ajolla ja päivittää sisällön automaattisesti, jos lähde-JSON muuttuu.
+- Tuo `src/data/ammatit.json`-datan tietokantaan ensimmäisellä ajolla ja päivittää sisällön automaattisesti, jos lähde-JSON muuttuu.
 - Näyttää tutkintolistan ja valitun tutkinnon tutkintonimikkeet.
 - Mahdollistaa kahden tutkintonimikkeen korttivertailun (`Vertailu`).
 - Lataa `Opintopolut`-näkymän sisällön tiedostosta `src/data/opiskeluSuunnat.json`.
@@ -77,18 +77,21 @@ Skriptit tekevät nämä vaiheet:
 2. Asentaa Python-riippuvuudet
 3. Ajaa TypeScript-buildin (`npm run build`)
 4. Kopioi buildatut JS-tiedostot `dist/ui/scripts/` -> `src/ui/scripts/`
-5. Käynnistää appin (`python3 src/desktop/app.py` / `.venv\\Scripts\\python.exe src\\desktop\\app.py`)
+5. Käynnistää appin (`python3 src/app/app.py` / `.venv\\Scripts\\python.exe src\\app\\app.py`)
 
 ## Projektin rakenne
 
 ```text
 digi-opo/
 ├── src/
-│   ├── desktop/          # pywebview app + Python API
+│   ├── app/              # pywebview app + Python API
 │   ├── ui/               # HTML/CSS/TS näkymät
-│   └── data/             # opintopolkujen JSON-data
+│   │   ├── pages/        # HTML-näkymät
+│   │   ├── scripts/      # TypeScript
+│   │   ├── styles/       # CSS
+│   │   └── assets/       # kuvat ja muut staattiset
+│   └── data/             # JSON-lähdedata
 ├── data/                 # SQLite-tiedostot
-├── ammatit.json          # tutkintojen lähdedata
 ├── run_linux.sh
 ├── run_windows.bat
 ├── requirements.txt

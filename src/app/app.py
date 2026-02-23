@@ -11,7 +11,7 @@ import webview
 
 def _ui_index_path() -> str:
     project_root = Path(__file__).resolve().parents[2]
-    return str(project_root / "src" / "ui" / "home.html")
+    return str(project_root / "src" / "ui" / "pages" / "home.html")
 
 
 def _db_path() -> Path:
@@ -23,7 +23,7 @@ def _db_path() -> Path:
 
 def _source_json_path() -> Path:
     project_root = Path(__file__).resolve().parents[2]
-    return project_root / "ammatit.json"
+    return project_root / "src" / "data" / "ammatit.json"
 
 
 def _opiskelu_suunnat_json_path() -> Path:

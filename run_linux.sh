@@ -29,5 +29,5 @@ cp dist/ui/scripts/quiz.js src/ui/scripts/quiz.js
 cp dist/ui/scripts/layout.js src/ui/scripts/layout.js
 cp dist/ui/scripts/opintopolut.js src/ui/scripts/opintopolut.js
 
-echo "[INFO] Kaynnistetaan sovellus: python3 src/desktop/app.py"
-python3 src/desktop/app.py
+echo "[INFO] Kaynnistetaan sovellus: python3 src/app/app.py"
+python3 src/app/app.py
