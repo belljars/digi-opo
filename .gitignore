@@ -89,4 +89,5 @@ package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
 
+# Buildatut JS-tiedostot (TypeScript on lähdekieli)
 src/ui/scripts/*.js
