@@ -1,0 +1,303 @@
+{
+  "meta": {
+    "id": "opintopolku_quiz_fi_v1",
+    "title": "Löydä sopiva opintopolku",
+    "language": "fi-FI",
+    "version": 1,
+    "estimatedMinutes": 4
+  },
+  "paths": [
+    {
+      "id": "tuva",
+      "label": "TUVA",
+      "summary": "Tutkintokoulutukseen valmentava koulutus. Sopii, jos haluat selkeyttää suuntaa ja vahvistaa opiskelutaitoja."
+    },
+    {
+      "id": "lukio",
+      "label": "Lukio",
+      "summary": "Yleissivistävä polku, joka pitää jatko-opintovaihtoehdot auki ja valmistaa ylioppilastutkintoon."
+    },
+    {
+      "id": "amis",
+      "label": "Ammattikoulu",
+      "summary": "Ammatillinen polku, jossa opit käytännön työelämätaitoja ja voit valmistua ammattiin."
+    }
+  ],
+  "scoring": {
+    "scale": "0-2",
+    "tieBreakers": ["tuva", "lukio", "amis"],
+    "minAnswers": 8
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "text": "Kuinka selkeä käsitys sinulla on tulevasta alasta tai ammatista?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q1_a",
+          "text": "En vielä tiedä lainkaan.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q1_b",
+          "text": "Minulla on muutama vaihtoehto mielessä.",
+          "score": { "tuva": 1, "lukio": 1, "amis": 0 }
+        },
+        {
+          "id": "q1_c",
+          "text": "Suunta on melko selkeä.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        },
+        {
+          "id": "q1_d",
+          "text": "Tiedän tarkasti mihin ammattiin tähtään.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "text": "Millainen oppiminen tuntuu luontevimmalta?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q2_a",
+          "text": "Tekemällä ja kokeilemalla käytännössä.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q2_b",
+          "text": "Lukeminen, kirjoittaminen ja teoria.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q2_c",
+          "text": "Sekä teoriaa että käytäntöä, tarvitsen vielä kokeilua.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q2_d",
+          "text": "Ryhmä- ja projektityö.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "text": "Miten suhtaudut kokeisiin ja tenteihin?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q3_a",
+          "text": "Ne sopivat minulle hyvin.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q3_b",
+          "text": "Mieluummin näytöt ja käytännön tehtävät.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q3_c",
+          "text": "Tarvitsen lisää harjoittelua ja tukea.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q3_d",
+          "text": "Sekoitus on minulle ok.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        }
+      ]
+    },
+    {
+      "id": "q4",
+      "text": "Mikä tavoite tuntuu tärkeimmältä seuraavien 2–3 vuoden aikana?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q4_a",
+          "text": "Ylioppilastutkinto.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q4_b",
+          "text": "Ammatti ja työelämään siirtyminen.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q4_c",
+          "text": "Aikaa ja tukea suunnan löytämiseen.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q4_d",
+          "text": "Haluan pitää vaihtoehdot auki.",
+          "score": { "tuva": 1, "lukio": 1, "amis": 0 }
+        }
+      ]
+    },
+    {
+      "id": "q5",
+      "text": "Millainen koulupäivä motivoi sinua eniten?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q5_a",
+          "text": "Pitkät teoriatunnit ja itsenäinen työ.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q5_b",
+          "text": "Työpajat, harjoittelu ja konkreettiset tehtävät.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q5_c",
+          "text": "Lyhyet ja vaihtelevat jaksot.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q5_d",
+          "text": "Projektit ja ryhmätyö.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        }
+      ]
+    },
+    {
+      "id": "q6",
+      "text": "Kuinka tärkeää on päästä nopeasti työelämään?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q6_a",
+          "text": "Erittäin tärkeää.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q6_b",
+          "text": "Melko tärkeää.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        },
+        {
+          "id": "q6_c",
+          "text": "Ei ole kiire.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q6_d",
+          "text": "En osaa sanoa.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        }
+      ]
+    },
+    {
+      "id": "q7",
+      "text": "Miten koet opiskelun tuen tarpeen?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q7_a",
+          "text": "Tarvitsen ohjausta ja tukea säännöllisesti.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q7_b",
+          "text": "Pärjään hyvin itsenäisesti.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q7_c",
+          "text": "Pärjään parhaiten, kun saan tehdä käytännössä.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q7_d",
+          "text": "Tarvitsen tukea välillä, mutta en aina.",
+          "score": { "tuva": 1, "lukio": 1, "amis": 0 }
+        }
+      ]
+    },
+    {
+      "id": "q8",
+      "text": "Missä ympäristössä viihdyt parhaiten?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q8_a",
+          "text": "Luokassa ja luennoilla.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q8_b",
+          "text": "Työpaikalla tai harjoittelussa.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q8_c",
+          "text": "Haluan kokeilla erilaisia ympäristöjä.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q8_d",
+          "text": "Projektitiimeissä.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        }
+      ]
+    },
+    {
+      "id": "q9",
+      "text": "Mikä kuulostaa sinulle tällä hetkellä tärkeimmältä?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q9_a",
+          "text": "Laaja yleissivistys.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q9_b",
+          "text": "Kädentaidot ja käytännön osaaminen.",
+          "score": { "tuva": 0, "lukio": 0, "amis": 2 }
+        },
+        {
+          "id": "q9_c",
+          "text": "Opiskelutaidot ja suunnan selkiytyminen.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q9_d",
+          "text": "Verkostot ja työelämäkontaktit.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "text": "Miten koet matematiikan ja kielten opiskelun?",
+      "type": "single",
+      "options": [
+        {
+          "id": "q10_a",
+          "text": "Pidän niistä ja ne sujuvat hyvin.",
+          "score": { "tuva": 0, "lukio": 2, "amis": 0 }
+        },
+        {
+          "id": "q10_b",
+          "text": "Ne ovat ok, mutta eivät pääasia.",
+          "score": { "tuva": 0, "lukio": 1, "amis": 1 }
+        },
+        {
+          "id": "q10_c",
+          "text": "Ne ovat haastavia ja kaipaan tukea.",
+          "score": { "tuva": 2, "lukio": 0, "amis": 0 }
+        },
+        {
+          "id": "q10_d",
+          "text": "En osaa sanoa.",
+          "score": { "tuva": 1, "lukio": 0, "amis": 1 }
+        }
+      ]
+    }
+  ]
+}
