@@ -5,6 +5,7 @@ let
     pip
     setuptools
     wheel
+    typing_extensions
     pywebview
     pyqt6
     pyqt6-webengine
