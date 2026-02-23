@@ -58,7 +58,7 @@ const quizRunnerUpEl = document.getElementById("quiz-runner-up");
 const quizRestartEl = document.getElementById("quiz-restart") as HTMLButtonElement | null;
 
 type Api = {
-  get_opintopolku_quiz: () => Promise<QuizData>;
+  get_opintopolku_quiz: () => Promise<unknown>;
 };
 
 let quizData: QuizData | null = null;
@@ -95,6 +95,20 @@ function setProgress(): void {
     return;
   }
   quizProgressEl.textContent = `Kysymys ${currentIndex + 1}/${quizData.questions.length}`;
+}
+
+function isQuizData(value: unknown): value is QuizData {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const data = value as QuizData;
+  if (!Array.isArray(data.questions) || !Array.isArray(data.paths)) {
+    return false;
+  }
+  if (!data.scoring || !Array.isArray(data.scoring.tieBreakers)) {
+    return false;
+  }
+  return true;
 }
 
 function getApi(): Api | null {
@@ -293,7 +307,7 @@ async function loadQuiz(): Promise<void> {
       return;
     }
     const data = await api.get_opintopolku_quiz();
-    if (!data.questions || data.questions.length === 0) {
+    if (!isQuizData(data) || data.questions.length === 0) {
       throw new Error("quiz-empty");
     }
     quizData = data;
