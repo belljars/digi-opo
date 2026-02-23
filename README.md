@@ -38,6 +38,7 @@ Huomio:
 
 Python-riippuvuudet asennetaan tiedostosta `requirements.txt`.
 TypeScript buildataan komennolla `npm run build`.
+Repositorio on TypeScript-painotteinen: lähdekoodi pidetään `.ts`-tiedostoissa, ja buildatut `.js`-tiedostot jätetään pois versiosta.
 
 ## Ajaminen paikallisesti
 
