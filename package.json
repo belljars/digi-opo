@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check": "tsc --noEmit --project tsconfig.json",
-    "run": "python3 src/desktop/app.py"
+    "run": "python3 src/app/app.py"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

@@ -5,6 +5,7 @@ import json
 import sqlite3
 import threading
 from pathlib import Path
+from urllib.parse import urlparse
 
 import webview
 
@@ -34,6 +35,52 @@ def _opiskelu_suunnat_json_path() -> Path:
 def _opintopolku_quiz_json_path() -> Path:
     project_root = Path(__file__).resolve().parents[2]
     return project_root / "src" / "data" / "opintopolkuQuiz.json"
+
+
+def _resolve_local_ui_path(raw_path: str) -> Path | None:
+    candidate_text = str(raw_path or "").strip()
+    if not candidate_text:
+        return None
+
+    # Leave URLs (http/file/data/etc.) untouched.
+    if urlparse(candidate_text).scheme:
+        return None
+
+    normalized = candidate_text.replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    while normalized.startswith("../"):
+        normalized = normalized[3:]
+    normalized = normalized.lstrip("/")
+
+    if not normalized:
+        return None
+
+    project_root = Path(__file__).resolve().parents[2]
+    rel_candidates = [Path(normalized)]
+
+    if normalized.startswith("src/ui/"):
+        rel_candidates.append(Path(normalized.removeprefix("src/ui/")))
+    elif normalized.startswith("ui/"):
+        rel_candidates.append(Path(normalized.removeprefix("ui/")))
+
+    for rel in list(rel_candidates):
+        rel_candidates.append(Path("src/ui") / rel)
+
+    seen: set[Path] = set()
+    for rel in rel_candidates:
+        if rel in seen:
+            continue
+        seen.add(rel)
+        abs_path = project_root / rel
+        if abs_path.exists():
+            return abs_path
+    return None
+
+
+def _normalize_ui_asset_ref(raw_path: str) -> str:
+    resolved = _resolve_local_ui_path(raw_path)
+    return resolved.as_uri() if resolved else raw_path
 
 
 def _connect_db() -> sqlite3.Connection:
@@ -268,7 +315,7 @@ class Api:
             items.append(
                 {
                     "id": item_id,
-                    "img": str(item.get("img", "")).strip(),
+                    "img": _normalize_ui_asset_ref(str(item.get("img", "")).strip()),
                     "nimi": nimi,
                     "desc": str(item.get("desc", "")).strip(),
                     "kenelle": str(item.get("kenelle", "")).strip(),
