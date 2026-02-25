@@ -25,6 +25,7 @@
           pythonEnv
           pkgs.nodejs
           pkgs.typescript
+          pkgs.qt6.qtwayland
         ];
       };
     };
