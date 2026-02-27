@@ -14,6 +14,7 @@ type Api = {
 
 const statusEl = document.getElementById("opintopolut-status");
 const listEl = document.getElementById("opintopolut-list");
+let initialized = false;
 
 function setStatus(message: string): void {
   if (statusEl) {
@@ -121,10 +122,18 @@ async function init(): Promise<void> {
   }
 }
 
-window.addEventListener("pywebviewready", () => {
+function initOnce(): void {
+  if (initialized) {
+    return;
+  }
+  initialized = true;
   void init();
+}
+
+window.addEventListener("pywebviewready", () => {
+  initOnce();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  void init();
+  initOnce();
 });
