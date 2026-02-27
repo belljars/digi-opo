@@ -4,37 +4,38 @@ import hashlib
 import json
 import sqlite3
 import threading
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
 import webview
 
 
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
 def _ui_index_path() -> str:
-    project_root = Path(__file__).resolve().parents[2]
-    return str(project_root / "src" / "ui" / "pages" / "home.html")
+    return "/src/ui/pages/home.html"
 
 
 def _db_path() -> Path:
-    project_root = Path(__file__).resolve().parents[2]
-    data_dir = project_root / "data"
+    data_dir = _project_root() / "data"
     data_dir.mkdir(exist_ok=True)
     return data_dir / "tutkinnot.db"
 
 
 def _source_json_path() -> Path:
-    project_root = Path(__file__).resolve().parents[2]
-    return project_root / "src" / "data" / "ammatit.json"
+    return _project_root() / "src" / "data" / "ammatit.json"
 
 
 def _opiskelu_suunnat_json_path() -> Path:
-    project_root = Path(__file__).resolve().parents[2]
-    return project_root / "src" / "data" / "opiskeluSuunnat.json"
+    return _project_root() / "src" / "data" / "opiskeluSuunnat.json"
 
 
 def _opintopolku_quiz_json_path() -> Path:
-    project_root = Path(__file__).resolve().parents[2]
-    return project_root / "src" / "data" / "opintopolkuQuiz.json"
+    return _project_root() / "src" / "data" / "opintopolkuQuiz.json"
 
 
 def _resolve_local_ui_path(raw_path: str) -> Path | None:
@@ -56,7 +57,7 @@ def _resolve_local_ui_path(raw_path: str) -> Path | None:
     if not normalized:
         return None
 
-    project_root = Path(__file__).resolve().parents[2]
+    project_root = _project_root()
     rel_candidates = [Path(normalized)]
 
     if normalized.startswith("src/ui/"):
@@ -80,7 +81,14 @@ def _resolve_local_ui_path(raw_path: str) -> Path | None:
 
 def _normalize_ui_asset_ref(raw_path: str) -> str:
     resolved = _resolve_local_ui_path(raw_path)
-    return resolved.as_uri() if resolved else raw_path
+    if not resolved:
+        return raw_path
+
+    try:
+        rel = resolved.relative_to(_project_root()).as_posix()
+        return f"/{rel}"
+    except ValueError:
+        return raw_path
 
 
 def _connect_db() -> sqlite3.Connection:
@@ -88,6 +96,14 @@ def _connect_db() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
+
+
+def _start_static_server() -> tuple[ThreadingHTTPServer, int]:
+    handler = partial(SimpleHTTPRequestHandler, directory=str(_project_root()))
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, server.server_port
 
 
 def _parse_json_payload(raw_text: str, source_name: str) -> dict:
@@ -337,8 +353,19 @@ class Api:
 
 def main() -> None:
     api = Api()
-    webview.create_window("digi-opo", _ui_index_path(), js_api=api, width=1024, height=768)
-    webview.start(gui="qt")
+    server, port = _start_static_server()
+    try:
+        webview.create_window(
+            "digi-opo",
+            f"http://127.0.0.1:{port}{_ui_index_path()}",
+            js_api=api,
+            width=1024,
+            height=768,
+        )
+        webview.start(gui="qt")
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 if __name__ == "__main__":
