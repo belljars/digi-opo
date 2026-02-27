@@ -33,6 +33,7 @@ let activeId: number | null = null;
 let allItems: TutkintoListItem[] = [];
 let searchTimeout: number | null = null;
 let activeApi: Api | null = null;
+let initialized = false;
 
 function setCount(count: number): void {
   if (countEl) {
@@ -202,10 +203,18 @@ async function init(): Promise<void> {
   }
 }
 
-window.addEventListener("pywebviewready", () => {
+function initOnce(): void {
+  if (initialized) {
+    return;
+  }
+  initialized = true;
   void init();
+}
+
+window.addEventListener("pywebviewready", () => {
+  initOnce();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  void init();
+  initOnce();
 });
