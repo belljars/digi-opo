@@ -4,11 +4,12 @@
 
 **digi-opo** on paikallinen pywebview-työpöytäsovellus suomalaisten tutkintojen selailuun.
 
-Sovellus sisältää tällä hetkellä neljä näkymää:
+Sovellus sisältää tällä hetkellä viisi näkymää:
 - `Etusivu` (`src/ui/pages/home.html`)
 - `Tutkintopankki` (`src/ui/pages/index.html`)
 - `Opintopolut` (`src/ui/pages/opintopolut.html`)
-- `Vertailu` (`src/ui/pages/quiz.html`)
+- `Opintopolku-kysely` (`src/ui/pages/quiz.html`)
+- `Amis-korttivertailu` (`src/ui/pages/amis-quiz.html`)
 
 ## Mitä sovellus tekee nyt
 

@@ -84,7 +84,15 @@ body {
 
 #card-select {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(260px, 320px));
+  justify-content: center;
+  gap: 1rem;
+}
+
+#kyselyt-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 320px));
+  justify-content: center;
   gap: 1rem;
 }
 
@@ -413,7 +421,8 @@ body {
     grid-template-columns: 1fr;
   }
 
-  #card-select {
+  #card-select,
+  #kyselyt-cards {
     grid-template-columns: 1fr;
   }
 

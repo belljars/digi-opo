@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>digi-opo - amis korttivertailu</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+  </head>
+  <body data-page="amis-quiz" data-subtitle="Amis-korttivertailu">
+    <main class="app">
+      <div id="app-header"></div>
+
+      <section class="panel panel-quiz">
+        <header class="quiz-header">
+          <h2>Amis-korttivertailu</h2>
+          <div class="quiz-meta">
+            <span id="quiz-count"></span>
+            <button id="quiz-skip" type="button">Vaihda pari</button>
+          </div>
+        </header>
+        <div class="quiz-cards">
+          <button id="quiz-left" class="quiz-card" type="button"></button>
+          <button id="quiz-right" class="quiz-card" type="button"></button>
+        </div>
+        <div class="quiz-history">
+          <h3>Viimeisimmat valinnat</h3>
+          <ul id="quiz-history" class="history"></ul>
+        </div>
+      </section>
+
+      <footer id="app-footer" class="site-footer"></footer>
+    </main>
+
+    <script type="module" src="../scripts/layout.js"></script>
+    <script type="module" src="../scripts/amis-quiz.js"></script>
+  </body>
+</html>
