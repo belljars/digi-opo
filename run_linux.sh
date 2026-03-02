@@ -20,7 +20,7 @@ fi
 echo "[INFO] Building TypeScript."
 npm run build
 
-for file in main.js quiz.js layout.js opintopolut.js; do
+for file in main.js quiz.js layout.js opintopolut.js amis-quiz.js; do
   if [ ! -f "dist/ui/scripts/${file}" ]; then
     echo "[ERROR] Missing build output: dist/ui/scripts/${file}" >&2
     exit 1
@@ -32,6 +32,7 @@ cp dist/ui/scripts/main.js src/ui/scripts/main.js
 cp dist/ui/scripts/quiz.js src/ui/scripts/quiz.js
 cp dist/ui/scripts/layout.js src/ui/scripts/layout.js
 cp dist/ui/scripts/opintopolut.js src/ui/scripts/opintopolut.js
+cp dist/ui/scripts/amis-quiz.js src/ui/scripts/amis-quiz.js
 
 echo "[INFO] Launching app with ${PY_CMD}."
 exec "${PY_CMD}" src/app/app.py

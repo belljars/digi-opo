@@ -20,8 +20,17 @@ class UiSmokeTests(unittest.TestCase):
     def _resolve_page_asset(self, page_name: str, rel_path: str) -> Path:
         return (self.pages_dir / page_name).parent.joinpath(rel_path).resolve()
 
+    def _script_exists_with_ts_fallback(self, page_name: str, script_src: str) -> bool:
+        script_path = self._resolve_page_asset(page_name, script_src)
+        if script_path.exists():
+            return True
+        if script_path.suffix != ".js":
+            return False
+        ts_path = script_path.with_suffix(".ts")
+        return ts_path.exists()
+
     def test_pages_reference_existing_css_and_scripts(self) -> None:
-        pages = ["home.html", "index.html", "opintopolut.html", "quiz.html"]
+        pages = ["home.html", "index.html", "opintopolut.html", "quiz.html", "amis-quiz.html"]
         for page in pages:
             with self.subTest(page=page):
                 html = self._load_html(page)
@@ -39,10 +48,9 @@ class UiSmokeTests(unittest.TestCase):
                     )
 
                 for src in scripts:
-                    asset_path = self._resolve_page_asset(page, src)
                     self.assertTrue(
-                        asset_path.exists(),
-                        f"{page} script does not exist: {src}",
+                        self._script_exists_with_ts_fallback(page, src),
+                        f"{page} script does not exist (js/ts): {src}",
                     )
 
 
