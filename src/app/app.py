@@ -2,12 +2,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 import threading
+import sys
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
+
+# Avoid known Qt Wayland EGL crashes in some Linux environments by defaulting
+# to XWayland unless the user has explicitly selected a Qt platform.
+if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
+    os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
 import webview
 
