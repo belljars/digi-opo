@@ -10,8 +10,7 @@ const navItems: NavItem[] = [
   { id: "home", href: "./home.html", label: "Etusivu" },
   { id: "index", href: "./index.html", label: "Tutkintopankki" },
   { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" },
-  { id: "quiz", href: "./quiz.html", label: "Opintopolku-kysely" },
-  { id: "amis-quiz", href: "./amis-quiz.html", label: "Amis-korttivertailu" }
+  { id: "tekoaly-chat", href: "./ai-chat.html", label: "Tekoäly-chat" }
 ];
 
 function renderHeader(): void {
@@ -54,7 +53,7 @@ function renderFooter(): void {
   const year = new Date().getFullYear();
 
   footerHost.innerHTML = `
-    <p class="site-footer-copy">(c) ${year} digi-opo</p>
+    <p class="site-footer-copy">(c) ${year} <em>digi-opo</em></p>
   `;
 }
 
