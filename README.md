@@ -109,8 +109,9 @@ Tehdyt
 
 Korjattava
 - [x] Amistutkinto kortti vertailu (jatkuu nyt ikuisesti, loppuu kun on voittaja ammatti nimike)
-	- [ ] Top 3
-	- [ ] Näyttää listan kaikista ammateista järjestyksenä, minkä käyttäjän valitsi eniten
+	- [x] Top 3
+	- [x] Näyttää listan kaikista ammateista järjestyksenä, minkä käyttäjän valitsi eniten
+	- [ ] Esiintyminen kyselyn *jälkeen*
 - [ ] Opintopolku-kysely vastaus tallennus
 
 Seuraava
@@ -127,6 +128,7 @@ Lisättävää
 
 Loppuvaihe
 - [ ] Lisää muut tutkinnot
+- [ ] Lisää linkityt kuvat jokaisiin tutkintoihin
 
 ## Lisenssi
 

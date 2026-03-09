@@ -18,6 +18,11 @@ type QuizResult = {
   aikaleima: string;
 };
 
+type RankedItem = {
+  item: TutkintonimikeItem;
+  wins: number;
+};
+
 const quizLeftEl = document.getElementById("quiz-vasen") as HTMLButtonElement | null;
 const quizRightEl = document.getElementById("quiz-oikea") as HTMLButtonElement | null;
 const quizCountEl = document.getElementById("quiz-count");
@@ -25,12 +30,15 @@ const quizHistoryEl = document.getElementById("quiz-historia");
 const quizSkipEl = document.getElementById("quiz-ohita") as HTMLButtonElement | null;
 const quizFinishedEl = document.getElementById("quiz-valmis");
 const quizWinnerEl = document.getElementById("quiz-voittaja");
+const quizTop3El = document.getElementById("quiz-top3");
+const quizRankingListEl = document.getElementById("quiz-ranking-list");
 
 let allItems: TutkintonimikeItem[] = [];
 let currentPair: { left: TutkintonimikeItem; right: TutkintonimikeItem } | null = null;
 let currentWinner: TutkintonimikeItem | null = null;
 let currentWinnerSide: "left" | "right" | null = null;
 let challengerQueue: TutkintonimikeItem[] = [];
+let winCounts: Record<number, number> = {};
 const quizHistory: QuizResult[] = [];
 let initialized = false;
 
@@ -111,6 +119,73 @@ function renderWinner(item: TutkintonimikeItem | null): void {
   }
 }
 
+function getRankedItems(): RankedItem[] {
+  return allItems
+    .map((item) => ({
+      item,
+      wins: winCounts[item.id] ?? 0
+    }))
+    .sort((a, b) => {
+      if (b.wins !== a.wins) {
+        return b.wins - a.wins;
+      }
+      return a.item.nimi.localeCompare(b.item.nimi, "fi");
+    });
+}
+
+function renderTop3(): void {
+  if (!quizTop3El) {
+    return;
+  }
+
+  const topThree = getRankedItems().slice(0, 3);
+  quizTop3El.replaceChildren();
+
+  const heading = document.createElement("h4");
+  heading.textContent = "Top 3";
+  quizTop3El.append(heading);
+
+  topThree.forEach((entry, index) => {
+    const card = document.createElement("div");
+    card.className = "quiz-result-card";
+
+    const title = document.createElement("h4");
+    title.textContent = `${index + 1}. ${entry.item.nimi}`;
+
+    const desc = document.createElement("p");
+    desc.textContent = entry.item.tutkinto_nimi;
+
+    const score = document.createElement("span");
+    score.className = "quiz-score";
+    score.textContent = `Valinnat: ${entry.wins}`;
+
+    card.append(title, desc, score);
+    quizTop3El.append(card);
+  });
+}
+
+function renderRankingList(): void {
+  if (!quizRankingListEl) {
+    return;
+  }
+
+  const rows = getRankedItems().map((entry) => {
+    const li = document.createElement("li");
+
+    const title = document.createElement("strong");
+    title.textContent = entry.item.nimi;
+
+    const meta = document.createElement("span");
+    meta.className = "quiz-score";
+    meta.textContent = `${entry.item.tutkinto_nimi} | Valinnat: ${entry.wins}`;
+
+    li.append(title, meta);
+    return li;
+  });
+
+  quizRankingListEl.replaceChildren(...rows);
+}
+
 function renderCard(cardEl: HTMLButtonElement, item: TutkintonimikeItem | null): void {
   cardEl.replaceChildren();
   if (!item) {
@@ -186,6 +261,8 @@ function renderCurrentPair(): void {
     renderCard(quizLeftEl, currentWinner);
     renderCard(quizRightEl, null);
     renderWinner(currentWinner);
+    renderTop3();
+    renderRankingList();
     setFinishedVisible(true);
     setSkipEnabled(false);
     setQuizCount();
@@ -214,6 +291,7 @@ function startQuiz(): void {
   }
 
   const shuffled = shuffleItems(allItems);
+  winCounts = Object.fromEntries(shuffled.map((item) => [item.id, 0]));
   currentWinner = shuffled[0];
   currentWinnerSide = "left";
   challengerQueue = shuffled.slice(1);
@@ -239,6 +317,7 @@ async function handleQuizChoice(selected: "left" | "right"): Promise<void> {
   const voittaja = selected === "left" ? currentPair.left : currentPair.right;
   const haviaja = selected === "left" ? currentPair.right : currentPair.left;
   recordQuizResult(voittaja, haviaja);
+  winCounts[voittaja.id] = (winCounts[voittaja.id] ?? 0) + 1;
   currentWinner = voittaja;
   currentWinnerSide = selected;
   challengerQueue = challengerQueue.slice(1);
