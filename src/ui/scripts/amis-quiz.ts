@@ -18,22 +18,26 @@ type QuizResult = {
   aikaleima: string;
 };
 
-const quizLeftEl = document.getElementById("quiz-left") as HTMLButtonElement | null;
-const quizRightEl = document.getElementById("quiz-right") as HTMLButtonElement | null;
+const quizLeftEl = document.getElementById("quiz-vasen") as HTMLButtonElement | null;
+const quizRightEl = document.getElementById("quiz-oikea") as HTMLButtonElement | null;
 const quizCountEl = document.getElementById("quiz-count");
-const quizHistoryEl = document.getElementById("quiz-history");
-const quizSkipEl = document.getElementById("quiz-skip") as HTMLButtonElement | null;
+const quizHistoryEl = document.getElementById("quiz-historia");
+const quizSkipEl = document.getElementById("quiz-ohita") as HTMLButtonElement | null;
+const quizFinishedEl = document.getElementById("quiz-valmis");
+const quizWinnerEl = document.getElementById("quiz-voittaja");
 
 let allItems: TutkintonimikeItem[] = [];
 let currentPair: { left: TutkintonimikeItem; right: TutkintonimikeItem } | null = null;
 let currentWinner: TutkintonimikeItem | null = null;
 let currentWinnerSide: "left" | "right" | null = null;
+let challengerQueue: TutkintonimikeItem[] = [];
 const quizHistory: QuizResult[] = [];
 let initialized = false;
 
 function setQuizCount(): void {
   if (quizCountEl) {
-    quizCountEl.textContent = `Vertailuja: ${quizHistory.length}`;
+    const jaljella = challengerQueue.length + (currentWinner ? 1 : 0);
+    quizCountEl.textContent = `Vertailuja: ${quizHistory.length} | Jaljella: ${jaljella}`;
   }
 }
 
@@ -79,6 +83,34 @@ function renderQuizHistory(): void {
   setQuizCount();
 }
 
+function setFinishedVisible(visible: boolean): void {
+  if (quizFinishedEl) {
+    quizFinishedEl.hidden = !visible;
+  }
+}
+
+function renderWinner(item: TutkintonimikeItem | null): void {
+  if (!quizWinnerEl || !item) {
+    return;
+  }
+
+  quizWinnerEl.replaceChildren();
+  const title = document.createElement("h4");
+  title.textContent = item.nimi;
+  const desc = document.createElement("p");
+  desc.textContent = item.tutkinto_nimi;
+  quizWinnerEl.append(title, desc);
+
+  if (item.linkki) {
+    const link = document.createElement("a");
+    link.href = item.linkki;
+    link.textContent = "Lisatiedot";
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    quizWinnerEl.append(link);
+  }
+}
+
 function renderCard(cardEl: HTMLButtonElement, item: TutkintonimikeItem | null): void {
   cardEl.replaceChildren();
   if (!item) {
@@ -118,65 +150,74 @@ function setQuizLoading(message: string): void {
   }
 }
 
-function pickOpponent(items: TutkintonimikeItem[], excludeId: number | null): TutkintonimikeItem | null {
-  const candidates = excludeId === null ? items : items.filter((item) => item.id !== excludeId);
-  if (candidates.length === 0) {
-    return null;
+function setSkipEnabled(enabled: boolean): void {
+  if (quizSkipEl) {
+    quizSkipEl.disabled = !enabled;
   }
-  return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-function pickPair(items: TutkintonimikeItem[]): [TutkintonimikeItem, TutkintonimikeItem] | null {
-  if (items.length < 2) {
-    return null;
+function shuffleItems(items: TutkintonimikeItem[]): TutkintonimikeItem[] {
+  const shuffled = items.slice();
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    const current = shuffled[index];
+    shuffled[index] = shuffled[swapIndex];
+    shuffled[swapIndex] = current;
   }
-  const pool = items;
-  let left = pool[Math.floor(Math.random() * pool.length)];
-  let right = left;
-  let attempts = 0;
-  while (right === left && attempts < 20) {
-    right = pool[Math.floor(Math.random() * pool.length)];
-    attempts += 1;
-  }
-  if (right === left) {
-    return null;
-  }
-  return [left, right];
+  return shuffled;
 }
 
-async function loadQuizPair(keepWinner = false): Promise<void> {
+function renderCurrentPair(): void {
   if (!quizLeftEl || !quizRightEl) {
     return;
   }
 
-  setQuizLoading("Ladataan...");
-  if (keepWinner && currentWinner) {
-    const opponent = pickOpponent(allItems, currentWinner.id);
-    if (!opponent) {
-      setQuizLoading("Tarvitaan vahintaan kaksi tutkintonimikkeita.");
-      return;
-    }
-    const winnerSide = currentWinnerSide ?? "left";
-    const left = winnerSide === "left" ? currentWinner : opponent;
-    const right = winnerSide === "left" ? opponent : currentWinner;
-    currentPair = { left, right };
-    renderCard(quizLeftEl, left);
-    renderCard(quizRightEl, right);
-    return;
-  }
-
-  const pair = pickPair(allItems);
-  if (!pair) {
+  setFinishedVisible(false);
+  if (!currentWinner) {
     setQuizLoading("Tarvitaan vahintaan kaksi tutkintonimiketta.");
+    setSkipEnabled(false);
+    setQuizCount();
     return;
   }
-  const [left, right] = pair;
 
+  const challenger = challengerQueue[0] ?? null;
+  if (!challenger) {
+    currentPair = null;
+    renderCard(quizLeftEl, currentWinner);
+    renderCard(quizRightEl, null);
+    renderWinner(currentWinner);
+    setFinishedVisible(true);
+    setSkipEnabled(false);
+    setQuizCount();
+    return;
+  }
+
+  const winnerSide = currentWinnerSide ?? "left";
+  const left = winnerSide === "left" ? currentWinner : challenger;
+  const right = winnerSide === "left" ? challenger : currentWinner;
   currentPair = { left, right };
-  currentWinner = null;
-  currentWinnerSide = null;
   renderCard(quizLeftEl, left);
   renderCard(quizRightEl, right);
+  setSkipEnabled(challengerQueue.length > 1);
+  setQuizCount();
+}
+
+function startQuiz(): void {
+  if (allItems.length < 2) {
+    setQuizLoading("Tarvitaan vahintaan kaksi tutkintonimiketta.");
+    currentWinner = null;
+    currentPair = null;
+    challengerQueue = [];
+    setSkipEnabled(false);
+    setQuizCount();
+    return;
+  }
+
+  const shuffled = shuffleItems(allItems);
+  currentWinner = shuffled[0];
+  currentWinnerSide = "left";
+  challengerQueue = shuffled.slice(1);
+  renderCurrentPair();
 }
 
 function recordQuizResult(voittaja: TutkintonimikeItem, haviaja: TutkintonimikeItem): void {
@@ -200,7 +241,20 @@ async function handleQuizChoice(selected: "left" | "right"): Promise<void> {
   recordQuizResult(voittaja, haviaja);
   currentWinner = voittaja;
   currentWinnerSide = selected;
-  await loadQuizPair(true);
+  challengerQueue = challengerQueue.slice(1);
+  renderCurrentPair();
+}
+
+function skipChallenger(): void {
+  if (challengerQueue.length <= 1) {
+    return;
+  }
+  const next = challengerQueue.shift();
+  if (!next) {
+    return;
+  }
+  challengerQueue.push(next);
+  renderCurrentPair();
 }
 
 async function init(): Promise<void> {
@@ -211,7 +265,7 @@ async function init(): Promise<void> {
   }
   setQuizLoading("Ladataan...");
   allItems = await api.list_tutkintonimikkeet();
-  await loadQuizPair();
+  startQuiz();
   renderQuizHistory();
 }
 
@@ -240,5 +294,5 @@ quizRightEl?.addEventListener("click", () => {
 });
 
 quizSkipEl?.addEventListener("click", () => {
-  void loadQuizPair();
+  skipChallenger();
 });

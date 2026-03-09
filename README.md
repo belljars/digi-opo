@@ -108,7 +108,7 @@ Tehdyt
 - [ ] Amis-tutkinto kortti vertailu (interaktiivinen)
 
 Korjattava
-- [ ] Amistutkinto kortti vertailu (jatkuu nyt ikuisesti, loppuu kun on voittaja ammatti nimike)
+- [x] Amistutkinto kortti vertailu (jatkuu nyt ikuisesti, loppuu kun on voittaja ammatti nimike)
 	- [ ] Top 3
 	- [ ] Näyttää listan kaikista ammateista järjestyksenä, minkä käyttäjän valitsi eniten
 - [ ] Opintopolku-kysely vastaus tallennus
