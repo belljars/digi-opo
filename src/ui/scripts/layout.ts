@@ -8,7 +8,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { id: "home", href: "./home.html", label: "Etusivu" },
-  { id: "index", href: "./index.html", label: "Tutkintopankki" },
+  { id: "index", href: "./pankki.html", label: "Tutkintopankki" },
   { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" }
 ];
 

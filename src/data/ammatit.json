@@ -7,12 +7,12 @@
         {
           "nimi": "Automekaanikko",
           "linkki": "https://luovi.fi/koulutukset/automekaanikko/",
-          "img": " "
+          "img": "assets/ammatit/automekaanikko.png"
         },
         {
           "nimi": "Pienkonemekaanikko",
           "linkki": "https://luovi.fi/koulutukset/pienkonemekaanikko/",
-          "img": " "
+          "img": "assets/ammatit/pienkonemekaanikko.png"
         }
       ]
     },
@@ -23,17 +23,17 @@
         {
           "nimi": "Elintarvikkeiden valmistaja",
           "linkki": "https://luovi.fi/koulutukset/elintarvikkeiden-valmistaja/",
-          "img": " "
+          "img": "assets/ammatit/elintarvikkeiden-valmistaja.png"
         },
         {
           "nimi": "Leipuri-kondiittori",
           "linkki": "https://luovi.fi/koulutukset/leipuri-kondiittori/",
-          "img": " "
+          "img": "assets/ammatit/leipuri-kondiittori.png"
         },
         {
           "nimi": "Lihatuotteiden valmistaja",
           "linkki": "https://luovi.fi/koulutukset/lihatuotteiden-valmistaja/",
-          "img": " "
+          "img": "assets/ammatit/lihatuotteiden-valmistaja.png"
         }
       ]
     },
@@ -44,12 +44,12 @@
         {
           "nimi": "Koneistaja",
           "linkki": "https://luovi.fi/koulutukset/koneistaja/",
-          "img": " "
+          "img": "assets/ammatit/koneistaja.png"
         },
         {
           "nimi": "Levyseppähitsaaja",
           "linkki": "https://luovi.fi/koulutukset/levyseppahitsaaja/",
-          "img": " "
+          "img": "assets/ammatit/levyseppahitsaaja.png"
         }
       ]
     },
@@ -60,7 +60,7 @@
         {
           "nimi": "Merkonomi",
           "linkki": "https://luovi.fi/koulutukset/merkonomi/",
-          "img": " "
+          "img": "assets/ammatit/merkonomi.png"
         }
       ]
     },
@@ -71,17 +71,17 @@
         {
           "nimi": "Kuorma-autonkuljettaja",
           "linkki": "https://luovi.fi/koulutukset/kuorma-autonkuljettaja/",
-          "img": " "
+          "img": "assets/ammatit/kuorma-autonkuljettaja.png"
         },
         {
           "nimi": "Palvelulogistiikkatyöntekijä",
           "linkki": "https://luovi.fi/koulutukset/palvelulogistiikkatyontekija/",
-          "img": " "
+          "img": "assets/ammatit/palvelulogistiikka-tyontekija.png"
         },
         {
           "nimi": "Yhdistelmäajoneuvonkuljettaja",
           "linkki": "https://luovi.fi/koulutukset/yhdistelmaajoneuvonkuljettaja/",
-          "img": " "
+          "img": "assets/ammatit/yhdistelma-ajoneuvonkuljettaja.png"
         }
       ]
     },
@@ -92,12 +92,12 @@
         {
           "nimi": "Ympäristönhoitaja",
           "linkki": "https://luovi.fi/koulutukset/ymparistonhoitaja",
-          "img": " "
+          "img": "assets/ammatit/ymparistonhoitaja.png"
         },
         {
           "nimi": "Ympäristönhuoltaja",
           "linkki": "https://luovi.fi/koulutukset/ymparistonhuoltaja/",
-          "img": " "
+          "img": "assets/ammatit/ymparistonhuoltaja.png"
         }
       ]
     },
@@ -108,12 +108,12 @@
         {
           "nimi": "Eläintenhoitaja",
           "linkki": "https://luovi.fi/koulutukset/elaintenhoitaja/",
-          "img": " "
+          "img": "assets/ammatit/elaintenhoitaja.png"
         },
         {
           "nimi": "Maaseutuyrittäjä",
           "linkki": "https://luovi.fi/koulutukset/maaseutuyrittaja/",
-          "img": " "
+          "img": "assets/ammatit/maaseutuyrittaja.png"
         }
       ]
     },
@@ -124,7 +124,7 @@
         {
           "nimi": "Mediapalvelujen toteuttaja",
           "linkki": "https://luovi.fi/koulutukset/mediapalvelujen-toteuttaja/",
-          "img": " "
+          "img": "assets/ammatit/mediapalvelujen-toteuttaja.png"
         }
       ]
     },
@@ -135,12 +135,12 @@
         {
           "nimi": "Maalari",
           "linkki": "https://luovi.fi/koulutukset/maalari/",
-          "img": " "
+          "img": "assets/ammatit/maalari.png"
         },
         {
           "nimi": "Pintakäsittelijä",
           "linkki": "https://luovi.fi/koulutukset/pintakasittelija/",
-          "img": " "
+          "img": "assets/ammatit/pintakasittelija.png"
         }
       ]
     },
@@ -151,17 +151,17 @@
         {
           "nimi": "Kiinteistönhoitaja",
           "linkki": "https://luovi.fi/koulutukset/kiinteistonhoitaja/",
-          "img": " "
+          "img": "assets/ammatit/kiinteistonhoitaja.png"
         },
         {
           "nimi": "Kodinhuoltaja",
           "linkki": "https://luovi.fi/koulutukset/kodinhuoltaja/",
-          "img": " "
+          "img": "assets/ammatit/kodinhuoltaja.png"
         },
         {
           "nimi": "Toimitilahuoltaja",
           "linkki": "https://luovi.fi/koulutukset/toimitilahuoltaja/",
-          "img": " "
+          "img": "assets/ammatit/toimitilahuoltaja.png"
         }
       ]
     },
@@ -172,7 +172,7 @@
         {
           "nimi": "Puutarhuri",
           "linkki": "https://luovi.fi/koulutukset/puutarhuri/",
-          "img": " "
+          "img": "assets/ammatit/puutarhuri.png"
         }
       ]
     },
@@ -183,7 +183,7 @@
         {
           "nimi": "Puuseppä",
           "linkki": "https://luovi.fi/koulutukset/puuseppa/",
-          "img": " "
+          "img": "assets/ammatit/puuseppa.png"
         }
       ]
     },
@@ -194,7 +194,7 @@
         {
           "nimi": "Talonrakentaja",
           "linkki": "https://luovi.fi/koulutukset/talonrakentaja/",
-          "img": " "
+          "img": "assets/ammatit/talonrakentaja.png"
         }
       ]
     },
@@ -205,12 +205,12 @@
         {
           "nimi": "Kokki",
           "linkki": "https://luovi.fi/koulutukset/kokki/",
-          "img": " "
+          "img": "assets/ammatit/kokki.png"
         },
         {
           "nimi": "Tarjoilija",
           "linkki": "https://luovi.fi/koulutukset/tarjoilija/",
-          "img": " "
+          "img": ""
         }
       ]
     },
@@ -221,7 +221,7 @@
         {
           "nimi": "Artesaani",
           "linkki": "https://luovi.fi/koulutukset/artesaani/",
-          "img": " "
+          "img": "assets/ammatit/artesaani.png"
         }
       ]
     },
@@ -232,17 +232,17 @@
         {
           "nimi": "Elektroniikka-asentaja",
           "linkki": "https://luovi.fi/koulutukset/elektroniikka-asentaja/",
-          "img": ""
+          "img": "assets/ammatit/elektroniikka-asentaja.png"
         },
         {
           "nimi": "IT-tukihenkilä",
           "linkki": "https://luovi.fi/koulutukset/it-tukihenkilo/",
-          "img": " "
+          "img": "assets/ammatit/it-tukihenkilo.png"
         },
         {
           "nimi": "Ohjelmistokehittäjä",
           "linkki": "https://luovi.fi/koulutukset/ohjelmistokehittaja/",
-          "img": " "
+          "img": "assets/ammatit/ohjelmistokehittaja.png"
         }
       ]
     },
@@ -253,7 +253,7 @@
         {
           "nimi": "Tutkintokoulutukseen valmentava koulutus (TUVA)",
           "linkki": "https://luovi.fi/koulutukset/tutkintokoulutukseen-valmentava-koulutus-tuva/",
-          "img": " "
+          "img": "assets/ammatit/tuva.png"
         }
       ]
     },
@@ -264,7 +264,7 @@
         {
           "nimi": "Työhön ja itsenäiseen elämään valmentava koulutus (TELMA)",
           "linkki": "https://luovi.fi/koulutukset/tyohon-ja-itsenaiseen-elamaan-valmentava-koulutus-telma/",
-          "img": " "
+          "img": "assets/ammatit/telma.png"
         }
       ]
     }

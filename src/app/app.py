@@ -130,6 +130,9 @@ def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+AMMATIT_IMPORT_VERSION = "2"
+
+
 def _ensure_schema(conn: sqlite3.Connection) -> None:
     conn.execute(
         """
@@ -147,10 +150,17 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
             tutkinto_id INTEGER NOT NULL,
             nimi TEXT NOT NULL,
             linkki TEXT,
+            img TEXT,
             FOREIGN KEY (tutkinto_id) REFERENCES tutkinnot(id) ON DELETE CASCADE
         );
         """
     )
+    columns = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(tutkintonimikkeet);").fetchall()
+    }
+    if "img" not in columns:
+        conn.execute("ALTER TABLE tutkintonimikkeet ADD COLUMN img TEXT;")
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS app_meta (
@@ -178,14 +188,15 @@ def _import_tutkinnot(conn: sqlite3.Connection, tutkinnot: list) -> None:
         for nimike in nimikkeet:
             nimike_nimi = str(nimike.get("nimi", "")).strip()
             linkki = str(nimike.get("linkki", "")).strip() or None
+            img = _normalize_ui_asset_ref(str(nimike.get("img", "")).strip()) or None
             if not nimike_nimi:
                 continue
             conn.execute(
                 """
-                INSERT INTO tutkintonimikkeet (tutkinto_id, nimi, linkki)
-                VALUES (?, ?, ?);
+                INSERT INTO tutkintonimikkeet (tutkinto_id, nimi, linkki, img)
+                VALUES (?, ?, ?, ?);
                 """,
-                (tutkinto_id, nimike_nimi, linkki),
+                (tutkinto_id, nimike_nimi, linkki, img),
             )
 
 
@@ -218,15 +229,16 @@ def _ensure_data(conn: sqlite3.Connection) -> None:
         raise ValueError("ammatit.json missing 'tutkinnot' list")
 
     source_hash = _sha256(raw_text)
+    import_signature = f"{AMMATIT_IMPORT_VERSION}:{source_hash}"
     total = conn.execute("SELECT COUNT(*) AS total FROM tutkinnot;").fetchone()["total"]
     current_hash = _get_meta(conn, "ammatit_json_sha256")
 
-    if total == 0 or current_hash != source_hash:
+    if total == 0 or current_hash != import_signature:
         with conn:
             conn.execute("DELETE FROM tutkintonimikkeet;")
             conn.execute("DELETE FROM tutkinnot;")
             _import_tutkinnot(conn, tutkinnot)
-            _set_meta(conn, "ammatit_json_sha256", source_hash)
+            _set_meta(conn, "ammatit_json_sha256", import_signature)
 
 
 class Api:
@@ -254,7 +266,7 @@ class Api:
         with self._lock:
             nimikkeet = self._conn.execute(
                 """
-                SELECT nimi, linkki
+                SELECT nimi, linkki, img
                 FROM tutkintonimikkeet
                 WHERE tutkinto_id = ?
                 ORDER BY nimi;
@@ -266,7 +278,11 @@ class Api:
             "nimi": row["nimi"],
             "desc": row["desc"],
             "tutkintonimikkeet": [
-                {"nimi": nimike["nimi"], "linkki": nimike["linkki"]}
+                {
+                    "nimi": nimike["nimi"],
+                    "linkki": nimike["linkki"],
+                    "img": nimike["img"],
+                }
                 for nimike in nimikkeet
             ],
         }
@@ -292,7 +308,7 @@ class Api:
         with self._lock:
             rows = self._conn.execute(
                 """
-                SELECT n.id, n.nimi, n.linkki, n.tutkinto_id, t.nimi AS tutkinto_nimi
+                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
                 FROM tutkintonimikkeet n
                 JOIN tutkinnot t ON t.id = n.tutkinto_id
                 ORDER BY n.nimi;
@@ -303,6 +319,7 @@ class Api:
                 "id": row["id"],
                 "nimi": row["nimi"],
                 "linkki": row["linkki"],
+                "img": row["img"],
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
             }
