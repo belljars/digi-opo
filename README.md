@@ -1,4 +1,4 @@
-# digi-opo — Työpöytäsovellus
+# digi-opo  (tosissaan)
 
 ## Yleiskuvaus
 
@@ -19,7 +19,7 @@ Sovellus sisältää tällä hetkellä viisi näkymää:
 - Mahdollistaa kahden tutkintonimikkeen korttivertailun (`Vertailu`).
 - Lataa `Opintopolut`-näkymän sisällön tiedostosta `src/data/opiskeluSuunnat.json`.
 
-Huomio:
+### Huomio
 - API:ssa on myös `search_tutkinnot`, mutta sitä ei tällä hetkellä käytetä UI:ssa.
 - Repossa voi olla vanhoja tietokantatiedostoja (esim. `data/ammatit.db`), mutta appi käyttää `data/tutkinnot.db`-tiedostoa.
 
