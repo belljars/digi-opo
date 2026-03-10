@@ -1,3 +1,5 @@
+REM ÄLÄ KOSKE TAI MUOKKAA
+
 @echo off
 setlocal
 
