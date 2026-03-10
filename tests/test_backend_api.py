@@ -15,7 +15,7 @@ def load_app_module():
     app_path = project_root / "src" / "app" / "app.py"
     spec = importlib.util.spec_from_file_location("digi_opo_app", app_path)
     if spec is None or spec.loader is None:
-        raise RuntimeError("Could not load src/app/app.py")
+        raise RuntimeError("Ei pystynyt lataamaan src/app/app.py")
 
     fake_webview = types.SimpleNamespace(
         create_window=lambda *args, **kwargs: None,
