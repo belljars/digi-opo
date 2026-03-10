@@ -1,120 +1,270 @@
 {
   "tutkinnot": [
     {
-      "nimi": "Puhtaus- ja kiinteistöpalvelualan perustutkinto",
-      "desc": "Puhtaus- ja kiinteistöpalvelualan perustutkinnon suorittanut osaa toimia asiakaskohteessa puhtaus- ja kiinteistöpalvelualan työtehtävissä ja asiakaspalvelutilanteissa asiakaskohteen palvelusopimuksen mukaisesti. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan kiinteistönhoitoon, kotityöpalveluihin tai toimitilahuoltoon osaamisalansa mukaisesti.",
+      "nimi": "Ajoneuvoalan perustutkinto",
+      "desc": "Ajoneuvoalan perustutkinnon suorittanut osaa toimia ajoneuvoalan tehtävissä, kuten autokorjaamoissa, huoltoasemilla ja autoliikkeissä. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan ajoneuvoalaan osaamisalansa mukaisesti.",
       "tutkintonimikkeet": [
         {
-          "nimi": "Kiinteistönhoitaja",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9723361/tekstikappale/9723355"
+          "nimi": "Automekaanikko",
+          "linkki": "https://luovi.fi/koulutukset/automekaanikko/",
+          "img": " "
         },
         {
-          "nimi": "Kotityöpalvelujen osaamisala",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9723361/tekstikappale/9723356"
-        },
-        {
-        "nimi": "Toimitilahuoltaja",
-        "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9723361/tekstikappale/9723357"
+          "nimi": "Pienkonemekaanikko",
+          "linkki": "https://luovi.fi/koulutukset/pienkonemekaanikko/",
+          "img": " "
         }
       ]
     },
     {
-      "nimi": "Liiketoiminnan perustutkinto",
-      "desc": "Liiketoiminnan perustutkinnon suorittanut osaa toimia asiakaspalvelu- ja myyntitehtävissä, markkinointitehtävissä, taloushallinnon tehtävissä, henkilöstöhallinnon tehtävissä, yritystoiminnan tehtävissä tai logistiikan tehtävissä. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan asiakaspalveluun ja myyntiin, markkinointiin, taloushallintoon, henkilöstöhallintoon, yritystoimintaan tai logistiikkaan osaamisalansa mukaisesti.",
+      "nimi": "Elintarvikealan perustutkinto",
+      "desc": "Elintarvikealan perustutkinnon suorittanut osaa toimia elintarvikealan tehtävissä, kuten elintarvikkeiden valmistuksessa, leipomoissa ja lihatuotteiden valmistuksessa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan elintarvikealaan osaamisalansa mukaisesti.",
       "tutkintonimikkeet": [
         {
-          "nimi": "Merkonomi",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9720962/tiedot"
+          "nimi": "Elintarvikkeiden valmistaja",
+          "linkki": "https://luovi.fi/koulutukset/elintarvikkeiden-valmistaja/",
+          "img": " "
+        },
+        {
+          "nimi": "Leipuri-kondiittori",
+          "linkki": "https://luovi.fi/koulutukset/leipuri-kondiittori/",
+          "img": " "
+        },
+        {
+          "nimi": "Lihatuotteiden valmistaja",
+          "linkki": "https://luovi.fi/koulutukset/lihatuotteiden-valmistaja/",
+          "img": " "
         }
       ]
     },
     {
       "nimi": "Kone- ja tuotantotekniikan perustutkinto",
-      "desc": "Kone- ja tuotantotekniikan perustutkinnon suorittanut osaa toimia kone- ja tuotantotekniikan tehtävissä, kuten koneiden käyttö, huolto, asennus ja testaus. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan kone- ja tuotantotekniikkaan osaamisalansa mukaisesti.",
+      "desc": "Kone- ja tuotantotekniikan perustutkinnon suorittanut osaa toimia kone- ja tuotantotekniikan tehtävissä, kuten konepajoissa, teollisuudessa ja valmistavassa teollisuudessa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan kone- ja tuotantotekniikkaan osaamisalansa mukaisesti.",
       "tutkintonimikkeet": [
         {
           "nimi": "Koneistaja",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719736"
+          "linkki": "https://luovi.fi/koulutukset/koneistaja/",
+          "img": " "
         },
         {
           "nimi": "Levyseppähitsaaja",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719736"
+          "linkki": "https://luovi.fi/koulutukset/levyseppahitsaaja/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Liiketoiminnan perustutkinto",
+      "desc": "Liiketoiminnan perustutkinnon suorittanut osaa toimia liiketoiminnan tehtävissä, kuten myynti, asiakaspalvelu ja markkinointi. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan liiketoimintaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Merkonomi",
+          "linkki": "https://luovi.fi/koulutukset/merkonomi/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Logistiikan perustutkinto",
+      "desc": "Logistiikan perustutkinnon suorittanut osaa toimia logistiikan tehtävissä, kuten varastoinnissa, kuljetuksissa ja toimituksissa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan logistiikkaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Kuorma-autonkuljettaja",
+          "linkki": "https://luovi.fi/koulutukset/kuorma-autonkuljettaja/",
+          "img": " "
         },
         {
-          "nimi": "Koneautomaatioasentaja",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719737"
+          "nimi": "Palvelulogistiikkatyöntekijä",
+          "linkki": "https://luovi.fi/koulutukset/palvelulogistiikkatyontekija/",
+          "img": " "
         },
         {
-          "nimi": "Koneasentaja",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719737"
+          "nimi": "Yhdistelmäajoneuvonkuljettaja",
+          "linkki": "https://luovi.fi/koulutukset/yhdistelmaajoneuvonkuljettaja/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Luonto- ja ympäristöalan perustutkinto",
+      "desc": "Luonto- ja ympäristöalan perustutkinnon suorittanut osaa toimia luonto- ja ympäristöalan tehtävissä, kuten ympäristön suunnittelussa, luonnon monimuotoisuuden huollossa ja ympäristönsuojelussa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan luonto- ja ympäristöalaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Ympäristönhoitaja",
+          "linkki": "https://luovi.fi/koulutukset/ymparistonhoitaja",
+          "img": " "
         },
         {
-          "nimi": "Kumituotevalmistaja",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719738"
+          "nimi": "Ympäristönhuoltaja",
+          "linkki": "https://luovi.fi/koulutukset/ymparistonhuoltaja/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Maatalousalan perustutkinto",
+      "desc": "Maatalousalan perustutkinnon suorittanut osaa toimia maatalousalan tehtävissä, kuten maataloudessa, metsässä ja luonnossa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan maatalousalaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Eläintenhoitaja",
+          "linkki": "https://luovi.fi/koulutukset/elaintenhoitaja/",
+          "img": " "
         },
         {
-          "nimi": "Muovituotevalmistaja",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9719743/tekstikappale/9719739"
+          "nimi": "Maaseutuyrittäjä",
+          "linkki": "https://luovi.fi/koulutukset/maaseutuyrittaja/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Media-alan ja kuvallisen ilmaisun perustutkinto",
+      "desc": "Media-alan ja kuvallisen ilmaisun perustutkinnon suorittanut osaa toimia media-alan ja kuvallisen ilmaisun tehtävissä, kuten mediasisältöjen tuottamisessa, kuvallisen ilmaisun suunnittelussa ja mediapalvelujen toteutuksessa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan media-alan ja kuvallisen ilmaisun alaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Mediapalvelujen toteuttaja",
+          "linkki": "https://luovi.fi/koulutukset/mediapalvelujen-toteuttaja/",
+          "img": " "
         }
       ]
     },
     {
       "nimi": "Pintakäsittelyalan perustutkinto",
-      "desc": "Pintakäsittelyalan perustutkinnon suorittanut osaa toimia pintakäsittelyalan tehtävissä, kuten maalaus, pinnoitus, korroosiosuojaus ja pintakäsittelyprosessien hallinta. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan pintakäsittelyyn osaamisalansa mukaisesti.",
+      "desc": "Pintakäsittelyalan perustutkinnon suorittanut osaa toimia pintakäsittelyalan tehtävissä, kuten pintakäsittelyssä, maalauksessa ja korjaamisessa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan pintakäsittelyalaan osaamisalansa mukaisesti.",
       "tutkintonimikkeet": [
         {
-          "nimi": "Lattianpäällystäjä",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9710485/tekstikappale/9710480"
-        },
-        {
           "nimi": "Maalari",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9710485/tekstikappale/9710479"
+          "linkki": "https://luovi.fi/koulutukset/maalari/",
+          "img": " "
         },
         {
           "nimi": "Pintakäsittelijä",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/9710485/tekstikappale/9710481"
+          "linkki": "https://luovi.fi/koulutukset/pintakasittelija/",
+          "img": " "
         }
       ]
     },
     {
-      "nimi": "Ajoneuvoalan perustutkinto",
-      "desc": "Ajoneuvoalan perustutkinnon suorittanut osaa toimia ajoneuvoalan tehtävissä, kuten ajoneuvojen huolto, korjaus, myynti ja asiakaspalvelu. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan ajoneuvoalaan osaamisalansa mukaisesti.",
+      "nimi": "Puhtaus- ja kiinteistöpalvelualan perustutkinto",
+      "desc": "Puhtaus- ja kiinteistöpalvelualan perustutkinnon suorittanut osaa toimia puhtaus- ja kiinteistöpalvelualan tehtävissä, kuten kiinteistöjen puhdistuksessa, huollossa ja ylläpidossa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan puhtaus- ja kiinteistöpalvelualaan osaamisalansa mukaisesti.",
       "tutkintonimikkeet": [
         {
-          "nimi": "Automaalari",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919034"
+          "nimi": "Kiinteistönhoitaja",
+          "linkki": "https://luovi.fi/koulutukset/kiinteistonhoitaja/",
+          "img": " "
         },
         {
-          "nimi": "Varaisamyyjä",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919033"
+          "nimi": "Kodinhuoltaja",
+          "linkki": "https://luovi.fi/koulutukset/kodinhuoltaja/",
+          "img": " "
         },
         {
-          "nimi": "Automekaanikko",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
+          "nimi": "Toimitilahuoltaja",
+          "linkki": "https://luovi.fi/koulutukset/toimitilahuoltaja/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Puutarha-alan perustutkinto",
+      "desc": "Puutarha-alan perustutkinnon suorittanut osaa toimia puutarha-alan tehtävissä, kuten puutarhojen hoitamisessa, kasvien kulttuurissa ja vihannesten viljelussa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan puutarha-alaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Puutarhuri",
+          "linkki": "https://luovi.fi/koulutukset/puutarhuri/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Puuteollisuuden perustutkinto",
+      "desc": "Puuteollisuuden perustutkinnon suorittanut osaa toimia puuteollisuuden tehtävissä, kuten puun muovauksessa, puun käsittelyssä ja puun valmistamisessa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan puuteollisuuteen osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Puuseppä",
+          "linkki": "https://luovi.fi/koulutukset/puuseppa/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Rakennusalan perustutkinto",
+      "desc": "Rakennusalan perustutkinnon suorittanut osaa toimia rakennusalan tehtävissä, kuten rakennusten suunnittelussa, rakentamisessa ja huollossa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan rakennusalaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Talonrakentaja",
+          "linkki": "https://luovi.fi/koulutukset/talonrakentaja/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Ravintola- ja catering-alan perustutkinto",
+      "desc": "Ravintola- ja catering-alan perustutkinnon suorittanut osaa toimia ravintola- ja catering-alan tehtävissä, kuten ravintoloissa, kahviloissa ja catering-palveluissa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan ravintola- ja catering-alaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Kokki",
+          "linkki": "https://luovi.fi/koulutukset/kokki/",
+          "img": " "
         },
         {
-          "nimi": "Ajoneuvomyyjä",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919033"
+          "nimi": "Tarjoilija",
+          "linkki": "https://luovi.fi/koulutukset/tarjoilija/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Taideteollisuusalan perustutkinto",
+      "desc": "Taideteollisuusalan perustutkinnon suorittanut osaa toimia taideteollisuusalan tehtävissä, kuten taideteollisuudessa, käsityöalalla ja muotoilussa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan taideteollisuusalaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Artesaani",
+          "linkki": "https://luovi.fi/koulutukset/artesaani/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Tieto- ja viestintätekniikan perustutkinto",
+      "desc": "Tieto- ja viestintätekniikan perustutkinnon suorittanut osaa toimia tieto- ja viestintätekniikan tehtävissä, kuten tietotekniikan huollossa, ohjelmoinnissa ja tietoverkkojen ylläpidossa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan tieto- ja viestintätekniikkaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Elektroniikka-asentaja",
+          "linkki": "https://luovi.fi/koulutukset/elektroniikka-asentaja/",
+          "img": ""
         },
         {
-          "nimi": "Pienkonemekaanikko",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
+          "nimi": "IT-tukihenkilä",
+          "linkki": "https://luovi.fi/koulutukset/it-tukihenkilo/",
+          "img": " "
         },
         {
-          "nimi": "Autokorimekaanikko",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
-        },
+          "nimi": "Ohjelmistokehittäjä",
+          "linkki": "https://luovi.fi/koulutukset/ohjelmistokehittaja/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Tutkintokoulutukseen valmentava koulutus (TUVA)",
+      "desc": "Tutkintokoulutukseen valmentava koulutus (TUVA) on koulutus, joka valmistelee opiskelijat ammatilliseen tutkintoon. Koulutus sisältää sekä teoreettista että käytännöllistä osaamista.",
+      "tutkintonimikkeet": [
         {
-          "nimi": "Diagnoosimekaanikko",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
-        },
+          "nimi": "Tutkintokoulutukseen valmentava koulutus (TUVA)",
+          "linkki": "https://luovi.fi/koulutukset/tutkintokoulutukseen-valmentava-koulutus-tuva/",
+          "img": " "
+        }
+      ]
+    },
+    {
+      "nimi": "Työhön ja itsenäiseen elämään valmentava koulutus (TELMA)",
+      "desc": "Työhön ja itsenäiseen elämään valmentava koulutus (TELMA) on koulutus, joka valmistelee opiskelijat työelämään ja itsenäiseen elämään. Koulutus sisältää sekä teoreettista että käytännöllistä osaamista.",
+      "tutkintonimikkeet": [
         {
-          "nimi": "Hyötyajoneuvomekaanikko",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7850160"
-        },
-        {
-          "nimi": "Huoltomyyjä",
-          "linkki": "https://eperusteet.opintopolku.fi/#/fi/tiedot/7614470/tekstikappale/7919033"
+          "nimi": "Työhön ja itsenäiseen elämään valmentava koulutus (TELMA)",
+          "linkki": "https://luovi.fi/koulutukset/tyohon-ja-itsenaiseen-elamaan-valmentava-koulutus-telma/",
+          "img": " "
         }
       ]
     }
