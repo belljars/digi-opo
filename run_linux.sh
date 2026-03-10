@@ -36,3 +36,6 @@ cp dist/ui/scripts/amis-quiz.js src/ui/scripts/amis-quiz.js
 
 echo "[INFO] Launching app with ${PY_CMD}."
 exec "${PY_CMD}" src/app/app.py
+
+# HOX: Skripti on tarkoitus on vain helpottaa kehitystä Linux-ympäristössä. Se ei ole tarkoitettu tuotantokäyttöön eikä sitä tule käyttää muissa ympäristöissä.
+# Tarkoitettu henkilökohtaiseen laitteeseen, jossa on NixOS, mutta pitäisi toimia myös muissa Linux-jakeluissa, joissa on Python 3 ja npm. :)
