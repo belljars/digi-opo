@@ -9,6 +9,7 @@ type TutkintonimikeItem = {
   id: number;
   nimi: string;
   linkki: string | null;
+  img: string | null;
   tutkinto_id: number;
   tutkinto_nimi: string;
 };
@@ -17,7 +18,7 @@ type TutkintoDetail = {
   id: number;
   nimi: string;
   desc: string;
-  tutkintonimikkeet: { nimi: string; linkki: string | null }[];
+  tutkintonimikkeet: { nimi: string; linkki: string | null; img: string | null }[];
 };
 
 type OpiskeluSuunta = {

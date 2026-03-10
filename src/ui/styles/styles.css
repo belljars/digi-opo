@@ -177,7 +177,7 @@ body {
 }
 
 .list button.active {
-  font-weight: 600;
+  background-color: var(--color-overlay-subtle);
 }
 
 .quiz-header {
@@ -360,6 +360,40 @@ body {
   padding-left: var(--space-8);
 }
 
+.tutkintonimike-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
+}
+
+.tutkintonimike-card {
+  border: var(--border-width) solid var(--color-border);
+  overflow: hidden;
+  background: var(--color-transparent);
+}
+
+.tutkintonimike-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: var(--color-surface-muted);
+}
+
+.tutkintonimike-image--placeholder {
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.tutkintonimike-card-body {
+  padding: var(--space-7);
+}
+
+.tutkintonimike-link {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+
 .opintopolut-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -431,6 +465,10 @@ body {
   }
 
   .opintopolut-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tutkintonimike-grid {
     grid-template-columns: 1fr;
   }
 

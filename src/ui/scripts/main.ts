@@ -8,6 +8,7 @@ type TutkintoListItem = {
 type Tutkintonimike = {
   nimi: string;
   linkki: string | null;
+  img: string | null;
 };
 
 type TutkintoDetail = {
@@ -100,14 +101,24 @@ function renderDetail(detail: TutkintoDetail): void {
   }
 
   const nimikkeet = detail.tutkintonimikkeet.length
-    ? `<ul>${detail.tutkintonimikkeet
+    ? `<div class="tutkintonimike-grid">${detail.tutkintonimikkeet
         .map((nimike) => {
+          const image = nimike.img
+            ? `<img src="${nimike.img}" alt="${nimike.nimi}" class="tutkintonimike-image" />`
+            : `<div class="tutkintonimike-image tutkintonimike-image--placeholder" aria-hidden="true"></div>`;
           const link = nimike.linkki
-            ? `<a href="${nimike.linkki}" target="_blank" rel="noreferrer">${nimike.nimi}</a>`
-            : nimike.nimi;
-          return `<li>${link}</li>`;
+            ? `<a href="${nimike.linkki}" target="_blank" rel="noreferrer" class="tutkintonimike-link">${nimike.nimi}</a>`
+            : `<span class="tutkintonimike-link">${nimike.nimi}</span>`;
+          return `
+            <article class="tutkintonimike-card">
+              ${image}
+              <div class="tutkintonimike-card-body">
+                ${link}
+              </div>
+            </article>
+          `;
         })
-        .join("")}</ul>`
+        .join("")}</div>`
     : `<p class="empty">Ei tutkintonimikkeitä.</p>`;
 
   detailEl.innerHTML = `
