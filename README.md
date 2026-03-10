@@ -41,49 +41,11 @@ Python-riippuvuudet asennetaan tiedostosta `requirements.txt`.
 TypeScript buildataan komennolla `npm run build`.
 Repositorio on TypeScript-painotteinen: lähdekoodi pidetään `.ts`-tiedostoissa, ja buildatut `.js`-tiedostot jätetään pois versiosta.
 
-## Ajaminen paikallisesti
-
-Linux:
-
-```bash
-./run_linux.sh
-```
-
-Makefile-komennot:
-
-```bash
-make check
-make run
-```
-
-NixOS (suositus):
-
-```bash
-nix --extra-experimental-features "nix-command flakes" develop path:.
-./run_linux.sh
-```
-
-Huom:
-- Nix shellissa `run_linux.sh` ei luo `.venv`:iä eikä aja `pip install`, vaan käyttää Nixin Python-paketteja.
-- Projektiin on lisätty `flake.nix` ja `shell.nix`, joten myös `nix-shell` toimii.
-
-Windows:
-
-```bat
-run_windows.bat
-```
-
-Skriptit tekevät nämä vaiheet:
-1. Luo `.venv` (tarvittaessa)
-2. Asentaa Python-riippuvuudet
-3. Ajaa TypeScript-buildin (`npm run build`)
-4. Kopioi buildatut JS-tiedostot `dist/ui/scripts/` -> `src/ui/scripts/`
-5. Käynnistää appin (`python3 src/app/app.py` / `.venv\\Scripts\\python.exe src\\app\\app.py`)
-
 ## Projektin rakenne
 
 ```text
 digi-opo/
+├── user/                 # Käyttäjä data
 ├── src/
 │   ├── app/              # pywebview app + Python API
 │   ├── ui/               # HTML/CSS/TS näkymät
