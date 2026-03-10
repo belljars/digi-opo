@@ -111,10 +111,12 @@ Korjattava
 - [x] Amistutkinto kortti vertailu (jatkuu nyt ikuisesti, loppuu kun on voittaja ammatti nimike)
 	- [x] Top 3
 	- [x] Näyttää listan kaikista ammateista järjestyksenä, minkä käyttäjän valitsi eniten
-	- [ ] Esiintyminen kyselyn *jälkeen*
+	- [x] Esiintyminen kyselyn *jälkeen*
 - [ ] Opintopolku-kysely vastaus tallennus
 
 Seuraava
+- [x] Lisää muut tutkinnot (10.3.26 lisätty kaikki Luovin tutkinnot)
+- [x] Lisää linkityt kuvat jokaisiin tutkintoihin
 
 Lisättävää
 - [ ] Mahdollisuus tallentaa eri tutkintonimikkeet
@@ -124,10 +126,6 @@ Lisättävää
 		- [ ] Ensimmäisenä lisätty
 		- [ ] Tutkinto kategoriana (aakkoset, laskeva)
 - [ ] Estää joidenkin tutkintonimikkeiden/perustutkintojen ilmestyminen kokonaan
-
-Loppuvaihe
-- [ ] Lisää muut tutkinnot
-- [ ] Lisää linkityt kuvat jokaisiin tutkintoihin
 
 ## Lisenssi
 
