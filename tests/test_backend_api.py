@@ -21,7 +21,7 @@ def load_app_module():
         create_window=lambda *args, **kwargs: None,
         start=lambda *args, **kwargs: None,
     )
-    sys.modules.setdefault("webview", fake_webview)
+    sys.modules.setdefault("webview", fake_webview) # Mockataan webview, jotta app.py ei yritä luoda oikeaa ikkunaa testatessa
 
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
