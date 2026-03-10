@@ -1,4 +1,4 @@
-from __future__ import annotations
+from __future__ import annotations # Tämä ei oikeastaan tee mitään tässä tiedostossa, mutta se on hyvä käytäntö, jos haluamme käyttää tyyppiviitteissä ominaisuuksia, jotka vaativat tämän importin (kuten forward references tai jotkin typing-moduulin ominaisuudet) :)
 
 import re
 import unittest
@@ -37,20 +37,20 @@ class UiSmokeTests(unittest.TestCase):
                 styles = LINK_RE.findall(html)
                 scripts = SCRIPT_RE.findall(html)
 
-                self.assertGreaterEqual(len(styles), 1, f"{page} missing stylesheet link")
-                self.assertGreaterEqual(len(scripts), 1, f"{page} missing script tags")
+                self.assertGreaterEqual(len(styles), 1, f"{page} puuttuu tyylitiedostoja")
+                self.assertGreaterEqual(len(scripts), 1, f"{page} puuttuu skriptitags")
 
                 for href in styles:
                     asset_path = self._resolve_page_asset(page, href)
                     self.assertTrue(
                         asset_path.exists(),
-                        f"{page} stylesheet does not exist: {href}",
+                        f"{page} tyylitiedosto ei ole olemassa: {href}",
                     )
 
                 for src in scripts:
                     self.assertTrue(
                         self._script_exists_with_ts_fallback(page, src),
-                        f"{page} script does not exist (js/ts): {src}",
+                        f"{page} skripti ei ole olemassa (js/ts): {src}",
                     )
 
 
