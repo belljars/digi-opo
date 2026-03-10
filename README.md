@@ -6,7 +6,7 @@
 
 Sovellus sisältää tällä hetkellä viisi näkymää:
 - `Etusivu` (`src/ui/pages/home.html`)
-- `Tutkintopankki` (`src/ui/pages/index.html`)
+- `Tutkintopankki` (`src/ui/pages/pankki.html`)
 - `Opintopolut` (`src/ui/pages/opintopolut.html`)
 - `Opintopolku-kysely` (`src/ui/pages/quiz.html`)
 - `Amis-korttivertailu` (`src/ui/pages/amis-quiz.html`)

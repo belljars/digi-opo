@@ -125,6 +125,58 @@ class BackendApiTests(unittest.TestCase):
             self.assertIn("questions", quiz)
             self.assertGreater(len(quiz["questions"]), 0)
 
+    def test_saved_tutkintonimikkeet_are_persisted_in_user_directory(self) -> None:
+        with mock.patch.object(self.app, "_project_root", return_value=self.root):
+            api = self.app.Api()
+            all_items = api.list_tutkintonimikkeet()
+            saved = api.save_tutkintonimike(all_items[0]["id"])
+
+            self.assertEqual(saved["nimi"], all_items[0]["nimi"])
+
+            saved_items = api.list_saved_tutkintonimikkeet()
+            self.assertEqual(len(saved_items), 1)
+            self.assertEqual(saved_items[0]["id"], all_items[0]["id"])
+
+            saved_path = self.root / "user" / "saved_tutkintonimikkeet.json"
+            self.assertTrue(saved_path.exists())
+            payload = json.loads(saved_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["items"]), 1)
+
+    def test_saved_tutkintonimike_can_be_removed(self) -> None:
+        with mock.patch.object(self.app, "_project_root", return_value=self.root):
+            api = self.app.Api()
+            all_items = api.list_tutkintonimikkeet()
+            api.save_tutkintonimike(all_items[0]["id"])
+
+            removed = api.remove_saved_tutkintonimike(all_items[0]["id"])
+            self.assertTrue(removed)
+            self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
+
+    def test_quiz_results_are_persisted_in_user_directory(self) -> None:
+        with mock.patch.object(self.app, "_project_root", return_value=self.root):
+            api = self.app.Api()
+            first = api.save_quiz_result(
+                "opintopolku",
+                {"topPathId": "lukio", "scores": {"lukio": 3}},
+            )
+            second = api.save_quiz_result(
+                "amis-quiz",
+                {"winnerId": 2, "comparisons": 5},
+            )
+
+            all_results = api.list_quiz_results()
+            self.assertEqual(len(all_results), 2)
+            self.assertEqual(all_results[0]["id"], second["id"])
+
+            opintopolku_results = api.list_quiz_results("opintopolku")
+            self.assertEqual(len(opintopolku_results), 1)
+            self.assertEqual(opintopolku_results[0]["id"], first["id"])
+
+            results_path = self.root / "user" / "quiz_results.json"
+            self.assertTrue(results_path.exists())
+            payload = json.loads(results_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["items"]), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

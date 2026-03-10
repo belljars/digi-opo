@@ -6,13 +6,13 @@ import os
 import sqlite3
 import threading
 import sys
+from datetime import datetime, timezone
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-# Avoid known Qt Wayland EGL crashes in some Linux environments by defaulting
-# to XWayland unless the user has explicitly selected a Qt platform.
+# Vältä tunnettuja Qt Wayland EGL -kaatumisia joissain Linux-ympäristöissä käyttämällä oletuksena XWaylandia, ellei käyttäjä ole nimenomaisesti valinnut Qt-alustaa
 if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
@@ -33,6 +33,12 @@ def _db_path() -> Path:
     return data_dir / "tutkinnot.db"
 
 
+def _user_data_dir() -> Path:
+    user_dir = _project_root() / "user"
+    user_dir.mkdir(exist_ok=True)
+    return user_dir
+
+
 def _source_json_path() -> Path:
     return _project_root() / "src" / "data" / "ammatit.json"
 
@@ -50,7 +56,7 @@ def _resolve_local_ui_path(raw_path: str) -> Path | None:
     if not candidate_text:
         return None
 
-    # Leave URLs (http/file/data/etc.) untouched.
+    # Jätä URL-tyyppiset viittaukset käsittelemättä, jotta ulkoiset linkit ja data-URI:t toimivat normaalisti. Tämä estää myös mahdolliset hakemistopolkuun liittyvät haavoittuvuudet, koska URL-osoitteet eivät käsiteltäisi tiedostopolkuina
     if urlparse(candidate_text).scheme:
         return None
 
@@ -105,6 +111,14 @@ def _connect_db() -> sqlite3.Connection:
     return conn
 
 
+def _saved_tutkintonimikkeet_path() -> Path:
+    return _user_data_dir() / "saved_tutkintonimikkeet.json"
+
+
+def _quiz_results_path() -> Path:
+    return _user_data_dir() / "quiz_results.json"
+
+
 def _start_static_server() -> tuple[ThreadingHTTPServer, int]:
     handler = partial(SimpleHTTPRequestHandler, directory=str(_project_root()))
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
@@ -117,7 +131,7 @@ def _parse_json_payload(raw_text: str, source_name: str) -> dict:
     try:
         data = json.loads(raw_text)
     except json.JSONDecodeError:
-        # Käsittelee JSON-payloadin jälkeiset roskat.
+        # Käsittelee JSON-payloadin jälkeiset roskat
         decoder = json.JSONDecoder()
         data, _ = decoder.raw_decode(raw_text.lstrip())
 
@@ -128,6 +142,32 @@ def _parse_json_payload(raw_text: str, source_name: str) -> dict:
 
 def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def _read_json_object(path: Path, default: dict) -> dict:
+    if not path.exists():
+        return dict(default)
+
+    raw_text = path.read_text(encoding="utf-8").strip()
+    if not raw_text:
+        return dict(default)
+
+    data = _parse_json_payload(raw_text, path.name)
+    return data if isinstance(data, dict) else dict(default)
+
+
+def _write_json_object(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_suffix(f"{path.suffix}.tmp")
+    tmp_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    tmp_path.replace(path)
 
 
 AMMATIT_IMPORT_VERSION = "2"
@@ -247,6 +287,34 @@ class Api:
         self._lock = threading.Lock()
         _ensure_data(self._conn)
 
+    def _load_saved_tutkintonimikkeet(self) -> list[dict]:
+        data = _read_json_object(_saved_tutkintonimikkeet_path(), {"items": []})
+        items = data.get("items", [])
+        return items if isinstance(items, list) else []
+
+    def _write_saved_tutkintonimikkeet(self, items: list[dict]) -> None:
+        _write_json_object(
+            _saved_tutkintonimikkeet_path(),
+            {
+                "items": items,
+                "updatedAt": _utc_now_iso(),
+            },
+        )
+
+    def _load_quiz_results(self) -> list[dict]:
+        data = _read_json_object(_quiz_results_path(), {"items": []})
+        items = data.get("items", [])
+        return items if isinstance(items, list) else []
+
+    def _write_quiz_results(self, items: list[dict]) -> None:
+        _write_json_object(
+            _quiz_results_path(),
+            {
+                "items": items,
+                "updatedAt": _utc_now_iso(),
+            },
+        )
+
     def list_tutkinnot(self) -> list[dict[str, str | int]]:
         with self._lock:
             rows = self._conn.execute(
@@ -325,6 +393,107 @@ class Api:
             }
             for row in rows
         ]
+
+    def list_saved_tutkintonimikkeet(self) -> list[dict]:
+        with self._lock:
+            items = self._load_saved_tutkintonimikkeet()
+        return sorted(items, key=lambda item: str(item.get("nimi", "")).casefold())
+
+    def save_tutkintonimike(self, tutkintonimike_id: int) -> dict:
+        try:
+            nimike_id = int(tutkintonimike_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Invalid tutkintonimike id") from exc
+
+        with self._lock:
+            row = self._conn.execute(
+                """
+                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
+                FROM tutkintonimikkeet n
+                JOIN tutkinnot t ON t.id = n.tutkinto_id
+                WHERE n.id = ?;
+                """,
+                (nimike_id,),
+            ).fetchone()
+            if row is None:
+                raise ValueError(f"Unknown tutkintonimike id: {nimike_id}")
+
+            items = self._load_saved_tutkintonimikkeet()
+            existing = next(
+                (item for item in items if int(item.get("id", 0)) == nimike_id),
+                None,
+            )
+            saved_at = existing.get("savedAt") if existing else _utc_now_iso()
+            item = {
+                "id": row["id"],
+                "nimi": row["nimi"],
+                "linkki": row["linkki"],
+                "img": row["img"],
+                "tutkinto_id": row["tutkinto_id"],
+                "tutkinto_nimi": row["tutkinto_nimi"],
+                "savedAt": saved_at,
+            }
+
+            if existing is None:
+                items.append(item)
+            else:
+                items[items.index(existing)] = item
+            self._write_saved_tutkintonimikkeet(items)
+        return item
+
+    def remove_saved_tutkintonimike(self, tutkintonimike_id: int) -> bool:
+        try:
+            nimike_id = int(tutkintonimike_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Invalid tutkintonimike id") from exc
+
+        with self._lock:
+            items = self._load_saved_tutkintonimikkeet()
+            filtered = [item for item in items if int(item.get("id", 0)) != nimike_id]
+            changed = len(filtered) != len(items)
+            if changed:
+                self._write_saved_tutkintonimikkeet(filtered)
+        return changed
+
+    def list_quiz_results(self, quiz_id: str | None = None) -> list[dict]:
+        normalized_quiz_id = str(quiz_id or "").strip()
+        with self._lock:
+            items = self._load_quiz_results()
+
+        if normalized_quiz_id:
+            items = [item for item in items if item.get("quizId") == normalized_quiz_id]
+        return sorted(
+            items,
+            key=lambda item: str(item.get("createdAt", "")),
+            reverse=True,
+        )
+
+    def save_quiz_result(self, quiz_id: str, result: dict) -> dict:
+        normalized_quiz_id = str(quiz_id or "").strip()
+        if not normalized_quiz_id:
+            raise ValueError("quiz_id is required")
+        if not isinstance(result, dict):
+            raise ValueError("result must be an object")
+
+        created_at = _utc_now_iso()
+        entry = {
+            "id": _sha256(
+                json.dumps(
+                    {"quizId": normalized_quiz_id, "result": result, "createdAt": created_at},
+                    sort_keys=True,
+                    ensure_ascii=False,
+                )
+            )[:16],
+            "quizId": normalized_quiz_id,
+            "createdAt": created_at,
+            "result": result,
+        }
+
+        with self._lock:
+            items = self._load_quiz_results()
+            items.append(entry)
+            self._write_quiz_results(items)
+        return entry
 
     def list_opiskelu_suunnat(self) -> list[dict[str, str | int]]:
         source_path = _opiskelu_suunnat_json_path()
