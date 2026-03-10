@@ -18,7 +18,7 @@
             <button id="quiz-ohita" type="button">Vaihda pari</button>
           </div>
         </header>
-        <div class="quiz-cards">
+        <div id="quiz-cards" class="quiz-cards">
           <button id="quiz-vasen" class="quiz-card" type="button"></button>
           <button id="quiz-oikea" class="quiz-card" type="button"></button>
         </div>
@@ -26,15 +26,11 @@
           <h3>Valmis</h3>
           <div id="quiz-voittaja" class="quiz-result-card"></div>
           <div id="quiz-top3" class="quiz-ranking"></div>
-          <div class="quiz-ranking">
-            <h4>Kaikki tutkintonimikkeet</h4>
+          <details class="quiz-ranking">
+            <summary>Nayta kaikki tutkintonimikkeet</summary>
             <ol id="quiz-ranking-list" class="quiz-ranking-list"></ol>
-          </div>
+          </details>
         </section>
-        <div class="quiz-historia">
-          <h3>Viimeisimmat valinnat</h3>
-          <ul id="quiz-historia" class="history"></ul>
-        </div>
       </section>
 
       <footer id="app-footer" class="site-footer"></footer>
