@@ -91,3 +91,5 @@ package-lock.json
 
 # Buildatut JS-tiedostot (TypeScript on lähdekieli)
 src/ui/scripts/*.js
+
+*.db
