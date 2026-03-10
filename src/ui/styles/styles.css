@@ -257,15 +257,6 @@ body {
   margin: 0;
 }
 
-.quiz-historia {
-  margin-top: var(--space-8);
-}
-
-.quiz-historia h3 {
-  margin: 0 0 var(--space-4);
-  font-size: var(--text-lg);
-}
-
 .history {
   list-style: none;
   padding: 0;
@@ -339,6 +330,15 @@ body {
 .quiz-ranking {
   display: grid;
   gap: var(--space-5);
+}
+
+.quiz-ranking summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.quiz-ranking[open] summary {
+  margin-bottom: var(--space-4);
 }
 
 .quiz-ranking-list {

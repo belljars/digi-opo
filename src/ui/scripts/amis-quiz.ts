@@ -25,8 +25,8 @@ type RankedItem = {
 
 const quizLeftEl = document.getElementById("quiz-vasen") as HTMLButtonElement | null;
 const quizRightEl = document.getElementById("quiz-oikea") as HTMLButtonElement | null;
+const quizCardsEl = document.getElementById("quiz-cards");
 const quizCountEl = document.getElementById("quiz-count");
-const quizHistoryEl = document.getElementById("quiz-historia");
 const quizSkipEl = document.getElementById("quiz-ohita") as HTMLButtonElement | null;
 const quizFinishedEl = document.getElementById("quiz-valmis");
 const quizWinnerEl = document.getElementById("quiz-voittaja");
@@ -41,11 +41,13 @@ let challengerQueue: TutkintonimikeItem[] = [];
 let winCounts: Record<number, number> = {};
 const quizHistory: QuizResult[] = [];
 let initialized = false;
+let isTieBreakRound = false;
 
 function setQuizCount(): void {
   if (quizCountEl) {
     const jaljella = challengerQueue.length + (currentWinner ? 1 : 0);
-    quizCountEl.textContent = `Vertailuja: ${quizHistory.length} | Jaljella: ${jaljella}`;
+    const vaihe = isTieBreakRound ? " | Tasapeli: ratkaistaan sijoitukset" : "";
+    quizCountEl.textContent = `Vertailuja: ${quizHistory.length} | Jaljella: ${jaljella}${vaihe}`;
   }
 }
 
@@ -72,28 +74,12 @@ async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
   });
 }
 
-function renderQuizHistory(): void {
-  if (!quizHistoryEl) {
-    return;
-  }
-
-  quizHistoryEl.replaceChildren(
-    ...quizHistory.map((entry) => {
-      const li = document.createElement("li");
-      const time = new Date(entry.aikaleima).toLocaleTimeString("fi-FI", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-      li.textContent = `${entry.voittaja} > ${entry.haviaja} (${time})`;
-      return li;
-    })
-  );
-  setQuizCount();
-}
-
 function setFinishedVisible(visible: boolean): void {
   if (quizFinishedEl) {
     quizFinishedEl.hidden = !visible;
+  }
+  if (quizCardsEl) {
+    quizCardsEl.hidden = visible;
   }
 }
 
@@ -131,6 +117,61 @@ function getRankedItems(): RankedItem[] {
       }
       return a.item.nimi.localeCompare(b.item.nimi, "fi");
     });
+}
+
+function getTiedItemsForVisibleTop3(): TutkintonimikeItem[] {
+  const rankedItems = getRankedItems();
+  const topThree = rankedItems.slice(0, 3);
+  const duplicatedScores = new Set<number>();
+  const scoreCounts = new Map<number, number>();
+
+  topThree.forEach((entry) => {
+    scoreCounts.set(entry.wins, (scoreCounts.get(entry.wins) ?? 0) + 1);
+  });
+
+  topThree.forEach((entry) => {
+    if ((scoreCounts.get(entry.wins) ?? 0) > 1) {
+      duplicatedScores.add(entry.wins);
+    }
+  });
+
+  if (duplicatedScores.size === 0) {
+    return [];
+  }
+
+  return rankedItems
+    .filter((entry) => duplicatedScores.has(entry.wins))
+    .map((entry) => entry.item);
+}
+
+function startTieBreakRound(items: TutkintonimikeItem[]): void {
+  const shuffled = shuffleItems(items);
+  currentWinner = shuffled[0] ?? null;
+  currentWinnerSide = "left";
+  challengerQueue = shuffled.slice(1);
+  isTieBreakRound = true;
+}
+
+function maybeResolveTieOrFinish(): void {
+  const tiedItems = getTiedItemsForVisibleTop3();
+  if (tiedItems.length >= 2) {
+    startTieBreakRound(tiedItems);
+    renderCurrentPair();
+    return;
+  }
+
+  currentPair = null;
+  isTieBreakRound = false;
+  if (quizLeftEl && quizRightEl) {
+    renderCard(quizLeftEl, currentWinner);
+    renderCard(quizRightEl, null);
+  }
+  renderWinner(currentWinner);
+  renderTop3();
+  renderRankingList();
+  setFinishedVisible(true);
+  setSkipEnabled(false);
+  setQuizCount();
 }
 
 function renderTop3(): void {
@@ -257,15 +298,7 @@ function renderCurrentPair(): void {
 
   const challenger = challengerQueue[0] ?? null;
   if (!challenger) {
-    currentPair = null;
-    renderCard(quizLeftEl, currentWinner);
-    renderCard(quizRightEl, null);
-    renderWinner(currentWinner);
-    renderTop3();
-    renderRankingList();
-    setFinishedVisible(true);
-    setSkipEnabled(false);
-    setQuizCount();
+    maybeResolveTieOrFinish();
     return;
   }
 
@@ -295,19 +328,8 @@ function startQuiz(): void {
   currentWinner = shuffled[0];
   currentWinnerSide = "left";
   challengerQueue = shuffled.slice(1);
+  isTieBreakRound = false;
   renderCurrentPair();
-}
-
-function recordQuizResult(voittaja: TutkintonimikeItem, haviaja: TutkintonimikeItem): void {
-  quizHistory.unshift({
-    voittaja: voittaja.nimi,
-    haviaja: haviaja.nimi,
-    aikaleima: new Date().toISOString()
-  });
-  if (quizHistory.length > 6) {
-    quizHistory.pop();
-  }
-  renderQuizHistory();
 }
 
 async function handleQuizChoice(selected: "left" | "right"): Promise<void> {
@@ -316,7 +338,7 @@ async function handleQuizChoice(selected: "left" | "right"): Promise<void> {
   }
   const voittaja = selected === "left" ? currentPair.left : currentPair.right;
   const haviaja = selected === "left" ? currentPair.right : currentPair.left;
-  recordQuizResult(voittaja, haviaja);
+  // recordQuizResult(voittaja, haviaja);
   winCounts[voittaja.id] = (winCounts[voittaja.id] ?? 0) + 1;
   currentWinner = voittaja;
   currentWinnerSide = selected;
@@ -345,7 +367,6 @@ async function init(): Promise<void> {
   setQuizLoading("Ladataan...");
   allItems = await api.list_tutkintonimikkeet();
   startQuiz();
-  renderQuizHistory();
 }
 
 function initOnce(): void {
