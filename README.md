@@ -115,7 +115,6 @@ Korjattava
 - [ ] Opintopolku-kysely vastaus tallennus
 
 Seuraava
-- [ ] Tekoäly-integrointi ja suunittelu
 
 Lisättävää
 - [ ] Mahdollisuus tallentaa eri tutkintonimikkeet

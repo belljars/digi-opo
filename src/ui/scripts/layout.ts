@@ -9,8 +9,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { id: "home", href: "./home.html", label: "Etusivu" },
   { id: "index", href: "./index.html", label: "Tutkintopankki" },
-  { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" },
-  { id: "tekoaly-chat", href: "./ai-chat.html", label: "Tekoäly-chat" }
+  { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" }
 ];
 
 function renderHeader(): void {
