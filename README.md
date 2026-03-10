@@ -100,33 +100,6 @@ digi-opo/
 └── README.md
 ```
 
-## To-do lista
-Tehdyt
-- [x] Tutkintopankki (amis)
-- [x] Opintopolut (peruskoulun jälkeen)
-- [ ] Opintopolku-kysely (interaktiivinen)
-- [ ] Amis-tutkinto kortti vertailu (interaktiivinen)
-
-Korjattava
-- [x] Amistutkinto kortti vertailu (jatkuu nyt ikuisesti, loppuu kun on voittaja ammatti nimike)
-	- [x] Top 3
-	- [x] Näyttää listan kaikista ammateista järjestyksenä, minkä käyttäjän valitsi eniten
-	- [x] Esiintyminen kyselyn *jälkeen*
-- [ ] Opintopolku-kysely vastaus tallennus
-
-Seuraava
-- [x] Lisää muut tutkinnot (10.3.26 lisätty kaikki Luovin tutkinnot)
-- [x] Lisää linkityt kuvat jokaisiin tutkintoihin
-
-Lisättävää
-- [ ] Mahdollisuus tallentaa eri tutkintonimikkeet
-	- [ ] Nähdä tallennettu tutkintonimikkeet
-		- [ ] Aakkoset (laskeva ja nouseva)
-		- [ ] Viimeiseksi lisätty
-		- [ ] Ensimmäisenä lisätty
-		- [ ] Tutkinto kategoriana (aakkoset, laskeva)
-- [ ] Estää joidenkin tutkintonimikkeiden/perustutkintojen ilmestyminen kokonaan
-
 ## Lisenssi
 
 Katso `LICENSE`.
