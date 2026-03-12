@@ -63,8 +63,8 @@ echo [INFO] Ajetaan TypeScript-build: npm run build
 call npm run build
 if errorlevel 1 exit /b %errorlevel%
 
-if not exist "dist\ui\scripts\main.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\main.js
+if not exist "dist\ui\scripts\pankki.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\pankki.js
   exit /b 1
 )
 
@@ -89,7 +89,7 @@ if not exist "dist\ui\scripts\amis-quiz.js" (
 )
 
 echo [INFO] Kopioidaan buildatut JavaScript-tiedostot kansioon src\ui\scripts.
-copy /Y dist\ui\scripts\main.js src\ui\scripts\main.js >nul
+copy /Y dist\ui\scripts\pankki.js src\ui\scripts\pankki.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
 copy /Y dist\ui\scripts\quiz.js src\ui\scripts\quiz.js >nul
