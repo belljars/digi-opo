@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>digi-opo - Tallennetut tutkintonimikkeet</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+  </head>
+  <body data-page="saved" data-subtitle="Tallennetut tutkintonimikkeet">
+    <main class="app">
+      <div id="app-header"></div>
+
+      <section class="panel saved-page">
+        <div class="saved-page-header">
+          <div>
+            <h2>Tallennetut tutkintonimikkeet</h2>
+            <p class="saved-page-copy">Tarkastele ja poista pankista tallentamasi tutkintonimikkeet.</p>
+          </div>
+          <div id="saved-count" class="count"></div>
+        </div>
+        <div id="saved-feedback" class="saved-feedback" aria-live="polite"></div>
+        <div id="saved-list" class="saved-grid"></div>
+      </section>
+
+      <footer id="app-footer" class="site-footer"></footer>
+    </main>
+
+    <script type="module" src="../scripts/layout.js"></script>
+    <script type="module" src="../scripts/saved-tutkintonimikkeet.js"></script>
+  </body>
+</html>

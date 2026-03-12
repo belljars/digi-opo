@@ -6,6 +6,7 @@ type TutkintoListItem = {
 };
 
 type Tutkintonimike = {
+  id: number;
   nimi: string;
   linkki: string | null;
   img: string | null;
@@ -22,11 +23,15 @@ type Api = {
   list_tutkinnot: () => Promise<TutkintoListItem[]>;
   get_tutkinto: (id: number) => Promise<TutkintoDetail | null>;
   search_tutkinnot: (query: string) => Promise<TutkintoListItem[]>;
+  list_saved_tutkintonimikkeet: () => Promise<{ id: number }[]>;
+  save_tutkintonimike: (id: number) => Promise<unknown>;
+  remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
 };
 
 const listEl = document.getElementById("tutkinto-list");
 const detailEl = document.getElementById("detail");
 const countEl = document.getElementById("count");
+const feedbackEl = document.getElementById("detail-feedback");
 const searchInput = document.getElementById("tutkinto-search") as
   | HTMLInputElement
   | null;
@@ -35,10 +40,17 @@ let allItems: TutkintoListItem[] = [];
 let searchTimeout: number | null = null;
 let activeApi: Api | null = null;
 let initialized = false;
+let savedIds = new Set<number>();
 
 function setCount(count: number): void {
   if (countEl) {
     countEl.textContent = `${count} tutkintoa`;
+  }
+}
+
+function setFeedback(message = ""): void {
+  if (feedbackEl) {
+    feedbackEl.textContent = message;
   }
 }
 
@@ -109,11 +121,16 @@ function renderDetail(detail: TutkintoDetail): void {
           const link = nimike.linkki
             ? `<a href="${nimike.linkki}" target="_blank" rel="noreferrer" class="tutkintonimike-link">${nimike.nimi}</a>`
             : `<span class="tutkintonimike-link">${nimike.nimi}</span>`;
+          const isSaved = savedIds.has(nimike.id);
+          const actionLabel = isSaved ? "Poista tallennuksista" : "Tallenna";
           return `
             <article class="tutkintonimike-card">
               ${image}
               <div class="tutkintonimike-card-body">
                 ${link}
+                <button type="button" class="tutkintonimike-action" data-save-id="${nimike.id}">
+                  ${actionLabel}
+                </button>
               </div>
             </article>
           `;
@@ -127,6 +144,50 @@ function renderDetail(detail: TutkintoDetail): void {
     <h3>Tutkintonimikkeet</h3>
     ${nimikkeet}
   `;
+
+  detailEl.querySelectorAll<HTMLButtonElement>("[data-save-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const nimikeId = Number(button.dataset.saveId);
+      const cardTitle = button
+        .closest(".tutkintonimike-card")
+        ?.querySelector(".tutkintonimike-link")
+        ?.textContent;
+      void toggleSavedTutkintonimike(nimikeId, cardTitle ?? "Tutkintonimike");
+    });
+  });
+}
+
+async function loadSavedIds(): Promise<void> {
+  if (!activeApi) {
+    savedIds = new Set<number>();
+    return;
+  }
+  const items = await activeApi.list_saved_tutkintonimikkeet();
+  savedIds = new Set(items.map((item) => item.id));
+}
+
+async function toggleSavedTutkintonimike(id: number, nimi: string): Promise<void> {
+  if (!activeApi) {
+    setFeedback("Pywebview API ei ole kaytettavissa.");
+    return;
+  }
+
+  if (savedIds.has(id)) {
+    await activeApi.remove_saved_tutkintonimike(id);
+    savedIds.delete(id);
+    setFeedback(`"${nimi}" poistettiin tallennuksista.`);
+  } else {
+    await activeApi.save_tutkintonimike(id);
+    savedIds.add(id);
+    setFeedback(`"${nimi}" tallennettiin.`);
+  }
+
+  if (activeId !== null) {
+    const detail = await activeApi.get_tutkinto(activeId);
+    if (detail) {
+      renderDetail(detail);
+    }
+  }
 }
 
 async function selectTutkinto(id: number): Promise<void> {
@@ -190,6 +251,7 @@ async function runSearch(rawQuery: string): Promise<void> {
 
 async function loadInitial(api: Api): Promise<void> {
   renderEmpty("Ladataan...");
+  await loadSavedIds();
   allItems = await api.list_tutkinnot();
   renderList(allItems);
   if (allItems.length > 0) {

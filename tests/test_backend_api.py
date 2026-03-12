@@ -110,6 +110,7 @@ class BackendApiTests(unittest.TestCase):
             detail = api.get_tutkinto(results[0]["id"])
             self.assertIsNotNone(detail)
             self.assertEqual(detail["tutkintonimikkeet"][0]["nimi"], "Sahkoasentaja")
+            self.assertIn("id", detail["tutkintonimikkeet"][0])
 
     def test_opiskelu_suunnat_image_is_normalized_for_http(self) -> None:
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
@@ -125,7 +126,7 @@ class BackendApiTests(unittest.TestCase):
             self.assertIn("questions", quiz)
             self.assertGreater(len(quiz["questions"]), 0)
 
-    def test_saved_tutkintonimikkeet_are_persisted_in_user_directory(self) -> None:
+    def test_saved_tutkintonimikkeet_are_persisted_in_sqlite(self) -> None:
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
             api = self.app.Api()
             all_items = api.list_tutkintonimikkeet()
@@ -137,10 +138,19 @@ class BackendApiTests(unittest.TestCase):
             self.assertEqual(len(saved_items), 1)
             self.assertEqual(saved_items[0]["id"], all_items[0]["id"])
 
-            saved_path = self.root / "user" / "saved_tutkintonimikkeet.json"
-            self.assertTrue(saved_path.exists())
-            payload = json.loads(saved_path.read_text(encoding="utf-8"))
-            self.assertEqual(len(payload["items"]), 1)
+            db_path = self.root / "data" / "tutkinnot.db"
+            self.assertTrue(db_path.exists())
+            import sqlite3
+
+            conn = sqlite3.connect(db_path)
+            try:
+                row = conn.execute(
+                    "SELECT tutkintonimike_id FROM saved_tutkintonimikkeet;"
+                ).fetchone()
+            finally:
+                conn.close()
+            self.assertIsNotNone(row)
+            self.assertEqual(row[0], all_items[0]["id"])
 
     def test_saved_tutkintonimike_can_be_removed(self) -> None:
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
