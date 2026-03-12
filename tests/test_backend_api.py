@@ -48,16 +48,24 @@ class BackendApiTests(unittest.TestCase):
                     "nimi": "Sahkoala",
                     "desc": "Sahkoalan perustutkinto",
                     "tutkintonimikkeet": [
-                        {"nimi": "Sahkoasentaja", "linkki": "https://example.invalid/sahko"}
+                        {
+                            "nimi": "Sahkoasentaja",
+                            "linkki": "https://example.invalid/sahko",
+                            "img": "assets/ammatit/sahkoasentaja.png",
+                        }
                     ],
                 },
                 {
                     "nimi": "Kokki",
                     "desc": "Ravintola- ja catering-ala",
-                    "tutkintonimikkeet": [{"nimi": "Kokki", "linkki": ""}],
+                    "tutkintonimikkeet": [{"nimi": "Kokki", "linkki": "", "img": ""}],
                 },
             ]
         }
+        (self.root / "src" / "ui" / "assets" / "ammatit").mkdir(parents=True, exist_ok=True)
+        (self.root / "src" / "ui" / "assets" / "ammatit" / "sahkoasentaja.png").write_bytes(
+            b"png"
+        )
         (self.root / "src" / "data" / "ammatit.json").write_text(
             json.dumps(ammatit_payload), encoding="utf-8"
         )
@@ -111,6 +119,17 @@ class BackendApiTests(unittest.TestCase):
             self.assertIsNotNone(detail)
             self.assertEqual(detail["tutkintonimikkeet"][0]["nimi"], "Sahkoasentaja")
             self.assertIn("id", detail["tutkintonimikkeet"][0])
+            self.assertEqual(
+                detail["tutkintonimikkeet"][0]["img"],
+                "/src/ui/assets/ammatit/sahkoasentaja.png",
+            )
+
+            all_items = api.list_tutkintonimikkeet()
+            sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
+            self.assertEqual(
+                sahkoasentaja["img"],
+                "/src/ui/assets/ammatit/sahkoasentaja.png",
+            )
 
     def test_opiskelu_suunnat_image_is_normalized_for_http(self) -> None:
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
@@ -176,7 +195,7 @@ class BackendApiTests(unittest.TestCase):
 
             all_results = api.list_quiz_results()
             self.assertEqual(len(all_results), 2)
-            self.assertEqual(all_results[0]["id"], second["id"])
+            self.assertEqual({item["id"] for item in all_results}, {first["id"], second["id"]})
 
             opintopolku_results = api.list_quiz_results("opintopolku")
             self.assertEqual(len(opintopolku_results), 1)

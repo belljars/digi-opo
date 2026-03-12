@@ -4,12 +4,16 @@ type TutkintonimikeItem = {
   id: number;
   nimi: string;
   linkki: string | null;
+  img: string | null;
   tutkinto_id: number;
   tutkinto_nimi: string;
 };
 
 type Api = {
   list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
+  list_saved_tutkintonimikkeet: () => Promise<{ id: number }[]>;
+  save_tutkintonimike: (id: number) => Promise<unknown>;
+  remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
 };
 
 type QuizResult = {
@@ -23,13 +27,13 @@ type RankedItem = {
   wins: number;
 };
 
-const quizLeftEl = document.getElementById("quiz-vasen") as HTMLButtonElement | null;
-const quizRightEl = document.getElementById("quiz-oikea") as HTMLButtonElement | null;
+const quizLeftEl = document.getElementById("quiz-vasen") as HTMLDivElement | null;
+const quizRightEl = document.getElementById("quiz-oikea") as HTMLDivElement | null;
 const quizCardsEl = document.getElementById("quiz-cards");
 const quizCountEl = document.getElementById("quiz-count");
+const quizFeedbackEl = document.getElementById("quiz-feedback");
 const quizSkipEl = document.getElementById("quiz-ohita") as HTMLButtonElement | null;
 const quizFinishedEl = document.getElementById("quiz-valmis");
-const quizWinnerEl = document.getElementById("quiz-voittaja");
 const quizTop3El = document.getElementById("quiz-top3");
 const quizRankingListEl = document.getElementById("quiz-ranking-list");
 
@@ -42,12 +46,20 @@ let winCounts: Record<number, number> = {};
 const quizHistory: QuizResult[] = [];
 let initialized = false;
 let isTieBreakRound = false;
+let activeApi: Api | null = null;
+let savedIds = new Set<number>();
 
 function setQuizCount(): void {
   if (quizCountEl) {
     const jaljella = challengerQueue.length + (currentWinner ? 1 : 0);
     const vaihe = isTieBreakRound ? " | Tasapeli: ratkaistaan sijoitukset" : "";
     quizCountEl.textContent = `Vertailuja: ${quizHistory.length} | Jaljella: ${jaljella}${vaihe}`;
+  }
+}
+
+function setFeedback(message = ""): void {
+  if (quizFeedbackEl) {
+    quizFeedbackEl.textContent = message;
   }
 }
 
@@ -83,26 +95,69 @@ function setFinishedVisible(visible: boolean): void {
   }
 }
 
-function renderWinner(item: TutkintonimikeItem | null): void {
-  if (!quizWinnerEl || !item) {
-    return;
+function createImageElement(item: TutkintonimikeItem): HTMLElement {
+  if (!item.img) {
+    const placeholder = document.createElement("div");
+    placeholder.className = "tutkintonimike-image tutkintonimike-image--placeholder";
+    placeholder.setAttribute("aria-hidden", "true");
+    return placeholder;
   }
 
-  quizWinnerEl.replaceChildren();
-  const title = document.createElement("h4");
-  title.textContent = item.nimi;
+  const image = document.createElement("img");
+  image.className = "tutkintonimike-image";
+  image.src = item.img;
+  image.alt = item.nimi;
+  image.addEventListener("error", () => {
+    const placeholder = document.createElement("div");
+    placeholder.className = "tutkintonimike-image tutkintonimike-image--placeholder";
+    placeholder.setAttribute("aria-hidden", "true");
+    image.replaceWith(placeholder);
+  });
+  return image;
+}
+
+function createCardBody(item: TutkintonimikeItem, isSaved: boolean, titleTag: "h3" | "h4" = "h3"): HTMLElement {
+  const card = document.createElement("div");
+  card.className = "tutkintonimike-card";
+
+  const image = createImageElement(item);
+  const body = document.createElement("div");
+  body.className = "tutkintonimike-card-body";
+
+  const title = document.createElement(titleTag);
+  const titleContent = item.linkki ? document.createElement("a") : document.createElement("span");
+  titleContent.textContent = item.nimi;
+  titleContent.className = "tutkintonimike-link";
+  if (titleContent instanceof HTMLAnchorElement) {
+    titleContent.href = item.linkki ?? "";
+    titleContent.target = "_blank";
+    titleContent.rel = "noreferrer";
+    titleContent.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+  }
+  title.append(titleContent);
+
   const desc = document.createElement("p");
+  desc.className = "tutkintonimike-meta";
   desc.textContent = item.tutkinto_nimi;
-  quizWinnerEl.append(title, desc);
 
-  if (item.linkki) {
-    const link = document.createElement("a");
-    link.href = item.linkki;
-    link.textContent = "Lisatiedot";
-    link.target = "_blank";
-    link.rel = "noreferrer";
-    quizWinnerEl.append(link);
-  }
+  const actions = document.createElement("div");
+  actions.className = "quiz-card-actions";
+
+  const saveButton = document.createElement("button");
+  saveButton.type = "button";
+  saveButton.className = "tutkintonimike-action";
+  saveButton.textContent = isSaved ? "Poista tallennus" : "Tallenna";
+  saveButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    void toggleSavedTutkintonimike(item);
+  });
+  actions.append(saveButton);
+
+  body.append(title, desc, actions);
+  card.append(image, body);
+  return card;
 }
 
 function getRankedItems(): RankedItem[] {
@@ -166,7 +221,6 @@ function maybeResolveTieOrFinish(): void {
     renderCard(quizLeftEl, currentWinner);
     renderCard(quizRightEl, null);
   }
-  renderWinner(currentWinner);
   renderTop3();
   renderRankingList();
   setFinishedVisible(true);
@@ -189,18 +243,17 @@ function renderTop3(): void {
   topThree.forEach((entry, index) => {
     const card = document.createElement("div");
     card.className = "quiz-result-card";
-
-    const title = document.createElement("h4");
-    title.textContent = `${index + 1}. ${entry.item.nimi}`;
-
-    const desc = document.createElement("p");
-    desc.textContent = entry.item.tutkinto_nimi;
+    const body = createCardBody(entry.item, savedIds.has(entry.item.id), "h4");
+    const title = body.querySelector("h4");
+    if (title) {
+      title.textContent = `${index + 1}. ${entry.item.nimi}`;
+    }
 
     const score = document.createElement("span");
     score.className = "quiz-score";
     score.textContent = `Valinnat: ${entry.wins}`;
 
-    card.append(title, desc, score);
+    card.append(body, score);
     quizTop3El.append(card);
   });
 }
@@ -227,42 +280,31 @@ function renderRankingList(): void {
   quizRankingListEl.replaceChildren(...rows);
 }
 
-function renderCard(cardEl: HTMLButtonElement, item: TutkintonimikeItem | null): void {
+function renderCard(cardEl: HTMLElement, item: TutkintonimikeItem | null): void {
   cardEl.replaceChildren();
   if (!item) {
-    cardEl.disabled = true;
     cardEl.textContent = "Ei dataa.";
+    cardEl.setAttribute("aria-disabled", "true");
+    cardEl.classList.add("is-disabled");
     return;
   }
 
-  cardEl.disabled = false;
+  cardEl.removeAttribute("aria-disabled");
+  cardEl.classList.remove("is-disabled");
   cardEl.dataset.id = String(item.id);
-
-  const title = document.createElement("h3");
-  title.textContent = item.nimi;
-
-  const desc = document.createElement("p");
-  desc.textContent = item.tutkinto_nimi;
-
-  cardEl.append(title, desc);
-  if (item.linkki) {
-    const link = document.createElement("a");
-    link.href = item.linkki;
-    link.textContent = "Lisatiedot";
-    link.target = "_blank";
-    link.rel = "noreferrer";
-    cardEl.append(link);
-  }
+  cardEl.append(createCardBody(item, savedIds.has(item.id)));
 }
 
 function setQuizLoading(message: string): void {
   if (quizLeftEl) {
-    quizLeftEl.disabled = true;
     quizLeftEl.textContent = message;
+    quizLeftEl.setAttribute("aria-disabled", "true");
+    quizLeftEl.classList.add("is-disabled");
   }
   if (quizRightEl) {
-    quizRightEl.disabled = true;
     quizRightEl.textContent = message;
+    quizRightEl.setAttribute("aria-disabled", "true");
+    quizRightEl.classList.add("is-disabled");
   }
 }
 
@@ -358,13 +400,52 @@ function skipChallenger(): void {
   renderCurrentPair();
 }
 
+async function loadSavedIds(): Promise<void> {
+  if (!activeApi) {
+    savedIds = new Set<number>();
+    return;
+  }
+  const items = await activeApi.list_saved_tutkintonimikkeet();
+  savedIds = new Set(items.map((item) => item.id));
+}
+
+async function toggleSavedTutkintonimike(item: TutkintonimikeItem): Promise<void> {
+  if (!activeApi) {
+    setFeedback("Pywebview API ei ole kaytettavissa.");
+    return;
+  }
+
+  if (savedIds.has(item.id)) {
+    await activeApi.remove_saved_tutkintonimike(item.id);
+    savedIds.delete(item.id);
+    setFeedback(`"${item.nimi}" poistettiin tallennuksista.`);
+  } else {
+    await activeApi.save_tutkintonimike(item.id);
+    savedIds.add(item.id);
+    setFeedback(`"${item.nimi}" tallennettiin.`);
+  }
+
+  if (currentPair) {
+    if (quizLeftEl && quizRightEl) {
+      renderCard(quizLeftEl, currentPair.left);
+      renderCard(quizRightEl, currentPair.right);
+    }
+  }
+  if (!quizFinishedEl?.hidden) {
+    renderTop3();
+  }
+}
+
 async function init(): Promise<void> {
   const api = await waitForApi();
   if (!api) {
     setQuizLoading("Pywebview API ei ole kaytettavissa.");
     return;
   }
+  activeApi = api;
+  setFeedback("");
   setQuizLoading("Ladataan...");
+  await loadSavedIds();
   allItems = await api.list_tutkintonimikkeet();
   startQuiz();
 }
@@ -385,13 +466,30 @@ window.addEventListener("DOMContentLoaded", () => {
   initOnce();
 });
 
-quizLeftEl?.addEventListener("click", () => {
-  void handleQuizChoice("left");
-});
+function bindChoiceCard(cardEl: HTMLElement | null, side: "left" | "right"): void {
+  if (!cardEl) {
+    return;
+  }
+  cardEl.addEventListener("click", () => {
+    if (cardEl.classList.contains("is-disabled")) {
+      return;
+    }
+    void handleQuizChoice(side);
+  });
+  cardEl.addEventListener("keydown", (event) => {
+    if (cardEl.classList.contains("is-disabled")) {
+      return;
+    }
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    void handleQuizChoice(side);
+  });
+}
 
-quizRightEl?.addEventListener("click", () => {
-  void handleQuizChoice("right");
-});
+bindChoiceCard(quizLeftEl, "left");
+bindChoiceCard(quizRightEl, "right");
 
 quizSkipEl?.addEventListener("click", () => {
   skipChallenger();

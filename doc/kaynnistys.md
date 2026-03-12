@@ -28,6 +28,44 @@ Käyttö:
 .\run_windows.bat
 ```
 
+## Nopea käynnistys Linuxissa
+
+Projektissa on valmis skripti `run_linux.sh`, joka:
+
+1. etsii tuetun Python-version
+2. luo tarvittaessa `.venv`-virtuaaliympariston
+3. asentaa Python-riippuvuudet
+4. buildaa TypeScript-tiedostot
+5. kopioi buildatut `.js`-tiedostot takaisin `src/ui/scripts/`-kansioon
+6. kaynnistaa sovelluksen
+
+Kaytto:
+
+```bash
+./run_linux.sh
+```
+
+## NixOS
+
+Projektin juuressa on `flake.nix`, jolla saat tarvittavat riippuvuudet NixOS:aan:
+
+```bash
+nix develop
+./run_linux.sh
+```
+
+Voit kaynnistaa sovelluksen myos suoraan repojuuresta:
+
+```bash
+nix run
+```
+
+Jos haluat sovelluksen valikkoon, asenna launcher:
+
+```bash
+./scripts/install_linux_launcher.sh
+```
+
 ## Manuaalinen käynnistys
 
 Jos haluat ajaa vaiheet itse:
@@ -39,6 +77,18 @@ pip install -r requirements.txt
 npm install
 npm run build
 python src\app\app.py
+```
+
+Linuxissa:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+npm install
+npm run build
+cp dist/ui/scripts/*.js src/ui/scripts/
+python src/app/app.py
 ```
 
 Huomio:
