@@ -209,6 +209,15 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         );
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS saved_tutkintonimikkeet (
+            tutkintonimike_id INTEGER PRIMARY KEY,
+            saved_at TEXT NOT NULL,
+            FOREIGN KEY (tutkintonimike_id) REFERENCES tutkintonimikkeet(id) ON DELETE CASCADE
+        );
+        """
+    )
 
 
 def _import_tutkinnot(conn: sqlite3.Connection, tutkinnot: list) -> None:
@@ -281,25 +290,50 @@ def _ensure_data(conn: sqlite3.Connection) -> None:
             _set_meta(conn, "ammatit_json_sha256", import_signature)
 
 
+def _migrate_saved_tutkintonimikkeet_from_json(conn: sqlite3.Connection) -> None:
+    legacy_path = _saved_tutkintonimikkeet_path()
+    if not legacy_path.exists():
+        return
+
+    data = _read_json_object(legacy_path, {"items": []})
+    items = data.get("items", [])
+    if not isinstance(items, list) or not items:
+        return
+
+    with conn:
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            try:
+                tutkintonimike_id = int(item.get("id", 0))
+            except (TypeError, ValueError):
+                continue
+            if tutkintonimike_id <= 0:
+                continue
+            saved_at = str(item.get("savedAt", "")).strip() or _utc_now_iso()
+            exists = conn.execute(
+                "SELECT 1 FROM tutkintonimikkeet WHERE id = ?;",
+                (tutkintonimike_id,),
+            ).fetchone()
+            if not exists:
+                continue
+            conn.execute(
+                """
+                INSERT INTO saved_tutkintonimikkeet (tutkintonimike_id, saved_at)
+                VALUES (?, ?)
+                ON CONFLICT(tutkintonimike_id) DO NOTHING;
+                """,
+                (tutkintonimike_id, saved_at),
+            )
+    legacy_path.unlink(missing_ok=True)
+
+
 class Api:
     def __init__(self) -> None:
         self._conn = _connect_db()
         self._lock = threading.Lock()
         _ensure_data(self._conn)
-
-    def _load_saved_tutkintonimikkeet(self) -> list[dict]:
-        data = _read_json_object(_saved_tutkintonimikkeet_path(), {"items": []})
-        items = data.get("items", [])
-        return items if isinstance(items, list) else []
-
-    def _write_saved_tutkintonimikkeet(self, items: list[dict]) -> None:
-        _write_json_object(
-            _saved_tutkintonimikkeet_path(),
-            {
-                "items": items,
-                "updatedAt": _utc_now_iso(),
-            },
-        )
+        _migrate_saved_tutkintonimikkeet_from_json(self._conn)
 
     def _load_quiz_results(self) -> list[dict]:
         data = _read_json_object(_quiz_results_path(), {"items": []})
@@ -334,7 +368,7 @@ class Api:
         with self._lock:
             nimikkeet = self._conn.execute(
                 """
-                SELECT nimi, linkki, img
+                SELECT id, nimi, linkki, img
                 FROM tutkintonimikkeet
                 WHERE tutkinto_id = ?
                 ORDER BY nimi;
@@ -347,6 +381,7 @@ class Api:
             "desc": row["desc"],
             "tutkintonimikkeet": [
                 {
+                    "id": nimike["id"],
                     "nimi": nimike["nimi"],
                     "linkki": nimike["linkki"],
                     "img": nimike["img"],
@@ -396,8 +431,27 @@ class Api:
 
     def list_saved_tutkintonimikkeet(self) -> list[dict]:
         with self._lock:
-            items = self._load_saved_tutkintonimikkeet()
-        return sorted(items, key=lambda item: str(item.get("nimi", "")).casefold())
+            rows = self._conn.execute(
+                """
+                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi, s.saved_at
+                FROM saved_tutkintonimikkeet s
+                JOIN tutkintonimikkeet n ON n.id = s.tutkintonimike_id
+                JOIN tutkinnot t ON t.id = n.tutkinto_id
+                ORDER BY n.nimi;
+                """
+            ).fetchall()
+        return [
+            {
+                "id": row["id"],
+                "nimi": row["nimi"],
+                "linkki": row["linkki"],
+                "img": row["img"],
+                "tutkinto_id": row["tutkinto_id"],
+                "tutkinto_nimi": row["tutkinto_nimi"],
+                "savedAt": row["saved_at"],
+            }
+            for row in rows
+        ]
 
     def save_tutkintonimike(self, tutkintonimike_id: int) -> dict:
         try:
@@ -417,13 +471,15 @@ class Api:
             ).fetchone()
             if row is None:
                 raise ValueError(f"Unknown tutkintonimike id: {nimike_id}")
-
-            items = self._load_saved_tutkintonimikkeet()
-            existing = next(
-                (item for item in items if int(item.get("id", 0)) == nimike_id),
-                None,
-            )
-            saved_at = existing.get("savedAt") if existing else _utc_now_iso()
+            existing = self._conn.execute(
+                """
+                SELECT saved_at
+                FROM saved_tutkintonimikkeet
+                WHERE tutkintonimike_id = ?;
+                """,
+                (nimike_id,),
+            ).fetchone()
+            saved_at = existing["saved_at"] if existing else _utc_now_iso()
             item = {
                 "id": row["id"],
                 "nimi": row["nimi"],
@@ -433,12 +489,15 @@ class Api:
                 "tutkinto_nimi": row["tutkinto_nimi"],
                 "savedAt": saved_at,
             }
-
-            if existing is None:
-                items.append(item)
-            else:
-                items[items.index(existing)] = item
-            self._write_saved_tutkintonimikkeet(items)
+            with self._conn:
+                self._conn.execute(
+                    """
+                    INSERT INTO saved_tutkintonimikkeet (tutkintonimike_id, saved_at)
+                    VALUES (?, ?)
+                    ON CONFLICT(tutkintonimike_id) DO NOTHING;
+                    """,
+                    (nimike_id, saved_at),
+                )
         return item
 
     def remove_saved_tutkintonimike(self, tutkintonimike_id: int) -> bool:
@@ -448,12 +507,15 @@ class Api:
             raise ValueError("Invalid tutkintonimike id") from exc
 
         with self._lock:
-            items = self._load_saved_tutkintonimikkeet()
-            filtered = [item for item in items if int(item.get("id", 0)) != nimike_id]
-            changed = len(filtered) != len(items)
-            if changed:
-                self._write_saved_tutkintonimikkeet(filtered)
-        return changed
+            with self._conn:
+                cursor = self._conn.execute(
+                    """
+                    DELETE FROM saved_tutkintonimikkeet
+                    WHERE tutkintonimike_id = ?;
+                    """,
+                    (nimike_id,),
+                )
+        return cursor.rowcount > 0
 
     def list_quiz_results(self, quiz_id: str | None = None) -> list[dict]:
         normalized_quiz_id = str(quiz_id or "").strip()

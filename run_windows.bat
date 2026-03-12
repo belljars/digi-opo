@@ -88,6 +88,11 @@ if not exist "dist\ui\scripts\amis-quiz.js" (
   exit /b 1
 )
 
+if not exist "dist\ui\scripts\saved-tutkintonimikkeet.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\saved-tutkintonimikkeet.js
+  exit /b 1
+)
+
 echo [INFO] Kopioidaan buildatut JavaScript-tiedostot kansioon src\ui\scripts.
 copy /Y dist\ui\scripts\pankki.js src\ui\scripts\pankki.js >nul
 if errorlevel 1 exit /b %errorlevel%
@@ -102,6 +107,9 @@ copy /Y dist\ui\scripts\opintopolut.js src\ui\scripts\opintopolut.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
 copy /Y dist\ui\scripts\amis-quiz.js src\ui\scripts\amis-quiz.js >nul
+if errorlevel 1 exit /b %errorlevel%
+
+copy /Y dist\ui\scripts\saved-tutkintonimikkeet.js src\ui\scripts\saved-tutkintonimikkeet.js >nul
 if errorlevel 1 exit /b %errorlevel%
 
 echo [INFO] Kaynnistetaan sovellus: "%VENV_PY%" src\app\app.py

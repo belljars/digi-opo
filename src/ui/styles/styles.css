@@ -100,7 +100,7 @@ body {
 
 #card-select {
   display: grid;
-  grid-template-columns: repeat(2, minmax(260px, 320px));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
   justify-content: center;
   gap: var(--space-8);
 }
@@ -386,12 +386,51 @@ body {
 
 .tutkintonimike-card-body {
   padding: var(--space-7);
+  display: grid;
+  gap: var(--space-5);
 }
 
 .tutkintonimike-link {
   color: inherit;
   text-decoration: none;
   font-weight: 600;
+}
+
+.tutkintonimike-meta,
+.saved-page-copy,
+.saved-feedback {
+  margin: 0;
+}
+
+.tutkintonimike-action {
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-transparent);
+  padding: var(--space-4) var(--space-6);
+  cursor: pointer;
+  font: inherit;
+}
+
+.saved-page {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.saved-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.saved-page-header h2 {
+  margin: 0 0 var(--space-3);
+}
+
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-8);
 }
 
 .opintopolut-grid {
@@ -468,7 +507,8 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .tutkintonimike-grid {
+  .tutkintonimike-grid,
+  .saved-grid {
     grid-template-columns: 1fr;
   }
 

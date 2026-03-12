@@ -30,7 +30,14 @@ class UiSmokeTests(unittest.TestCase):
         return ts_path.exists()
 
     def test_pages_reference_existing_css_and_scripts(self) -> None:
-        pages = ["home.html", "index.html", "opintopolut.html", "quiz.html", "amis-quiz.html"]
+        pages = [
+            "home.html",
+            "pankki.html",
+            "saved-tutkintonimikkeet.html",
+            "opintopolut.html",
+            "quiz.html",
+            "amis-quiz.html",
+        ]
         for page in pages:
             with self.subTest(page=page):
                 html = self._load_html(page)

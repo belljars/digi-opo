@@ -18,7 +18,7 @@ type TutkintoDetail = {
   id: number;
   nimi: string;
   desc: string;
-  tutkintonimikkeet: { nimi: string; linkki: string | null; img: string | null }[];
+  tutkintonimikkeet: { id: number; nimi: string; linkki: string | null; img: string | null }[];
 };
 
 type OpiskeluSuunta = {
@@ -34,6 +34,9 @@ type PywebviewApi = {
   get_tutkinto: (id: number) => Promise<TutkintoDetail | null>;
   search_tutkinnot: (query: string) => Promise<TutkintoListItem[]>;
   list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
+  list_saved_tutkintonimikkeet: () => Promise<(TutkintonimikeItem & { savedAt: string })[]>;
+  save_tutkintonimike: (id: number) => Promise<TutkintonimikeItem & { savedAt: string }>;
+  remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
   list_opiskelu_suunnat: () => Promise<OpiskeluSuunta[]>;
   get_opintopolku_quiz: () => Promise<unknown>;
 };
