@@ -215,23 +215,64 @@ body {
   text-align: left;
   border: var(--border-width) solid var(--color-border);
   background: var(--color-transparent);
-  padding: var(--space-8);
-  min-height: 200px;
+  padding: 0;
   cursor: pointer;
+  display: block;
+  overflow: hidden;
 }
 
-.quiz-card:disabled {
+.quiz-card > .tutkintonimike-card {
+  border: 0;
+  height: 100%;
+}
+
+.quiz-card .tutkintonimike-card-body {
+  min-height: 100%;
+}
+
+.quiz-card .tutkintonimike-image {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  max-width: none;
+  max-height: none;
+}
+
+.quiz-result-card .tutkintonimike-image {
+  aspect-ratio: 1 / 1;
+  max-height: 140px;
+  width: 140px;
+  max-width: 100%;
+}
+
+.quiz-card.is-disabled {
   cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.quiz-card:hover,
+.quiz-card:focus-visible {
+  background: var(--color-overlay-subtle);
+}
+
+.quiz-card:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
 .quiz-card h3 {
-  margin-top: 0;
-  margin-bottom: var(--space-4);
+  margin: 0;
   font-size: var(--text-2xl);
 }
 
-.quiz-card p {
-  margin: 0 0 var(--space-6);
+.quiz-card h4 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.quiz-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
 }
 
 .quiz-body {
@@ -328,18 +369,19 @@ body {
 
 .quiz-result-card {
   border: var(--border-width) solid var(--color-border);
-  padding: var(--space-7) var(--space-8);
+  padding: 0;
   display: grid;
   gap: var(--space-3);
+  align-content: start;
+  overflow: hidden;
 }
 
 .quiz-result-card.secondary {
   opacity: 0.85;
 }
 
-.quiz-result-card h4 {
-  margin: 0;
-  font-size: var(--text-lg);
+.quiz-result-card > .quiz-score {
+  padding: 0 var(--space-7) var(--space-7);
 }
 
 .quiz-score,

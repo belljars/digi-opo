@@ -12,6 +12,10 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
+# Pywebview käyttää tässä projektissa PyQt6:ta, joten sidotaan qtpy siihen ennen GUI-backendin latausta.
+if sys.platform.startswith("linux"):
+    os.environ.setdefault("QT_API", "pyqt6")
+
 # Vältä tunnettuja Qt Wayland EGL -kaatumisia joissain Linux-ympäristöissä käyttämällä oletuksena XWaylandia, ellei käyttäjä ole nimenomaisesti valinnut Qt-alustaa :)
 if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
@@ -182,7 +186,7 @@ def _write_json_object(path: Path, payload: dict) -> None:
     tmp_path.replace(path)
 
 
-AMMATIT_IMPORT_VERSION = "2"
+AMMATIT_IMPORT_VERSION = "3"
 
 
 def _ensure_schema(conn: sqlite3.Connection) -> None:

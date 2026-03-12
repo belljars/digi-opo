@@ -18,13 +18,13 @@
             <button id="quiz-ohita" type="button">Vaihda pari</button>
           </div>
         </header>
+        <p id="quiz-feedback" class="saved-feedback" aria-live="polite"></p>
         <div id="quiz-cards" class="quiz-cards">
-          <button id="quiz-vasen" class="quiz-card" type="button"></button>
-          <button id="quiz-oikea" class="quiz-card" type="button"></button>
+          <div id="quiz-vasen" class="quiz-card" role="button" tabindex="0"></div>
+          <div id="quiz-oikea" class="quiz-card" role="button" tabindex="0"></div>
         </div>
         <section id="quiz-valmis" class="quiz-results" hidden>
           <h3>Valmis</h3>
-          <div id="quiz-voittaja" class="quiz-result-card"></div>
           <div id="quiz-top3" class="quiz-ranking"></div>
           <details class="quiz-ranking">
             <summary>Nayta kaikki tutkintonimikkeet</summary>

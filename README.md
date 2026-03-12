@@ -71,6 +71,44 @@ Skripti:
 5. kopioi buildatut JavaScript-tiedostot käyttöön
 6. käynnistää sovelluksen
 
+### Linux ja NixOS
+
+Projektissa on nyt valmis Linux-käynnistysskripti:
+
+```bash
+./run_linux.sh
+```
+
+Skripti:
+
+1. etsii tuetun Python-version 3.12 tai 3.11
+2. luo tarvittaessa `.venv`-virtuaaliympäristön
+3. asentaa Python-riippuvuudet
+4. buildaa TypeScript-tiedostot
+5. kopioi buildatut JavaScript-tiedostot käyttöön
+6. käynnistää sovelluksen
+
+NixOS:ssa helpoin tapa on käyttää flakea:
+
+```bash
+nix develop
+./run_linux.sh
+```
+
+Vaihtoehtoisesti:
+
+```bash
+nix run
+```
+
+Työpöytälauncher asentuu komennolla:
+
+```bash
+./scripts/install_linux_launcher.sh
+```
+
+Tämä luo tiedoston `~/.local/share/applications/digi-opo.desktop`.
+
 ### Manuaalisesti
 
 ```powershell
@@ -80,6 +118,18 @@ pip install -r requirements.txt
 npm install
 npm run build
 python src\app\app.py
+```
+
+Linuxissa vastaavat komennot ovat:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+npm install
+npm run build
+cp dist/ui/scripts/*.js src/ui/scripts/
+python src/app/app.py
 ```
 
 Huomio:
