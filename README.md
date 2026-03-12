@@ -1,67 +1,135 @@
-# digi-opo  (tosissaan)
+# digi-opo
 
-## Yleiskuvaus
+## Yleiskuva
 
-**digi-opo** on paikallinen pywebview-työpöytäsovellus suomalaisten tutkintojen selailuun.
+**digi-opo** on paikallinen `pywebview`-pohjainen työpöytäsovellus suomalaisten tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun.
 
-Sovellus sisältää tällä hetkellä viisi näkymää:
+Sovellus yhdistää:
+
+- Python-backendin
+- HTML/CSS/TypeScript-käyttöliittymän
+- SQLite-tietokannan
+- JSON-muotoisen lähdedatan
+
+## Nykyiset näkymät
+
+Sovelluksessa on tällä hetkellä seuraavat näkymät:
+
 - `Etusivu` (`src/ui/pages/home.html`)
 - `Tutkintopankki` (`src/ui/pages/pankki.html`)
+- `Tallennetut tutkintonimikkeet` (`src/ui/pages/saved-tutkintonimikkeet.html`)
 - `Opintopolut` (`src/ui/pages/opintopolut.html`)
 - `Opintopolku-kysely` (`src/ui/pages/quiz.html`)
 - `Amis-korttivertailu` (`src/ui/pages/amis-quiz.html`)
 
-## Mitä sovellus tekee nyt
+## Mitä sovellus tekee
 
-- Alustaa SQLite-tietokannan tiedostoon `data/tutkinnot.db`.
-- Tuo `src/data/ammatit.json`-datan tietokantaan ensimmäisellä ajolla ja päivittää sisällön automaattisesti, jos lähde-JSON muuttuu.
-- Näyttää tutkintolistan ja valitun tutkinnon tutkintonimikkeet.
-- Mahdollistaa kahden tutkintonimikkeen korttivertailun (`Vertailu`).
-- Lataa `Opintopolut`-näkymän sisällön tiedostosta `src/data/opiskeluSuunnat.json`.
-
-### Huomio
-- API:ssa on myös `search_tutkinnot`, mutta sitä ei tällä hetkellä käytetä UI:ssa.
-- Repossa voi olla vanhoja tietokantatiedostoja (esim. `data/ammatit.db`), mutta appi käyttää `data/tutkinnot.db`-tiedostoa.
+- alustaa SQLite-tietokannan tiedostoon `data/tutkinnot.db`
+- tuo `src/data/ammatit.json`-datan tietokantaan ensimmäisellä ajolla
+- päivittää tutkintodatan automaattisesti, jos lähde-JSON muuttuu
+- näyttää tutkintolistan sekä yksittäisen tutkinnon tutkintonimikkeet
+- mahdollistaa tutkintonimikkeiden tallentamisen
+- mahdollistaa kahden tutkintonimikkeen korttivertailun
+- lataa opintopolkujen sisällön tiedostosta `src/data/opiskeluSuunnat.json`
+- lataa kyselydatan tiedostosta `src/data/opintopolkuQuiz.json`
+- tallentaa quiz-tuloksia `user/`-kansioon
 
 ## Teknologiat
 
-- Python + `pywebview`
+- Python
+- `pywebview`
 - PyQt6 + Qt WebEngine
-- TypeScript + HTML + CSS
+- TypeScript
+- HTML + CSS
 - SQLite
 
 ## Vaatimukset
 
-- Python 3
-- Node.js + npm
+- Python 3.11 tai 3.12
+- Node.js ja npm
+- Windowsissa `py`-launcher on suositeltava
 - Linuxissa Qt-riippuvuudet järjestelmätasolla
-- Windowsissa ajoskripti tukee Pythonia 3.11/3.12
 
-Python-riippuvuudet asennetaan tiedostosta `requirements.txt`.
-TypeScript buildataan komennolla `npm run build`.
-Repositorio on TypeScript-painotteinen: lähdekoodi pidetään `.ts`-tiedostoissa, ja buildatut `.js`-tiedostot jätetään pois versiosta.
+Python-riippuvuudet löytyvät tiedostosta `requirements.txt`.
+
+## Käynnistys
+
+### Windows
+
+Helpoin tapa käynnistää projekti on ajaa:
+
+```powershell
+.\run_windows.bat
+```
+
+Skripti:
+
+1. etsii tuetun Python-version
+2. luo tarvittaessa `.venv`-virtuaaliympäristön
+3. asentaa Python-riippuvuudet
+4. buildaa TypeScript-tiedostot
+5. kopioi buildatut JavaScript-tiedostot käyttöön
+6. käynnistää sovelluksen
+
+### Manuaalisesti
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+npm install
+npm run build
+python src\app\app.py
+```
+
+Huomio:
+
+- `npm run build` kääntää TypeScript-tiedostot `dist/`-kansioon.
+- Windowsin käynnistysskripti kopioi buildatut `.js`-tiedostot takaisin `src/ui/scripts/`-kansioon.
+- Sovellus luo tietokannan automaattisesti tiedostoon `data/tutkinnot.db`.
+
+## Testit
+
+Projektissa on backend- ja UI-smoke-testejä `tests/`-kansiossa.
+
+Esimerkkejä:
+
+```powershell
+python -m unittest tests.test_backend_api
+python -m unittest tests.test_ui_smoke
+```
 
 ## Projektin rakenne
 
 ```text
 digi-opo/
-├── user/                 # Käyttäjä data
+├── doc/                  # Projektin dokumentaatio suomeksi
+├── data/                 # SQLite-tietokannat
+├── dist/                 # TypeScript-buildin tulosteet
 ├── src/
-│   ├── app/              # pywebview app + Python API
-│   ├── ui/               # HTML/CSS/TS näkymät
-│   │   ├── pages/        # HTML-näkymät
-│   │   ├── scripts/      # TypeScript
-│   │   ├── styles/       # CSS
-│   │   └── assets/       # kuvat ja muut staattiset
-│   └── data/             # JSON-lähdedata
-├── data/                 # SQLite-tiedostot
-├── run_linux.sh
-├── run_windows.bat
+│   ├── app/              # pywebview-sovellus ja Python API
+│   ├── data/             # JSON-lähdedata
+│   └── ui/
+│       ├── assets/       # Kuvat ja muut staattiset tiedostot
+│       ├── pages/        # HTML-näkymät
+│       ├── scripts/      # TypeScript- ja JavaScript-tiedostot
+│       └── styles/       # Tyylit
+├── tests/                # Testit
+├── user/                 # Käyttäjäkohtaiset tallennukset
 ├── requirements.txt
 ├── package.json
+├── run_windows.bat
 └── README.md
 ```
 
+## Dokumentaatio
+
+Lisädokumentaatio löytyy `doc/`-kansiosta:
+
+- `doc/README.md`
+- `doc/kaynnistys.md`
+- `doc/arkkitehtuuri.md`
+
 ## Lisenssi
 
-Katso `LICENSE`.
+Katso [LICENSE](/C:/Users/Omistaja/code/digi-opo/LICENSE).
