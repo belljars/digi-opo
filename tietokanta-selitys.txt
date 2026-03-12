@@ -1,0 +1,23 @@
+Tässä projektissa tietokanta toimii niin, että sovellus käyttää paikallista SQLite-tiedostoa nimelta data/tutkinnot.db
+
+Tutkintojen data tulee aluksi tiedostosta src/data/ammatit.json
+- Kun sovellus käynnistyy, se lukee JSON-tiedoston ja vie tiedot SQLite-tietokantaan
+- Jos JSON muuttuu, tietokannan sisalto paivitetaan automaattisesti
+
+Tietokannassa on kolme tarkeaa taulua:
+- tutkinnot = tutkintojen perustiedot
+- tutkintonimikkeet = tutkintoihin kuuluvat nimikkeet
+- saved_tutkintonimikkeet = kayttajan tallentamat nimikkeet
+
+
+- Eli JSON on alkuperainen lahdedata
+- SQLite on varsinainen tietokanta, josta sovellus hakee tiedot
+- quiz-tulokset eivat mene SQLiteen, vaan tiedostoon user/quiz_results.json
+
+Miten Python ja SQLite toimivat tassa:
+
+- Python toimii backendina
+- Python avaa yhteyden SQLite-tiedostoon
+- Python suorittaa SQL-kyselyt, joilla dataa haetaan ja tallennetaan
+- Käyttöliittymä pyytää tiedot Pythonilta, ja Python hakee ne tietokannasta
+- Kun käyttäjä tallentaa tai poistaa nimikkeen, Python päivittää muutoksen SQLiteen
