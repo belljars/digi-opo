@@ -20,7 +20,7 @@ import webview
 
 
 def _project_root() -> Path:
-    # Projektin juurikansio, jonka perusteella muut polut muodostetaan.
+    # Projektin juurikansio, jonka perusteella muut polut muodostetaan
     return Path(__file__).resolve().parents[2]
 
 
@@ -29,14 +29,14 @@ def _ui_index_path() -> str:
 
 
 def _db_path() -> Path:
-    # Varsinainen SQLite-tietokanta tallennetaan data-kansioon.
+    # Varsinainen SQLite-tietokanta tallennetaan data-kansioon
     data_dir = _project_root() / "data"
     data_dir.mkdir(exist_ok=True)
     return data_dir / "tutkinnot.db"
 
 
 def _user_data_dir() -> Path:
-    # Kayttajakohtaiset tiedostot, kuten quiz-tulokset, menevat tanne.
+    # Kayttajakohtaiset tiedostot, kuten quiz-tulokset, menevat tanne
     user_dir = _project_root() / "user"
     user_dir.mkdir(exist_ok=True)
     return user_dir
@@ -109,7 +109,9 @@ def _normalize_ui_asset_ref(raw_path: str) -> str:
 
 
 def _connect_db() -> sqlite3.Connection:
-    # Avataan yhteys paikalliseen SQLite-tiedostoon.
+
+    # Avataan yhteys paikalliseen SQLite-tiedostoon
+
     conn = sqlite3.connect(_db_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
@@ -136,7 +138,9 @@ def _parse_json_payload(raw_text: str, source_name: str) -> dict:
     try:
         data = json.loads(raw_text)
     except json.JSONDecodeError:
+
         # Käsittelee JSON-payloadin jälkeiset roskat
+
         decoder = json.JSONDecoder()
         data, _ = decoder.raw_decode(raw_text.lstrip())
 
@@ -166,7 +170,9 @@ def _read_json_object(path: Path, default: dict) -> dict:
 
 
 def _write_json_object(path: Path, payload: dict) -> None:
-    # Kirjoitetaan ensin valiaikaiseen tiedostoon ja vaihdetaan se lopuksi paikoilleen.
+
+    # Kirjoitetaan ensin valiaikaiseen tiedostoon ja vaihdetaan se lopuksi paikoilleen
+
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_suffix(f"{path.suffix}.tmp")
     tmp_path.write_text(
@@ -180,7 +186,9 @@ AMMATIT_IMPORT_VERSION = "2"
 
 
 def _ensure_schema(conn: sqlite3.Connection) -> None:
-    # Luodaan tietokannan taulut, jos ne puuttuvat.
+
+    # Luodaan tietokannan taulut, jos ne puuttuvat
+
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS tutkinnot (
@@ -228,7 +236,8 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
 
 
 def _import_tutkinnot(conn: sqlite3.Connection, tutkinnot: list) -> None:
-    # Tuodaan ammatit.jsonin sisalto SQLiteen.
+
+    # Tuodaan ammatit.jsonin sisalto SQLiteen
     for tutkinto in tutkinnot:
         nimi = str(tutkinto.get("nimi", "")).strip()
         desc = str(tutkinto.get("desc", "")).strip()
@@ -274,7 +283,8 @@ def _set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
 
 
 def _ensure_data(conn: sqlite3.Connection) -> None:
-    # Varmistetaan, etta tietokanta on olemassa ja sisalto vastaa lahde-JSONia.
+    # Varmistetaan, etta tietokanta on olemassa ja sisalto vastaa lahde-JSONia
+
     _ensure_schema(conn)
     source_path = _source_json_path()
     if not source_path.exists():
@@ -293,7 +303,7 @@ def _ensure_data(conn: sqlite3.Connection) -> None:
 
     if total == 0 or current_hash != import_signature:
         with conn:
-            # Jos lahdedata muuttui, rakennetaan tutkintodata uudelleen JSONista.
+            # Jos lahdedata muuttui, rakennetaan tutkintodata uudelleen JSONista
             conn.execute("DELETE FROM tutkintonimikkeet;")
             conn.execute("DELETE FROM tutkinnot;")
             _import_tutkinnot(conn, tutkinnot)
@@ -301,7 +311,7 @@ def _ensure_data(conn: sqlite3.Connection) -> None:
 
 
 def _migrate_saved_tutkintonimikkeet_from_json(conn: sqlite3.Connection) -> None:
-    # Vanhat JSON-tallennukset siirretaan kerran SQLiteen.
+    # Vanhat JSON-tallennukset siirretaan kerran SQLiteen
     legacy_path = _saved_tutkintonimikkeet_path()
     if not legacy_path.exists():
         return
@@ -341,7 +351,7 @@ def _migrate_saved_tutkintonimikkeet_from_json(conn: sqlite3.Connection) -> None
 
 class Api:
     def __init__(self) -> None:
-        # API on silta kayttoliittyman ja tiedostojen/tietokannan valissa.
+        # API on silta kayttoliittyman ja tiedostojen/tietokannan valissa
         self._conn = _connect_db()
         self._lock = threading.Lock()
         _ensure_data(self._conn)
@@ -362,7 +372,7 @@ class Api:
         )
 
     def list_tutkinnot(self) -> list[dict[str, str | int]]:
-        # Palauttaa kaikki tutkinnot listaa varten.
+        # Palauttaa kaikki tutkinnot listaa varten
         with self._lock:
             rows = self._conn.execute(
                 "SELECT id, nimi FROM tutkinnot ORDER BY nimi;"
@@ -370,7 +380,7 @@ class Api:
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
     def get_tutkinto(self, tutkinto_id: int) -> dict | None:
-        # Palauttaa yhden tutkinnon tarkemmat tiedot ja siihen kuuluvat nimikkeet.
+        # Palauttaa yhden tutkinnon tarkemmat tiedot ja siihen kuuluvat nimikkeet
         with self._lock:
             row = self._conn.execute(
                 "SELECT id, nimi, desc FROM tutkinnot WHERE id = ?;",
@@ -405,7 +415,7 @@ class Api:
         }
 
     def search_tutkinnot(self, query: str | None) -> list[dict[str, str | int]]:
-        # Hakee tutkintoja nimen, kuvauksen tai tutkintonimikkeen perusteella.
+        # Hakee tutkintoja nimen, kuvauksen tai tutkintonimikkeen perusteella
         if not query or not str(query).strip():
             return self.list_tutkinnot()
         term = f"%{str(query).strip()}%"
@@ -423,7 +433,7 @@ class Api:
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
     def list_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
-        # Palauttaa kaikki tutkintonimikkeet yhdessa listassa.
+        # Palauttaa kaikki tutkintonimikkeet yhdessa listassa
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -446,7 +456,7 @@ class Api:
         ]
 
     def list_saved_tutkintonimikkeet(self) -> list[dict]:
-        # Palauttaa kayttajan tallentamat tutkintonimikkeet.
+        # Palauttaa kayttajan tallentamat tutkintonimikkeet
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -471,7 +481,8 @@ class Api:
         ]
 
     def save_tutkintonimike(self, tutkintonimike_id: int) -> dict:
-        # Tallentaa yhden tutkintonimikkeen suosikkeihin.
+        # Tallentaa yhden tutkintonimikkeen suosikkeihin
+
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -519,7 +530,7 @@ class Api:
         return item
 
     def remove_saved_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        # Poistaa tutkintonimikkeen tallennuksista.
+        # Poistaa tutkintonimikkeen tallennuksista
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -537,7 +548,7 @@ class Api:
         return cursor.rowcount > 0
 
     def list_quiz_results(self, quiz_id: str | None = None) -> list[dict]:
-        # Lukee quiz-tulokset JSON-tiedostosta, ei SQLite-tietokannasta.
+        # Lukee quiz-tulokset JSON-tiedostosta, ei SQLite-tietokannasta
         normalized_quiz_id = str(quiz_id or "").strip()
         with self._lock:
             items = self._load_quiz_results()
@@ -551,7 +562,7 @@ class Api:
         )
 
     def save_quiz_result(self, quiz_id: str, result: dict) -> dict:
-        # Tallentaa quiz-tuloksen user-kansioon JSON-muodossa.
+        # Tallentaa quiz-tuloksen user-kansioon JSON-muodossa
         normalized_quiz_id = str(quiz_id or "").strip()
         if not normalized_quiz_id:
             raise ValueError("quiz_id is required")
@@ -579,7 +590,7 @@ class Api:
         return entry
 
     def list_opiskelu_suunnat(self) -> list[dict[str, str | int]]:
-        # Lukee Opintopolut-sivun sisallon suoraan JSON-tiedostosta.
+        # Lukee Opintopolut-sivun sisallon suoraan JSON-tiedostosta
         source_path = _opiskelu_suunnat_json_path()
         if not source_path.exists():
             raise FileNotFoundError(f"Missing source data: {source_path}")
@@ -617,7 +628,7 @@ class Api:
         return items
 
     def get_opintopolku_quiz(self) -> dict:
-        # Palauttaa quizin kysymykset ja asetukset JSON-tiedostosta.
+        # Palauttaa quizin kysymykset ja asetukset JSON-tiedostosta
         source_path = _opintopolku_quiz_json_path()
         if not source_path.exists():
             raise FileNotFoundError(f"Missing source data: {source_path}")
@@ -630,7 +641,8 @@ class Api:
 
 
 def main() -> None:
-    # Kaynnistetaan backend-API, paikallinen palvelin ja itse ikkuna.
+    # Kaynnistetaan backend-API, paikallinen palvelin ja itse ikkuna
+    
     api = Api()
     server, port = _start_static_server()
     try:
