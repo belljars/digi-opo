@@ -1,5 +1,7 @@
 export {};
 
+import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
+
 type SavedTutkintonimikeItem = {
   id: number;
   nimi: string;
@@ -62,31 +64,24 @@ function renderEmpty(message: string): void {
 }
 
 function createSavedCard(item: SavedTutkintonimikeItem): HTMLElement {
-  const article = document.createElement("article");
-  article.className = "tutkintonimike-card";
+  const { root, body } = createTutkintonimikeCard({
+    nimi: item.nimi,
+    linkki: item.linkki,
+    img: item.img,
+    tutkinto_nimi: item.tutkinto_nimi
+  });
 
-  const media = item.img
-    ? `<img src="${item.img}" alt="${item.nimi}" class="tutkintonimike-image" />`
-    : `<div class="tutkintonimike-image tutkintonimike-image--placeholder" aria-hidden="true"></div>`;
-  const title = item.linkki
-    ? `<a href="${item.linkki}" target="_blank" rel="noreferrer" class="tutkintonimike-link">${item.nimi}</a>`
-    : `<span class="tutkintonimike-link">${item.nimi}</span>`;
-
-  article.innerHTML = `
-    ${media}
-    <div class="tutkintonimike-card-body">
-      ${title}
-      <p class="tutkintonimike-meta">${item.tutkinto_nimi}</p>
-      <button type="button" class="tutkintonimike-action">Poista tallennuksista</button>
-    </div>
-  `;
-
-  const button = article.querySelector("button");
-  button?.addEventListener("click", () => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "tutkintonimike-action";
+  button.textContent = "Poista tallennuksista";
+  button.addEventListener("click", () => {
     void removeItem(item.id, item.nimi);
   });
 
-  return article;
+  body.append(button);
+
+  return root;
 }
 
 async function renderSavedItems(): Promise<void> {
