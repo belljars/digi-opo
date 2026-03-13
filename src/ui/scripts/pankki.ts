@@ -139,7 +139,7 @@ function renderDetail(detail: TutkintoDetail): void {
   grid.className = "tutkintonimike-grid";
 
   detail.tutkintonimikkeet.forEach((nimike) => {
-    const { root, body } = createTutkintonimikeCard({
+    const { root, actions, body } = createTutkintonimikeCard({
       nimi: nimike.nimi,
       linkki: nimike.linkki,
       img: nimike.img
@@ -153,7 +153,10 @@ function renderDetail(detail: TutkintoDetail): void {
       void toggleSavedTutkintonimike(nimike.id, nimike.nimi);
     });
 
-    body.append(button);
+    if (!body.contains(actions)) {
+      body.append(actions);
+    }
+    actions.append(button);
     grid.append(root);
   });
 

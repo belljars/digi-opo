@@ -2,6 +2,7 @@ export {};
 
 import {
   createTutkintonimikeCard,
+  createTutkintonimikeLinkAction,
   type TutkintonimikeCardItem
 } from "./tutkintonimike-card.js";
 
@@ -123,12 +124,14 @@ function setFinishedVisible(visible: boolean): void {
 function createCardContent(
   item: TutkintonimikeCardItem,
   titleTag: "h3" | "h4" = "h3",
-  allowLink = true
+  allowLink = true,
+  showLinkAction = true
 ): HTMLElement {
   return createTutkintonimikeCard(item, {
     titleTag,
     allowLink,
-    rootTag: "div"
+    rootTag: "div",
+    showLinkAction
   }).root;
 }
 
@@ -166,13 +169,17 @@ function renderChoiceSlot(slotEl: HTMLElement | null, item: TutkintonimikeItem |
   chooseButton.type = "button";
   chooseButton.className = "quiz-choice-button";
   chooseButton.setAttribute("aria-label", `Valitse ${item.nimi}`);
-  chooseButton.append(createCardContent(item, "h3", false));
+  chooseButton.append(createCardContent(item, "h3", false, false));
   chooseButton.addEventListener("click", () => {
     chooseSide(side);
   });
 
   const footer = document.createElement("div");
   footer.className = "quiz-choice-footer";
+  const linkAction = createTutkintonimikeLinkAction(item.linkki);
+  if (linkAction) {
+    footer.append(linkAction);
+  }
   footer.append(createSaveButton(item));
 
   shell.append(chooseButton, footer);
@@ -445,19 +452,20 @@ function renderSummary(): void {
 }
 
 function createResultCard(item: TutkintonimikeItem, label: string): HTMLElement {
-  const card = createCardContent(item, "h3");
+  const { root: card, body, actions } = createTutkintonimikeCard(item, {
+    titleTag: "h3",
+    allowLink: true,
+    rootTag: "div",
+    showLinkAction: true
+  });
   card.classList.add("quiz-result-card");
 
-  const body = card.querySelector(".tutkintonimike-card-body");
   const meta = document.createElement("span");
   meta.className = "quiz-score";
   meta.textContent = label;
 
-  const footer = document.createElement("div");
-  footer.className = "quiz-result-footer";
-  footer.append(createSaveButton(item));
-
-  body?.append(meta, footer);
+  body.insertBefore(meta, actions);
+  actions.append(createSaveButton(item));
   return card;
 }
 
