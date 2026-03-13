@@ -1,5 +1,10 @@
 export {};
 
+import {
+  createTutkintonimikeCard,
+  type TutkintonimikeCardItem
+} from "./tutkintonimike-card.js";
+
 type TutkintonimikeItem = {
   id: number;
   nimi: string;
@@ -16,50 +21,70 @@ type Api = {
   remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
 };
 
-type QuizResult = {
-  voittaja: string;
-  haviaja: string;
-  aikaleima: string;
+type CardSide = "left" | "right";
+type BucketSide = "leftBucket" | "rightBucket";
+
+type ActivePair = {
+  left: TutkintonimikeItem;
+  right: TutkintonimikeItem;
+  leftBucket: BucketSide;
+  rightBucket: BucketSide;
 };
 
-type RankedItem = {
-  item: TutkintonimikeItem;
-  wins: number;
+type QuizSession = {
+  queue: TutkintonimikeItem[][];
+  currentLeft: TutkintonimikeItem[] | null;
+  currentRight: TutkintonimikeItem[] | null;
+  merged: TutkintonimikeItem[];
+  leftIndex: number;
+  rightIndex: number;
+  completedComparisons: number;
+  estimatedComparisons: number;
+  completedMerges: number;
+  totalMerges: number;
+  startedAt: number;
 };
 
 const quizLeftEl = document.getElementById("quiz-vasen") as HTMLDivElement | null;
 const quizRightEl = document.getElementById("quiz-oikea") as HTMLDivElement | null;
 const quizCardsEl = document.getElementById("quiz-cards");
 const quizCountEl = document.getElementById("quiz-count");
+const quizStageEl = document.getElementById("quiz-stage");
 const quizFeedbackEl = document.getElementById("quiz-feedback");
-const quizSkipEl = document.getElementById("quiz-ohita") as HTMLButtonElement | null;
+const quizHelpEl = document.getElementById("quiz-help");
+const quizPromptEl = document.getElementById("quiz-prompt");
+const quizRestartEl = document.getElementById("quiz-restart") as HTMLButtonElement | null;
 const quizFinishedEl = document.getElementById("quiz-valmis");
+const quizSummaryEl = document.getElementById("quiz-summary");
 const quizTop3El = document.getElementById("quiz-top3");
 const quizRankingListEl = document.getElementById("quiz-ranking-list");
 
 let allItems: TutkintonimikeItem[] = [];
-let currentPair: { left: TutkintonimikeItem; right: TutkintonimikeItem } | null = null;
-let currentWinner: TutkintonimikeItem | null = null;
-let currentWinnerSide: "left" | "right" | null = null;
-let challengerQueue: TutkintonimikeItem[] = [];
-let winCounts: Record<number, number> = {};
-const quizHistory: QuizResult[] = [];
+let activeSession: QuizSession | null = null;
+let activePair: ActivePair | null = null;
+let finalRanking: TutkintonimikeItem[] = [];
+let finishedAt: number | null = null;
+let lastSessionDurationMs: number | null = null;
 let initialized = false;
-let isTieBreakRound = false;
 let activeApi: Api | null = null;
 let savedIds = new Set<number>();
-
-function setQuizCount(): void {
-  if (quizCountEl) {
-    const jaljella = challengerQueue.length + (currentWinner ? 1 : 0);
-    const vaihe = isTieBreakRound ? " | Tasapeli: ratkaistaan sijoitukset" : "";
-    quizCountEl.textContent = `Vertailuja: ${quizHistory.length} | Jaljella: ${jaljella}${vaihe}`;
-  }
-}
+let saveInFlightIds = new Set<number>();
 
 function setFeedback(message = ""): void {
   if (quizFeedbackEl) {
     quizFeedbackEl.textContent = message;
+  }
+}
+
+function setHelp(message: string): void {
+  if (quizHelpEl) {
+    quizHelpEl.textContent = message;
+  }
+}
+
+function setPrompt(message: string): void {
+  if (quizPromptEl) {
+    quizPromptEl.textContent = message;
   }
 }
 
@@ -95,222 +120,111 @@ function setFinishedVisible(visible: boolean): void {
   }
 }
 
-function createImageElement(item: TutkintonimikeItem): HTMLElement {
-  if (!item.img) {
-    const placeholder = document.createElement("div");
-    placeholder.className = "tutkintonimike-image tutkintonimike-image--placeholder";
-    placeholder.setAttribute("aria-hidden", "true");
-    return placeholder;
-  }
-
-  const image = document.createElement("img");
-  image.className = "tutkintonimike-image";
-  image.src = item.img;
-  image.alt = item.nimi;
-  image.addEventListener("error", () => {
-    const placeholder = document.createElement("div");
-    placeholder.className = "tutkintonimike-image tutkintonimike-image--placeholder";
-    placeholder.setAttribute("aria-hidden", "true");
-    image.replaceWith(placeholder);
-  });
-  return image;
+function createCardContent(
+  item: TutkintonimikeCardItem,
+  titleTag: "h3" | "h4" = "h3",
+  allowLink = true
+): HTMLElement {
+  return createTutkintonimikeCard(item, {
+    titleTag,
+    allowLink,
+    rootTag: "div"
+  }).root;
 }
 
-function createCardBody(item: TutkintonimikeItem, isSaved: boolean, titleTag: "h3" | "h4" = "h3"): HTMLElement {
-  const card = document.createElement("div");
-  card.className = "tutkintonimike-card";
-
-  const image = createImageElement(item);
-  const body = document.createElement("div");
-  body.className = "tutkintonimike-card-body";
-
-  const title = document.createElement(titleTag);
-  const titleContent = item.linkki ? document.createElement("a") : document.createElement("span");
-  titleContent.textContent = item.nimi;
-  titleContent.className = "tutkintonimike-link";
-  if (titleContent instanceof HTMLAnchorElement) {
-    titleContent.href = item.linkki ?? "";
-    titleContent.target = "_blank";
-    titleContent.rel = "noreferrer";
-    titleContent.addEventListener("click", (event) => {
-      event.stopPropagation();
-    });
-  }
-  title.append(titleContent);
-
-  const desc = document.createElement("p");
-  desc.className = "tutkintonimike-meta";
-  desc.textContent = item.tutkinto_nimi;
-
-  const actions = document.createElement("div");
-  actions.className = "quiz-card-actions";
-
+function createSaveButton(item: TutkintonimikeItem): HTMLButtonElement {
   const saveButton = document.createElement("button");
   saveButton.type = "button";
   saveButton.className = "tutkintonimike-action";
-  saveButton.textContent = isSaved ? "Poista tallennus" : "Tallenna";
+  saveButton.textContent = savedIds.has(item.id) ? "Poista tallennus" : "Tallenna";
+  saveButton.disabled = saveInFlightIds.has(item.id);
   saveButton.addEventListener("click", (event) => {
     event.stopPropagation();
     void toggleSavedTutkintonimike(item);
   });
-  actions.append(saveButton);
-
-  body.append(title, desc, actions);
-  card.append(image, body);
-  return card;
+  return saveButton;
 }
 
-function getRankedItems(): RankedItem[] {
-  return allItems
-    .map((item) => ({
-      item,
-      wins: winCounts[item.id] ?? 0
-    }))
-    .sort((a, b) => {
-      if (b.wins !== a.wins) {
-        return b.wins - a.wins;
-      }
-      return a.item.nimi.localeCompare(b.item.nimi, "fi");
-    });
-}
-
-function getTiedItemsForVisibleTop3(): TutkintonimikeItem[] {
-  const rankedItems = getRankedItems();
-  const topThree = rankedItems.slice(0, 3);
-  const duplicatedScores = new Set<number>();
-  const scoreCounts = new Map<number, number>();
-
-  topThree.forEach((entry) => {
-    scoreCounts.set(entry.wins, (scoreCounts.get(entry.wins) ?? 0) + 1);
-  });
-
-  topThree.forEach((entry) => {
-    if ((scoreCounts.get(entry.wins) ?? 0) > 1) {
-      duplicatedScores.add(entry.wins);
-    }
-  });
-
-  if (duplicatedScores.size === 0) {
-    return [];
-  }
-
-  return rankedItems
-    .filter((entry) => duplicatedScores.has(entry.wins))
-    .map((entry) => entry.item);
-}
-
-function startTieBreakRound(items: TutkintonimikeItem[]): void {
-  const shuffled = shuffleItems(items);
-  currentWinner = shuffled[0] ?? null;
-  currentWinnerSide = "left";
-  challengerQueue = shuffled.slice(1);
-  isTieBreakRound = true;
-}
-
-function maybeResolveTieOrFinish(): void {
-  const tiedItems = getTiedItemsForVisibleTop3();
-  if (tiedItems.length >= 2) {
-    startTieBreakRound(tiedItems);
-    renderCurrentPair();
+function renderChoiceSlot(slotEl: HTMLElement | null, item: TutkintonimikeItem | null, side: CardSide): void {
+  if (!slotEl) {
     return;
   }
 
-  currentPair = null;
-  isTieBreakRound = false;
-  if (quizLeftEl && quizRightEl) {
-    renderCard(quizLeftEl, currentWinner);
-    renderCard(quizRightEl, null);
-  }
-  renderTop3();
-  renderRankingList();
-  setFinishedVisible(true);
-  setSkipEnabled(false);
-  setQuizCount();
-}
+  slotEl.replaceChildren();
+  slotEl.classList.remove("is-disabled");
 
-function renderTop3(): void {
-  if (!quizTop3El) {
-    return;
-  }
-
-  const topThree = getRankedItems().slice(0, 3);
-  quizTop3El.replaceChildren();
-
-  const heading = document.createElement("h4");
-  heading.textContent = "Top 3";
-  quizTop3El.append(heading);
-
-  topThree.forEach((entry, index) => {
-    const card = document.createElement("div");
-    card.className = "quiz-result-card";
-    const body = createCardBody(entry.item, savedIds.has(entry.item.id), "h4");
-    const title = body.querySelector("h4");
-    if (title) {
-      title.textContent = `${index + 1}. ${entry.item.nimi}`;
-    }
-
-    const score = document.createElement("span");
-    score.className = "quiz-score";
-    score.textContent = `Valinnat: ${entry.wins}`;
-
-    card.append(body, score);
-    quizTop3El.append(card);
-  });
-}
-
-function renderRankingList(): void {
-  if (!quizRankingListEl) {
-    return;
-  }
-
-  const rows = getRankedItems().map((entry) => {
-    const li = document.createElement("li");
-
-    const title = document.createElement("strong");
-    title.textContent = entry.item.nimi;
-
-    const meta = document.createElement("span");
-    meta.className = "quiz-score";
-    meta.textContent = `${entry.item.tutkinto_nimi} | Valinnat: ${entry.wins}`;
-
-    li.append(title, meta);
-    return li;
-  });
-
-  quizRankingListEl.replaceChildren(...rows);
-}
-
-function renderCard(cardEl: HTMLElement, item: TutkintonimikeItem | null): void {
-  cardEl.replaceChildren();
   if (!item) {
-    cardEl.textContent = "Ei dataa.";
-    cardEl.setAttribute("aria-disabled", "true");
-    cardEl.classList.add("is-disabled");
+    slotEl.classList.add("is-disabled");
+    slotEl.textContent = "Ei vertailtavaa.";
     return;
   }
 
-  cardEl.removeAttribute("aria-disabled");
-  cardEl.classList.remove("is-disabled");
-  cardEl.dataset.id = String(item.id);
-  cardEl.append(createCardBody(item, savedIds.has(item.id)));
+  const shell = document.createElement("div");
+  shell.className = "quiz-choice-shell";
+
+  const chooseButton = document.createElement("button");
+  chooseButton.type = "button";
+  chooseButton.className = "quiz-choice-button";
+  chooseButton.setAttribute("aria-label", `Valitse ${item.nimi}`);
+  chooseButton.append(createCardContent(item, "h3", false));
+  chooseButton.addEventListener("click", () => {
+    chooseSide(side);
+  });
+
+  const footer = document.createElement("div");
+  footer.className = "quiz-choice-footer";
+  footer.append(createSaveButton(item));
+
+  shell.append(chooseButton, footer);
+  slotEl.append(shell);
 }
 
-function setQuizLoading(message: string): void {
-  if (quizLeftEl) {
-    quizLeftEl.textContent = message;
-    quizLeftEl.setAttribute("aria-disabled", "true");
-    quizLeftEl.classList.add("is-disabled");
+function renderInactiveSlot(slotEl: HTMLElement | null, message: string): void {
+  if (!slotEl) {
+    return;
   }
-  if (quizRightEl) {
-    quizRightEl.textContent = message;
-    quizRightEl.setAttribute("aria-disabled", "true");
-    quizRightEl.classList.add("is-disabled");
-  }
+
+  slotEl.replaceChildren();
+  slotEl.classList.add("is-disabled");
+
+  const shell = document.createElement("div");
+  shell.className = "quiz-choice-shell quiz-choice-shell--empty";
+  shell.textContent = message;
+  slotEl.append(shell);
 }
 
-function setSkipEnabled(enabled: boolean): void {
-  if (quizSkipEl) {
-    quizSkipEl.disabled = !enabled;
+function formatDuration(startedAt: number, endedAt: number): string {
+  const seconds = Math.max(Math.round((endedAt - startedAt) / 1000), 1);
+  if (seconds < 60) {
+    return `${seconds} s`;
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes} min ${remainingSeconds} s`;
+}
+
+function updateMeta(): void {
+  if (quizCountEl) {
+    if (activeSession) {
+      quizCountEl.textContent = `Vertailut: ${activeSession.completedComparisons}`;
+    } else if (finalRanking.length > 0) {
+      quizCountEl.textContent = `Valmis jarjestys: ${finalRanking.length} tutkintonimiketta`;
+    } else {
+      quizCountEl.textContent = "";
+    }
+  }
+
+  if (quizStageEl) {
+    if (activeSession) {
+      const mergeNumber = Math.min(activeSession.completedMerges + 1, activeSession.totalMerges);
+      const remainingEstimate = Math.max(activeSession.estimatedComparisons - activeSession.completedComparisons, 0);
+      quizStageEl.textContent = `Yhdistys ${mergeNumber}/${activeSession.totalMerges} | Arvio jaljella: ${remainingEstimate}`;
+    } else if (finalRanking.length > 0 && finishedAt && activeSession === null) {
+      quizStageEl.textContent = "Ranking valmis";
+    } else {
+      quizStageEl.textContent = "";
+    }
   }
 }
 
@@ -325,79 +239,289 @@ function shuffleItems(items: TutkintonimikeItem[]): TutkintonimikeItem[] {
   return shuffled;
 }
 
+function estimateComparisons(lengths: number[]): number {
+  const queue = lengths.slice();
+  let total = 0;
+
+  while (queue.length > 1) {
+    const left = queue.shift();
+    const right = queue.shift();
+    if (left === undefined || right === undefined) {
+      break;
+    }
+    total += left + right - 1;
+    queue.push(left + right);
+  }
+
+  return total;
+}
+
+function createSession(items: TutkintonimikeItem[]): QuizSession {
+  const queue = shuffleItems(items).map((item) => [item]);
+  return {
+    queue,
+    currentLeft: null,
+    currentRight: null,
+    merged: [],
+    leftIndex: 0,
+    rightIndex: 0,
+    completedComparisons: 0,
+    estimatedComparisons: estimateComparisons(queue.map((group) => group.length)),
+    completedMerges: 0,
+    totalMerges: Math.max(items.length - 1, 0),
+    startedAt: Date.now()
+  };
+}
+
+function finishQuiz(ranking: TutkintonimikeItem[]): void {
+  const durationMs = activeSession ? Date.now() - activeSession.startedAt : null;
+  finalRanking = ranking;
+  finishedAt = Date.now();
+  lastSessionDurationMs = durationMs;
+  activeSession = null;
+  activePair = null;
+  setFinishedVisible(true);
+  renderInactiveSlot(quizLeftEl, "Ranking valmis.");
+  renderInactiveSlot(quizRightEl, "Aloita alusta jos haluat uuden jarjestyksen.");
+  renderSummary();
+  renderTop3();
+  renderRankingList();
+  updateMeta();
+  setPrompt("Ranking valmis");
+  setHelp("Valmis. Voit tallentaa suosikkeja tai kaynnistaa quizin uudelleen.");
+}
+
+function startNextMerge(): void {
+  if (!activeSession) {
+    return;
+  }
+
+  if (activeSession.currentLeft && activeSession.currentRight) {
+    renderCurrentPair();
+    return;
+  }
+
+  if (activeSession.queue.length === 1) {
+    finishQuiz(activeSession.queue[0] ?? []);
+    return;
+  }
+
+  const left = activeSession.queue.shift() ?? null;
+  const right = activeSession.queue.shift() ?? null;
+
+  if (!left || !right) {
+    finishQuiz(left ?? right ?? []);
+    return;
+  }
+
+  activeSession.currentLeft = left;
+  activeSession.currentRight = right;
+  activeSession.merged = [];
+  activeSession.leftIndex = 0;
+  activeSession.rightIndex = 0;
+  renderCurrentPair();
+}
+
 function renderCurrentPair(): void {
-  if (!quizLeftEl || !quizRightEl) {
+  if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
+    return;
+  }
+
+  const leftCandidate = activeSession.currentLeft[activeSession.leftIndex] ?? null;
+  const rightCandidate = activeSession.currentRight[activeSession.rightIndex] ?? null;
+
+  if (!leftCandidate || !rightCandidate) {
     return;
   }
 
   setFinishedVisible(false);
-  if (!currentWinner) {
-    setQuizLoading("Tarvitaan vahintaan kaksi tutkintonimiketta.");
-    setSkipEnabled(false);
-    setQuizCount();
-    return;
+  setPrompt("Kumpi kiinnostaa enemman?");
+  setHelp("Valitse kiinnostavampi vaihtoehto. Voit kayttaa myos nuolinappaimia.");
+
+  if (Math.random() < 0.5) {
+    activePair = {
+      left: leftCandidate,
+      right: rightCandidate,
+      leftBucket: "leftBucket",
+      rightBucket: "rightBucket"
+    };
+  } else {
+    activePair = {
+      left: rightCandidate,
+      right: leftCandidate,
+      leftBucket: "rightBucket",
+      rightBucket: "leftBucket"
+    };
   }
 
-  const challenger = challengerQueue[0] ?? null;
-  if (!challenger) {
-    maybeResolveTieOrFinish();
-    return;
-  }
-
-  const winnerSide = currentWinnerSide ?? "left";
-  const left = winnerSide === "left" ? currentWinner : challenger;
-  const right = winnerSide === "left" ? challenger : currentWinner;
-  currentPair = { left, right };
-  renderCard(quizLeftEl, left);
-  renderCard(quizRightEl, right);
-  setSkipEnabled(challengerQueue.length > 1);
-  setQuizCount();
+  renderChoiceSlot(quizLeftEl, activePair.left, "left");
+  renderChoiceSlot(quizRightEl, activePair.right, "right");
+  updateMeta();
 }
 
-function startQuiz(): void {
+function completeCurrentMerge(): void {
+  if (!activeSession) {
+    return;
+  }
+
+  activeSession.queue.push(activeSession.merged.slice());
+  activeSession.currentLeft = null;
+  activeSession.currentRight = null;
+  activeSession.merged = [];
+  activeSession.leftIndex = 0;
+  activeSession.rightIndex = 0;
+  activeSession.completedMerges += 1;
+  startNextMerge();
+}
+
+function chooseBucket(bucketSide: BucketSide): void {
+  if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
+    return;
+  }
+
+  const chosenFromLeft = bucketSide === "leftBucket";
+  const chosenItem = chosenFromLeft
+    ? activeSession.currentLeft[activeSession.leftIndex]
+    : activeSession.currentRight[activeSession.rightIndex];
+
+  if (!chosenItem) {
+    return;
+  }
+
+  activeSession.merged.push(chosenItem);
+  activeSession.completedComparisons += 1;
+
+  if (chosenFromLeft) {
+    activeSession.leftIndex += 1;
+  } else {
+    activeSession.rightIndex += 1;
+  }
+
+  if (activeSession.leftIndex >= activeSession.currentLeft.length) {
+    activeSession.merged.push(...activeSession.currentRight.slice(activeSession.rightIndex));
+    completeCurrentMerge();
+    return;
+  }
+
+  if (activeSession.rightIndex >= activeSession.currentRight.length) {
+    activeSession.merged.push(...activeSession.currentLeft.slice(activeSession.leftIndex));
+    completeCurrentMerge();
+    return;
+  }
+
+  renderCurrentPair();
+}
+
+function chooseSide(side: CardSide): void {
+  if (!activePair) {
+    return;
+  }
+
+  const bucketSide = side === "left" ? activePair.leftBucket : activePair.rightBucket;
+  chooseBucket(bucketSide);
+}
+
+function renderSummary(): void {
+  if (!quizSummaryEl) {
+    return;
+  }
+
+  quizSummaryEl.replaceChildren();
+
+  if (finalRanking.length === 0) {
+    quizSummaryEl.textContent = "Quizia ei voitu muodostaa.";
+    return;
+  }
+
+  const top = finalRanking[0];
+  const summary = document.createElement("p");
+  const duration =
+    lastSessionDurationMs !== null ? formatDuration(0, lastSessionDurationMs) : null;
+
+  summary.textContent = duration
+    ? `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa ${duration} aikana.`
+    : `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa.`;
+  quizSummaryEl.append(summary);
+}
+
+function createResultCard(item: TutkintonimikeItem, label: string): HTMLElement {
+  const card = createCardContent(item, "h3");
+  card.classList.add("quiz-result-card");
+
+  const body = card.querySelector(".tutkintonimike-card-body");
+  const meta = document.createElement("span");
+  meta.className = "quiz-score";
+  meta.textContent = label;
+
+  const footer = document.createElement("div");
+  footer.className = "quiz-result-footer";
+  footer.append(createSaveButton(item));
+
+  body?.append(meta, footer);
+  return card;
+}
+
+function renderTop3(): void {
+  if (!quizTop3El) {
+    return;
+  }
+
+  quizTop3El.replaceChildren();
+
+  finalRanking.slice(0, 3).forEach((item, index) => {
+    const label = index === 0 ? "Sija 1" : `Sija ${index + 1}`;
+    quizTop3El.append(createResultCard(item, label));
+  });
+}
+
+function renderRankingList(): void {
+  if (!quizRankingListEl) {
+    return;
+  }
+
+  const rows = finalRanking.map((item, index) => {
+    const li = document.createElement("li");
+
+    const title = document.createElement("strong");
+    title.textContent = `${index + 1}. ${item.nimi}`;
+
+    const meta = document.createElement("span");
+    meta.className = "quiz-score";
+    meta.textContent = item.tutkinto_nimi;
+
+    const footer = document.createElement("div");
+    footer.className = "quiz-result-footer";
+    footer.append(createSaveButton(item));
+
+    li.append(title, meta, footer);
+    return li;
+  });
+
+  quizRankingListEl.replaceChildren(...rows);
+}
+
+function renderInitialState(message: string): void {
+  setFinishedVisible(false);
+  setPrompt("Valmistellaan quizia");
+  renderInactiveSlot(quizLeftEl, message);
+  renderInactiveSlot(quizRightEl, message);
+  updateMeta();
+}
+
+function restartQuiz(): void {
+  setFeedback("");
+  finalRanking = [];
+  finishedAt = null;
+  lastSessionDurationMs = null;
+
   if (allItems.length < 2) {
-    setQuizLoading("Tarvitaan vahintaan kaksi tutkintonimiketta.");
-    currentWinner = null;
-    currentPair = null;
-    challengerQueue = [];
-    setSkipEnabled(false);
-    setQuizCount();
+    renderInitialState("Tarvitaan vahintaan kaksi tutkintonimiketta.");
+    setHelp("Quiziin tarvitaan enemman dataa.");
     return;
   }
 
-  const shuffled = shuffleItems(allItems);
-  winCounts = Object.fromEntries(shuffled.map((item) => [item.id, 0]));
-  currentWinner = shuffled[0];
-  currentWinnerSide = "left";
-  challengerQueue = shuffled.slice(1);
-  isTieBreakRound = false;
-  renderCurrentPair();
-}
-
-async function handleQuizChoice(selected: "left" | "right"): Promise<void> {
-  if (!currentPair) {
-    return;
-  }
-  const voittaja = selected === "left" ? currentPair.left : currentPair.right;
-  const haviaja = selected === "left" ? currentPair.right : currentPair.left;
-  // recordQuizResult(voittaja, haviaja);
-  winCounts[voittaja.id] = (winCounts[voittaja.id] ?? 0) + 1;
-  currentWinner = voittaja;
-  currentWinnerSide = selected;
-  challengerQueue = challengerQueue.slice(1);
-  renderCurrentPair();
-}
-
-function skipChallenger(): void {
-  if (challengerQueue.length <= 1) {
-    return;
-  }
-  const next = challengerQueue.shift();
-  if (!next) {
-    return;
-  }
-  challengerQueue.push(next);
-  renderCurrentPair();
+  activeSession = createSession(allItems);
+  startNextMerge();
 }
 
 async function loadSavedIds(): Promise<void> {
@@ -405,49 +529,65 @@ async function loadSavedIds(): Promise<void> {
     savedIds = new Set<number>();
     return;
   }
+
   const items = await activeApi.list_saved_tutkintonimikkeet();
   savedIds = new Set(items.map((item) => item.id));
 }
 
 async function toggleSavedTutkintonimike(item: TutkintonimikeItem): Promise<void> {
-  if (!activeApi) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+  if (!activeApi || saveInFlightIds.has(item.id)) {
     return;
   }
 
-  if (savedIds.has(item.id)) {
-    await activeApi.remove_saved_tutkintonimike(item.id);
-    savedIds.delete(item.id);
-    setFeedback(`"${item.nimi}" poistettiin tallennuksista.`);
-  } else {
-    await activeApi.save_tutkintonimike(item.id);
-    savedIds.add(item.id);
-    setFeedback(`"${item.nimi}" tallennettiin.`);
+  saveInFlightIds.add(item.id);
+  try {
+    if (savedIds.has(item.id)) {
+      await activeApi.remove_saved_tutkintonimike(item.id);
+      savedIds.delete(item.id);
+      setFeedback(`"${item.nimi}" poistettiin tallennuksista.`);
+    } else {
+      await activeApi.save_tutkintonimike(item.id);
+      savedIds.add(item.id);
+      setFeedback(`"${item.nimi}" tallennettiin.`);
+    }
+  } catch {
+    setFeedback(`Tallennus ei onnistunut kohteelle "${item.nimi}".`);
+  } finally {
+    saveInFlightIds.delete(item.id);
   }
 
-  if (currentPair) {
-    if (quizLeftEl && quizRightEl) {
-      renderCard(quizLeftEl, currentPair.left);
-      renderCard(quizRightEl, currentPair.right);
-    }
+  if (activePair) {
+    renderChoiceSlot(quizLeftEl, activePair.left, "left");
+    renderChoiceSlot(quizRightEl, activePair.right, "right");
   }
+
   if (!quizFinishedEl?.hidden) {
     renderTop3();
+    renderRankingList();
   }
 }
 
 async function init(): Promise<void> {
-  const api = await waitForApi();
-  if (!api) {
-    setQuizLoading("Pywebview API ei ole kaytettavissa.");
-    return;
-  }
-  activeApi = api;
   setFeedback("");
-  setQuizLoading("Ladataan...");
-  await loadSavedIds();
-  allItems = await api.list_tutkintonimikkeet();
-  startQuiz();
+  setHelp("Ladataan tutkintonimikkeita...");
+  renderInitialState("Ladataan...");
+
+  try {
+    const api = await waitForApi();
+    if (!api) {
+      renderInitialState("Pywebview API ei ole kaytettavissa.");
+      setHelp("Quizia ei voitu kaynnistaa ilman backendia.");
+      return;
+    }
+
+    activeApi = api;
+    await loadSavedIds();
+    allItems = await api.list_tutkintonimikkeet();
+    restartQuiz();
+  } catch {
+    renderInitialState("Quizin lataus epaonnistui.");
+    setHelp("Yrita kaynnistaa sovellus uudelleen.");
+  }
 }
 
 function initOnce(): void {
@@ -466,31 +606,20 @@ window.addEventListener("DOMContentLoaded", () => {
   initOnce();
 });
 
-function bindChoiceCard(cardEl: HTMLElement | null, side: "left" | "right"): void {
-  if (!cardEl) {
+window.addEventListener("keydown", (event) => {
+  if (!activePair) {
     return;
   }
-  cardEl.addEventListener("click", () => {
-    if (cardEl.classList.contains("is-disabled")) {
-      return;
-    }
-    void handleQuizChoice(side);
-  });
-  cardEl.addEventListener("keydown", (event) => {
-    if (cardEl.classList.contains("is-disabled")) {
-      return;
-    }
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
+
+  if (event.key === "ArrowLeft") {
     event.preventDefault();
-    void handleQuizChoice(side);
-  });
-}
+    chooseSide("left");
+  } else if (event.key === "ArrowRight") {
+    event.preventDefault();
+    chooseSide("right");
+  }
+});
 
-bindChoiceCard(quizLeftEl, "left");
-bindChoiceCard(quizRightEl, "right");
-
-quizSkipEl?.addEventListener("click", () => {
-  skipChallenger();
+quizRestartEl?.addEventListener("click", () => {
+  restartQuiz();
 });

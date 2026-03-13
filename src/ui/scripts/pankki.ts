@@ -1,5 +1,7 @@
 export {};
 
+import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
+
 type TutkintoListItem = {
   id: number;
   nimi: string;
@@ -112,49 +114,50 @@ function renderDetail(detail: TutkintoDetail): void {
     return;
   }
 
-  const nimikkeet = detail.tutkintonimikkeet.length
-    ? `<div class="tutkintonimike-grid">${detail.tutkintonimikkeet
-        .map((nimike) => {
-          const image = nimike.img
-            ? `<img src="${nimike.img}" alt="${nimike.nimi}" class="tutkintonimike-image" />`
-            : `<div class="tutkintonimike-image tutkintonimike-image--placeholder" aria-hidden="true"></div>`;
-          const link = nimike.linkki
-            ? `<a href="${nimike.linkki}" target="_blank" rel="noreferrer" class="tutkintonimike-link">${nimike.nimi}</a>`
-            : `<span class="tutkintonimike-link">${nimike.nimi}</span>`;
-          const isSaved = savedIds.has(nimike.id);
-          const actionLabel = isSaved ? "Poista tallennuksista" : "Tallenna";
-          return `
-            <article class="tutkintonimike-card">
-              ${image}
-              <div class="tutkintonimike-card-body">
-                ${link}
-                <button type="button" class="tutkintonimike-action" data-save-id="${nimike.id}">
-                  ${actionLabel}
-                </button>
-              </div>
-            </article>
-          `;
-        })
-        .join("")}</div>`
-    : `<p class="empty">Ei tutkintonimikkeitä.</p>`;
+  detailEl.replaceChildren();
 
-  detailEl.innerHTML = `
-    <h2>${detail.nimi}</h2>
-    <p>${detail.desc}</p>
-    <h3>Tutkintonimikkeet</h3>
-    ${nimikkeet}
-  `;
+  const heading = document.createElement("h2");
+  heading.textContent = detail.nimi;
 
-  detailEl.querySelectorAll<HTMLButtonElement>("[data-save-id]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const nimikeId = Number(button.dataset.saveId);
-      const cardTitle = button
-        .closest(".tutkintonimike-card")
-        ?.querySelector(".tutkintonimike-link")
-        ?.textContent;
-      void toggleSavedTutkintonimike(nimikeId, cardTitle ?? "Tutkintonimike");
+  const description = document.createElement("p");
+  description.textContent = detail.desc;
+
+  const subheading = document.createElement("h3");
+  subheading.textContent = "Tutkintonimikkeet";
+
+  detailEl.append(heading, description, subheading);
+
+  if (!detail.tutkintonimikkeet.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty";
+    empty.textContent = "Ei tutkintonimikkeitä.";
+    detailEl.append(empty);
+    return;
+  }
+
+  const grid = document.createElement("div");
+  grid.className = "tutkintonimike-grid";
+
+  detail.tutkintonimikkeet.forEach((nimike) => {
+    const { root, body } = createTutkintonimikeCard({
+      nimi: nimike.nimi,
+      linkki: nimike.linkki,
+      img: nimike.img
     });
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tutkintonimike-action";
+    button.textContent = savedIds.has(nimike.id) ? "Poista tallennuksista" : "Tallenna";
+    button.addEventListener("click", () => {
+      void toggleSavedTutkintonimike(nimike.id, nimike.nimi);
+    });
+
+    body.append(button);
+    grid.append(root);
   });
+
+  detailEl.append(grid);
 }
 
 async function loadSavedIds(): Promise<void> {

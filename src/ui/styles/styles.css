@@ -182,7 +182,7 @@ body {
 
 .quiz-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-8);
   margin-bottom: var(--space-8);
@@ -193,16 +193,59 @@ body {
   font-size: var(--text-3xl);
 }
 
+.quiz-lead,
+.quiz-help,
+.quiz-summary p {
+  margin: 0;
+}
+
 .quiz-meta,
 .site-footer-copy {
   font-size: var(--text-sm);
 }
 
+.quiz-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.quiz-header > button,
 .quiz-meta button {
   border: var(--border-width) solid var(--color-border);
   background: var(--color-transparent);
   padding: var(--space-2) var(--space-5);
   cursor: pointer;
+}
+
+.quiz-overview,
+.quiz-play-header {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.quiz-overview {
+  margin-bottom: var(--space-8);
+}
+
+.quiz-help {
+  opacity: 0.82;
+}
+
+.quiz-play {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.quiz-play-header h3,
+.quiz-shortcuts {
+  margin: 0;
+}
+
+.quiz-shortcuts {
+  font-size: var(--text-sm);
+  opacity: 0.75;
 }
 
 .quiz-cards {
@@ -211,68 +254,80 @@ body {
   gap: var(--space-8);
 }
 
-.quiz-card {
-  text-align: left;
+.quiz-card-slot {
   border: var(--border-width) solid var(--color-border);
   background: var(--color-transparent);
   padding: 0;
-  cursor: pointer;
   display: block;
   overflow: hidden;
 }
 
-.quiz-card > .tutkintonimike-card {
+.quiz-card-slot.is-disabled {
+  opacity: 0.7;
+}
+
+.quiz-choice-shell {
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.quiz-choice-shell--empty {
+  min-height: 100%;
+  padding: var(--space-8);
+  align-items: center;
+}
+
+.quiz-choice-button {
+  border: 0;
+  background: var(--color-transparent);
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.quiz-choice-button:hover,
+.quiz-choice-button:focus-visible {
+  background: var(--color-overlay-subtle);
+}
+
+.quiz-choice-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.quiz-choice-button > .tutkintonimike-card {
   border: 0;
   height: 100%;
 }
 
-.quiz-card .tutkintonimike-card-body {
+.quiz-choice-button .tutkintonimike-card-body {
   min-height: 100%;
 }
 
-.quiz-card .tutkintonimike-image {
+.quiz-choice-button .tutkintonimike-image {
   aspect-ratio: 4 / 3;
   width: 100%;
   max-width: none;
   max-height: none;
 }
 
-.quiz-result-card .tutkintonimike-image {
-  aspect-ratio: 1 / 1;
-  max-height: 140px;
-  width: 140px;
-  max-width: 100%;
-}
-
-.quiz-card.is-disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-.quiz-card:hover,
-.quiz-card:focus-visible {
-  background: var(--color-overlay-subtle);
-}
-
-.quiz-card:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
-}
-
-.quiz-card h3 {
+.quiz-choice-button h3 {
   margin: 0;
   font-size: var(--text-2xl);
 }
 
-.quiz-card h4 {
+.quiz-choice-button h4 {
   margin: 0;
   font-size: var(--text-lg);
 }
 
-.quiz-card-actions {
+.quiz-choice-footer,
+.quiz-result-footer {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
+  padding: 0 var(--space-7) var(--space-7);
 }
 
 .quiz-body {
@@ -336,9 +391,21 @@ body {
   gap: var(--space-6);
 }
 
+.quiz-summary {
+  border: var(--border-width) solid var(--color-border);
+  padding: var(--space-6) var(--space-7);
+  background: var(--color-overlay-subtle);
+}
+
 .quiz-ranking {
   display: grid;
   gap: var(--space-5);
+}
+
+#quiz-top3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
 }
 
 .quiz-ranking summary {
@@ -359,7 +426,9 @@ body {
 
 .quiz-ranking-list li {
   display: grid;
-  gap: 0.15rem;
+  gap: var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  padding: var(--space-5) var(--space-6);
 }
 
 .quiz-results h3,
@@ -368,20 +437,28 @@ body {
 }
 
 .quiz-result-card {
-  border: var(--border-width) solid var(--color-border);
-  padding: 0;
-  display: grid;
-  gap: var(--space-3);
+  height: 100%;
+}
+
+.quiz-result-card .tutkintonimike-card-body {
+  min-height: 100%;
+  gap: var(--space-4);
   align-content: start;
-  overflow: hidden;
 }
 
 .quiz-result-card.secondary {
   opacity: 0.85;
 }
 
-.quiz-result-card > .quiz-score {
-  padding: 0 var(--space-7) var(--space-7);
+.quiz-result-footer {
+  padding: 0;
+  margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  #quiz-top3 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quiz-score,
