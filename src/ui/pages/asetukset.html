@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>digi-opo - Asetukset</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+  </head>
+  <body data-page="asetukset" data-subtitle="Asetukset ja piilotetut kohteet">
+    <main class="app">
+      <div id="app-header"></div>
+
+      <section class="panel asetukset-page">
+        <div class="asetukset-page-header">
+          <div>
+            <h2>Asetukset</h2>
+            <p class="saved-page-copy">
+              Piilotetut tutkinnot ja tutkintonimikkeet poistuvat koko sovelluksesta, mukaan lukien quizit.
+            </p>
+          </div>
+          <div id="asetukset-feedback" class="saved-feedback" aria-live="polite"></div>
+        </div>
+
+        <section class="asetukset-section" aria-labelledby="asetukset-tutkinnot-title">
+          <div class="asetukset-section-header">
+            <div>
+              <h3 id="asetukset-tutkinnot-title">Tutkinnot</h3>
+              <p class="saved-page-copy">Piilota kokonaisia tutkintoja tai palauta ne takaisin näkyviin.</p>
+            </div>
+          </div>
+
+          <div class="asetukset-columns">
+            <div class="asetukset-pane">
+              <div class="search">
+                <label for="asetukset-tutkinto-search">Näkyvät tutkinnot</label>
+                <input
+                  id="asetukset-tutkinto-search"
+                  type="search"
+                  placeholder="Hae tutkintoa nimellä"
+                  autocomplete="off"
+                />
+              </div>
+              <div id="asetukset-visible-tutkinnot-count" class="count"></div>
+              <div id="asetukset-visible-tutkinnot" class="asetukset-list"></div>
+            </div>
+
+            <div class="asetukset-pane">
+              <h4>Piilotetut tutkinnot</h4>
+              <div id="asetukset-hidden-tutkinnot-count" class="count"></div>
+              <div id="asetukset-hidden-tutkinnot" class="asetukset-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="asetukset-section" aria-labelledby="asetukset-nimikkeet-title">
+          <div class="asetukset-section-header">
+            <div>
+              <h3 id="asetukset-nimikkeet-title">Tutkintonimikkeet</h3>
+              <p class="saved-page-copy">
+                Yksittäisen tutkintonimikkeen piilotus vaikuttaa pankkiin, tallennettuihin ja amis-korttivertailuun.
+              </p>
+            </div>
+          </div>
+
+          <div class="asetukset-columns">
+            <div class="asetukset-pane">
+              <div class="search">
+                <label for="asetukset-tutkintonimike-search">Näkyvät tutkintonimikkeet</label>
+                <input
+                  id="asetukset-tutkintonimike-search"
+                  type="search"
+                  placeholder="Hae tutkintonimikettä nimellä"
+                  autocomplete="off"
+                />
+              </div>
+              <div id="asetukset-visible-tutkintonimikkeet-count" class="count"></div>
+              <div id="asetukset-visible-tutkintonimikkeet" class="saved-grid"></div>
+            </div>
+
+            <div class="asetukset-pane">
+              <h4>Piilotetut tutkintonimikkeet</h4>
+              <div id="asetukset-hidden-tutkintonimikkeet-count" class="count"></div>
+              <div id="asetukset-hidden-tutkintonimikkeet" class="saved-grid"></div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <footer id="app-footer" class="site-footer"></footer>
+    </main>
+
+    <script type="module" src="../scripts/layout.js"></script>
+    <script type="module" src="../scripts/asetukset.js"></script>
+  </body>
+</html>

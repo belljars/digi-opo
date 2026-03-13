@@ -10,7 +10,8 @@ const navItems: NavItem[] = [
   { id: "home", href: "./home.html", label: "Etusivu" },
   { id: "index", href: "./pankki.html", label: "Tutkintopankki" },
   { id: "saved", href: "./saved-tutkintonimikkeet.html", label: "Tallennetut" },
-  { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" }
+  { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" },
+  { id: "asetukset", href: "./asetukset.html", label: "Asetukset" }
 ];
 
 function renderHeader(): void {
