@@ -31,6 +31,7 @@ API-luokka sisältää esimerkiksi seuraavat operaatiot:
 - yksittäisen tutkinnon tietojen haku
 - tutkintonimikkeiden listaus
 - tallennettujen tutkintonimikkeiden lisäys ja poisto
+- tutkintojen ja tutkintonimikkeiden globaali piilotus asetuksista
 - quiz-tulosten tallennus ja luku
 - opiskelu- ja quiz-datan luku JSON-tiedostoista
 
@@ -56,8 +57,11 @@ Keskeiset taulut:
 - `tutkintonimikkeet`
 - `app_meta`
 - `saved_tutkintonimikkeet`
+- `hidden_tutkinnot`
+- `hidden_tutkintonimikkeet`
 
 Tietokanta toimii sovelluksen ensisijaisena hakulähteenä tutkintoihin liittyvässä sisällössä.
+Piilotettujen kohteiden tila tallennetaan myös SQLiteen, jotta rajaukset säilyvät sovelluksen sulkemisen jälkeenkin.
 
 ### Käyttäjädata
 
@@ -78,6 +82,10 @@ Nykyisiä näkymiä ovat esimerkiksi:
 - opintopolku-kysely
 - amis-korttivertailu
 - tallennetut tutkintonimikkeet
+- asetukset
+
+`Asetukset`-sivulla käyttäjä voi piilottaa kokonaisia tutkintoja tai yksittäisiä tutkintonimikkeitä koko sovelluksesta.
+Piilotus vaikuttaa backend-tasolla, joten samat rajaukset näkyvät automaattisesti pankissa, tallennetuissa ja quizien datalähteissä.
 
 TypeScript-tiedostot buildataan JavaScriptiksi ennen ajoa.
 
@@ -93,6 +101,13 @@ Sovelluksen päävirta on seuraava:
 6. API palauttaa dataa SQLite-tietokannasta tai JSON-tiedostoista.
 7. Käyttöliittymä päivittää näkymän palautetun datan perusteella.
 
+Globaali piilotus toimii samalla periaatteella:
+
+1. käyttäjä tekee muutoksen `Asetukset`-sivulla
+2. TypeScript kutsuu backendin hide/unhide-metodia
+3. backend tallentaa muutoksen SQLiteen
+4. seuraavat haut ja listaukset palauttavat vain näkyvät kohteet
+
 ## Testaus
 
 `tests/test_backend_api.py` tarkistaa ainakin:
@@ -103,5 +118,7 @@ Sovelluksen päävirta on seuraava:
 - quiz-datan saatavuuden
 - tallennettujen tutkintonimikkeiden pysyvyyden
 - quiz-tulosten tallennuksen
+
+Globaalista piilotuksesta on lisätietoa dokumentissa `doc/asetukset-ja-piilotus.md`.
 
 Dokumentaatiota kannattaa laajentaa seuraavaksi esimerkiksi API-metodien, tietomallien ja sivukohtaisten UI-vastuiden osalta.
