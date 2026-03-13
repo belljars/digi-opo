@@ -9,6 +9,7 @@ type CreateTutkintonimikeCardOptions = {
   titleTag?: "h3" | "h4";
   allowLink?: boolean;
   rootTag?: "article" | "div";
+  showLinkAction?: boolean;
 };
 
 export type TutkintonimikeCardElements = {
@@ -18,6 +19,8 @@ export type TutkintonimikeCardElements = {
   title: HTMLHeadingElement;
   titleContent: HTMLAnchorElement | HTMLSpanElement;
   meta: HTMLParagraphElement | null;
+  actions: HTMLDivElement;
+  linkAction: HTMLAnchorElement | null;
 };
 
 function createImageElement(item: TutkintonimikeCardItem): HTMLElement {
@@ -41,11 +44,25 @@ function createImageElement(item: TutkintonimikeCardItem): HTMLElement {
   return image;
 }
 
+export function createTutkintonimikeLinkAction(linkki: string | null): HTMLAnchorElement | null {
+  if (!linkki) {
+    return null;
+  }
+
+  const linkAction = document.createElement("a");
+  linkAction.className = "tutkintonimike-link-action";
+  linkAction.href = linkki;
+  linkAction.target = "_blank";
+  linkAction.rel = "noreferrer";
+  linkAction.textContent = "Avaa tutkintonimike";
+  return linkAction;
+}
+
 export function createTutkintonimikeCard(
   item: TutkintonimikeCardItem,
   options: CreateTutkintonimikeCardOptions = {}
 ): TutkintonimikeCardElements {
-  const { titleTag = "h3", allowLink = true, rootTag = "article" } = options;
+  const { titleTag = "h3", allowLink = true, rootTag = "article", showLinkAction = true } = options;
 
   const root = document.createElement(rootTag);
   root.className = "tutkintonimike-card";
@@ -77,6 +94,18 @@ export function createTutkintonimikeCard(
     body.append(meta);
   }
 
+  const actions = document.createElement("div");
+  actions.className = "tutkintonimike-card-actions";
+
+  const linkAction = showLinkAction ? createTutkintonimikeLinkAction(item.linkki) : null;
+  if (linkAction) {
+    actions.append(linkAction);
+  }
+
+  if (actions.childElementCount > 0) {
+    body.append(actions);
+  }
+
   root.append(media, body);
 
   return {
@@ -85,6 +114,8 @@ export function createTutkintonimikeCard(
     body,
     title,
     titleContent,
-    meta
+    meta,
+    actions,
+    linkAction
   };
 }

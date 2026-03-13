@@ -64,7 +64,7 @@ function renderEmpty(message: string): void {
 }
 
 function createSavedCard(item: SavedTutkintonimikeItem): HTMLElement {
-  const { root, body } = createTutkintonimikeCard({
+  const { root, actions, body } = createTutkintonimikeCard({
     nimi: item.nimi,
     linkki: item.linkki,
     img: item.img,
@@ -79,7 +79,10 @@ function createSavedCard(item: SavedTutkintonimikeItem): HTMLElement {
     void removeItem(item.id, item.nimi);
   });
 
-  body.append(button);
+  if (!body.contains(actions)) {
+    body.append(actions);
+  }
+  actions.append(button);
 
   return root;
 }
