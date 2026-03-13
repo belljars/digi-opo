@@ -11,6 +11,20 @@ Sovellus yhdistää:
 - SQLite-tietokannan
 - JSON-muotoisen lähdedatan
 
+## Datan rakenne
+
+Tutkintoihin liittyvä data kulkee sovelluksessa kahdessa muodossa:
+
+- `src/data/ammatit.json` on helposti muokattava lähdedata
+- `data/tutkinnot.db` on ajonaikainen SQLite-tietokanta
+
+Käytännössä tämä tarkoittaa:
+
+- muokkaa tutkintoja, tutkintonimikkeitä, linkkejä ja kuvia tiedostossa `src/data/ammatit.json`
+- sovellus tuo datan automaattisesti SQLiteen käynnistyksen yhteydessä
+- jos `ammatit.json` muuttuu, tietokannan tutkintodata rakennetaan uudelleen
+- käyttöliittymän TypeScript ei lue JSON:ia tai SQLitea suoraan, vaan hakee datan Pythonin `pywebview`-API:n kautta
+
 ## Nykyiset näkymät
 
 Sovelluksessa on tällä hetkellä seuraavat näkymät:
@@ -25,11 +39,12 @@ Sovelluksessa on tällä hetkellä seuraavat näkymät:
 ## Mitä sovellus tekee
 
 - alustaa SQLite-tietokannan tiedostoon `data/tutkinnot.db`
+- käyttää `src/data/ammatit.json`-tiedostoa tutkintodatan muokattavana lähteenä
 - tuo `src/data/ammatit.json`-datan tietokantaan ensimmäisellä ajolla
 - päivittää tutkintodatan automaattisesti, jos lähde-JSON muuttuu
 - näyttää tutkintolistan sekä yksittäisen tutkinnon tutkintonimikkeet
 - mahdollistaa tutkintonimikkeiden tallentamisen
-- mahdollistaa kahden tutkintonimikkeen korttivertailun
+- sisältää amis-korttivertailun, joka järjestää tutkintonimikkeet käyttäjän valintojen perusteella
 - lataa opintopolkujen sisällön tiedostosta `src/data/opiskeluSuunnat.json`
 - lataa kyselydatan tiedostosta `src/data/opintopolkuQuiz.json`
 - tallentaa quiz-tuloksia `user/`-kansioon
@@ -67,9 +82,10 @@ Skripti:
 1. etsii tuetun Python-version
 2. luo tarvittaessa `.venv`-virtuaaliympäristön
 3. asentaa Python-riippuvuudet
-4. buildaa TypeScript-tiedostot
-5. kopioi buildatut JavaScript-tiedostot käyttöön
-6. käynnistää sovelluksen
+4. asentaa Node-riippuvuudet tarvittaessa
+5. buildaa TypeScript-tiedostot
+6. kopioi buildatut JavaScript-tiedostot käyttöön
+7. käynnistää sovelluksen
 
 ### Linux ja NixOS
 
@@ -84,9 +100,10 @@ Skripti:
 1. etsii tuetun Python-version 3.12 tai 3.11
 2. luo tarvittaessa `.venv`-virtuaaliympäristön
 3. asentaa Python-riippuvuudet
-4. buildaa TypeScript-tiedostot
-5. kopioi buildatut JavaScript-tiedostot käyttöön
-6. käynnistää sovelluksen
+4. asentaa Node-riippuvuudet tarvittaessa
+5. buildaa TypeScript-tiedostot
+6. kopioi buildatut JavaScript-tiedostot käyttöön
+7. käynnistää sovelluksen
 
 NixOS:ssa helpoin tapa on käyttää flakea:
 
@@ -135,8 +152,26 @@ python src/app/app.py
 Huomio:
 
 - `npm run build` kääntää TypeScript-tiedostot `dist/`-kansioon.
-- Windowsin käynnistysskripti kopioi buildatut `.js`-tiedostot takaisin `src/ui/scripts/`-kansioon.
-- Sovellus luo tietokannan automaattisesti tiedostoon `data/tutkinnot.db`.
+- sovellus käyttää ajossa tiedostoja kansiosta `src/ui/scripts/`, joten buildatut `.js`-tiedostot kopioidaan takaisin sinne
+- sovellus luo tietokannan automaattisesti tiedostoon `data/tutkinnot.db`
+- tutkintodata luetaan muokattavasta lähteestä `src/data/ammatit.json` ja tuodaan SQLiteen automaattisesti
+
+## Kehitys
+
+Yleisimmät komennot:
+
+```bash
+npm install
+npm run check
+npm run build
+python src/app/app.py
+```
+
+Jos ajat buildin käsin, kopioi lopuksi käyttöön buildatut tiedostot:
+
+```bash
+cp dist/ui/scripts/*.js src/ui/scripts/
+```
 
 ## Testit
 
@@ -145,6 +180,7 @@ Projektissa on backend- ja UI-smoke-testejä `tests/`-kansiossa.
 Esimerkkejä:
 
 ```powershell
+npm run check
 python -m unittest tests.test_backend_api
 python -m unittest tests.test_ui_smoke
 ```
@@ -182,4 +218,4 @@ Lisädokumentaatio löytyy `doc/`-kansiosta:
 
 ## Lisenssi
 
-Katso [LICENSE](/C:/Users/Omistaja/code/digi-opo/LICENSE).
+Katso [LICENSE](LICENSE).
