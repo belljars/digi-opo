@@ -12,14 +12,26 @@
 
       <section class="workspace">
         <aside class="panel panel-list">
-          <div class="search">
-            <label for="tutkinto-search">Haku</label>
-            <input
-              id="tutkinto-search"
-              type="search"
-              placeholder="Hae tutkinnon nimellä tai nimikkeellä"
-              autocomplete="off"
-            />
+          <div class="pankki-filters">
+            <div class="search">
+              <label for="tutkinto-search">Haku</label>
+              <input
+                id="tutkinto-search"
+                type="search"
+                placeholder="Hae tutkinnon nimellä tai nimikkeellä"
+                autocomplete="off"
+              />
+            </div>
+            <div class="search">
+              <label for="tutkinto-filter">Tutkinto</label>
+              <select id="tutkinto-filter">
+                <option value="">Kaikki tutkinnot</option>
+              </select>
+            </div>
+            <label class="filter-toggle" for="saved-only-filter">
+              <input id="saved-only-filter" type="checkbox" />
+              <span>Vain tallennetut tutkintonimikkeet</span>
+            </label>
           </div>
           <div id="count" class="count"></div>
           <ul id="tutkinto-list" class="list"></ul>
