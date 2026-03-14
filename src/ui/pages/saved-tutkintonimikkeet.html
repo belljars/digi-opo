@@ -3,23 +3,66 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>digi-opo - Tallennetut tutkintonimikkeet</title>
+    <title>digi-opo - Tallennetut</title>
     <link rel="stylesheet" href="../styles/styles.css" />
   </head>
-  <body data-page="saved" data-subtitle="Tallennetut tutkintonimikkeet">
+  <body data-page="saved" data-subtitle="Tallennetut">
     <main class="app">
       <div id="app-header"></div>
 
       <section class="panel saved-page">
         <div class="saved-page-header">
           <div>
-            <h2>Tallennetut tutkintonimikkeet</h2>
-            <p class="saved-page-copy">Tarkastele ja poista pankista tallentamasi tutkintonimikkeet.</p>
+            <h2>Tallennetut</h2>
+            <p class="saved-page-copy">Oma hubi tallennetuille tutkintonimikkeille, quiz-tuloksille ja myohemmin muulle omalle sisallolle.</p>
           </div>
-          <div id="saved-count" class="count"></div>
+          <div id="saved-summary" class="count"></div>
         </div>
         <div id="saved-feedback" class="saved-feedback" aria-live="polite"></div>
-        <div id="saved-list" class="saved-grid"></div>
+
+        <section class="saved-section" aria-labelledby="saved-items-title">
+          <div class="saved-section-header">
+            <div>
+              <h3 id="saved-items-title">Tallennetut tutkintonimikkeet</h3>
+              <p class="saved-page-copy">Tarkastele ja poista pankista tallentamasi tutkintonimikkeet.</p>
+            </div>
+            <div id="saved-count" class="count"></div>
+          </div>
+          <div id="saved-list" class="saved-grid"></div>
+        </section>
+
+        <section class="saved-section" aria-labelledby="saved-results-title">
+          <div class="saved-section-header">
+            <div>
+              <h3 id="saved-results-title">Tallennetut quiz-tulokset</h3>
+              <p class="saved-page-copy">Sekä opintopolku-kyselyn että amis-korttivertailun tallennetut tulokset.</p>
+            </div>
+            <div id="saved-results-count" class="count"></div>
+          </div>
+          <div id="saved-results-list" class="quiz-results-list"></div>
+        </section>
+
+        <section class="saved-section" aria-labelledby="saved-sessions-title">
+          <div class="saved-section-header">
+            <div>
+              <h3 id="saved-sessions-title">Kesken jaaneet quizit</h3>
+              <p class="saved-page-copy">Jatka aiemmin aloittamaasi quizia tai poista vanha keskenerainen tila.</p>
+            </div>
+            <div id="saved-sessions-count" class="count"></div>
+          </div>
+          <div id="saved-sessions-list" class="quiz-results-list"></div>
+        </section>
+
+        <section class="saved-section" aria-labelledby="saved-notes-title">
+          <div class="saved-section-header">
+            <div>
+              <h3 id="saved-notes-title">Muistiinpanot</h3>
+              <p class="saved-page-copy">Kirjoita omia huomioita tallennetuista tutkintonimikkeista ja selaa niita yhdessa paikassa.</p>
+            </div>
+            <div id="saved-notes-count" class="count"></div>
+          </div>
+          <div id="saved-notes-list" class="quiz-results-list"></div>
+        </section>
       </section>
 
       <footer id="app-footer" class="site-footer"></footer>

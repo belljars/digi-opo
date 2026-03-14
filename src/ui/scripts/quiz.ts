@@ -101,7 +101,6 @@ const quizResultsEl = document.getElementById("quiz-results");
 const quizTopEl = document.getElementById("quiz-top");
 const quizRunnerUpEl = document.getElementById("quiz-runner-up");
 const quizRestartEl = document.getElementById("quiz-restart") as HTMLButtonElement | null;
-const quizResultsListEl = document.getElementById("quiz-results-list");
 
 let quizData: QuizData | null = null;
 let currentIndex = 0;
@@ -359,80 +358,6 @@ function formatTimestamp(value: string): string {
   }).format(date);
 }
 
-function renderResultsList(items: QuizResultEntry[]): void {
-  if (!quizResultsListEl) {
-    return;
-  }
-
-  if (items.length === 0) {
-    quizResultsListEl.textContent = "Ei tallennettuja tuloksia viela.";
-    return;
-  }
-
-  const rows = items.map((item) => {
-    const row = document.createElement("article");
-    row.className = "quiz-saved-result";
-
-    const copy = document.createElement("div");
-    copy.className = "quiz-saved-result-copy";
-
-    const title = document.createElement("strong");
-    title.textContent = String(item.result.topPathLabel ?? item.result.topPathId ?? "Tallennettu tulos");
-
-    const meta = document.createElement("p");
-    const runnerUp = item.result.runnerUpPathLabel ? ` Myos: ${item.result.runnerUpPathLabel}.` : "";
-    meta.textContent = `Tallennettu ${formatTimestamp(item.createdAt)}.${runnerUp}`;
-
-    copy.append(title, meta);
-
-    const actions = document.createElement("div");
-    actions.className = "quiz-result-footer";
-
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "tutkintonimike-action";
-    deleteButton.textContent = "Poista";
-    deleteButton.addEventListener("click", () => {
-      void removeSavedResult(item.id);
-    });
-
-    actions.append(deleteButton);
-    row.append(copy, actions);
-    return row;
-  });
-
-  quizResultsListEl.replaceChildren(...rows);
-}
-
-async function loadSavedResults(): Promise<void> {
-  if (!activeApi) {
-    return;
-  }
-
-  try {
-    const items = await activeApi.list_quiz_results(QUIZ_ID);
-    renderResultsList(items);
-  } catch {
-    if (quizResultsListEl) {
-      quizResultsListEl.textContent = "Tallennettujen tulosten lataus epaonnistui.";
-    }
-  }
-}
-
-async function removeSavedResult(resultId: string): Promise<void> {
-  if (!activeApi) {
-    return;
-  }
-
-  try {
-    const removed = await activeApi.remove_quiz_result(resultId);
-    setFeedback(removed ? "Tallennettu tulos poistettiin." : "Tulosta ei loytynyt.");
-    await loadSavedResults();
-  } catch {
-    setFeedback("Tallennetun tuloksen poistaminen epaonnistui.");
-  }
-}
-
 async function saveSession(): Promise<void> {
   if (!activeApi || !quizData || answers.length === 0 || currentIndex >= quizData.questions.length) {
     return;
@@ -470,7 +395,6 @@ async function showResultsView(): Promise<void> {
     if (payload && activeApi) {
       await activeApi.save_quiz_result(QUIZ_ID, payload);
       await clearSession();
-      await loadSavedResults();
       setFeedback("Tulos tallennettiin.");
     }
   } catch {
@@ -575,8 +499,6 @@ async function loadQuiz(): Promise<void> {
       api.get_opintopolku_quiz(),
       api.get_quiz_session(QUIZ_ID),
     ]);
-
-    await loadSavedResults();
 
     if (!isQuizData(data) || data.questions.length === 0) {
       throw new Error("quiz-empty");

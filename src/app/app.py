@@ -259,6 +259,16 @@ def _ensure_schema(conn: sqlite3.Connection) -> None:
         );
         """
     )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS tutkintonimike_notes (
+            tutkintonimike_id INTEGER PRIMARY KEY,
+            note_text TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (tutkintonimike_id) REFERENCES tutkintonimikkeet(id) ON DELETE CASCADE
+        );
+        """
+    )
 
 
 def _import_tutkinnot(conn: sqlite3.Connection, tutkinnot: list) -> None:
@@ -608,6 +618,102 @@ class Api:
                 cursor = self._conn.execute(
                     """
                     DELETE FROM saved_tutkintonimikkeet
+                    WHERE tutkintonimike_id = ?;
+                    """,
+                    (nimike_id,),
+                )
+        return cursor.rowcount > 0
+
+    def list_tutkintonimike_notes(self) -> list[dict]:
+        # Palauttaa kayttajan kirjoittamat muistiinpanot tutkintonimikkeille
+        with self._lock:
+            rows = self._conn.execute(
+                """
+                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi, notes.note_text, notes.updated_at
+                FROM tutkintonimike_notes notes
+                JOIN tutkintonimikkeet n ON n.id = notes.tutkintonimike_id
+                JOIN tutkinnot t ON t.id = n.tutkinto_id
+                LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
+                LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
+                WHERE ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL
+                ORDER BY notes.updated_at DESC, n.nimi;
+                """
+            ).fetchall()
+        return [
+            {
+                "id": row["id"],
+                "nimi": row["nimi"],
+                "linkki": row["linkki"],
+                "img": row["img"],
+                "tutkinto_id": row["tutkinto_id"],
+                "tutkinto_nimi": row["tutkinto_nimi"],
+                "noteText": row["note_text"],
+                "updatedAt": row["updated_at"],
+            }
+            for row in rows
+        ]
+
+    def save_tutkintonimike_note(self, tutkintonimike_id: int, note_text: str) -> dict:
+        # Tallentaa tai paivittaa tutkintonimikkeen muistiinpanon
+        try:
+            nimike_id = int(tutkintonimike_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Invalid tutkintonimike id") from exc
+
+        normalized_note = str(note_text or "").strip()
+        if not normalized_note:
+            raise ValueError("note_text is required")
+
+        with self._lock:
+            row = self._conn.execute(
+                """
+                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
+                FROM tutkintonimikkeet n
+                JOIN tutkinnot t ON t.id = n.tutkinto_id
+                LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
+                LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
+                WHERE n.id = ? AND ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL;
+                """,
+                (nimike_id,),
+            ).fetchone()
+            if row is None:
+                raise ValueError(f"Unknown tutkintonimike id: {nimike_id}")
+
+            updated_at = _utc_now_iso()
+            with self._conn:
+                self._conn.execute(
+                    """
+                    INSERT INTO tutkintonimike_notes (tutkintonimike_id, note_text, updated_at)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(tutkintonimike_id) DO UPDATE
+                    SET note_text = excluded.note_text, updated_at = excluded.updated_at;
+                    """,
+                    (nimike_id, normalized_note, updated_at),
+                )
+
+        return {
+            "id": row["id"],
+            "nimi": row["nimi"],
+            "linkki": row["linkki"],
+            "img": row["img"],
+            "tutkinto_id": row["tutkinto_id"],
+            "tutkinto_nimi": row["tutkinto_nimi"],
+            "noteText": normalized_note,
+            "updatedAt": updated_at,
+        }
+
+    def remove_tutkintonimike_note(self, tutkintonimike_id: int) -> bool:
+        # Poistaa tutkintonimikkeen muistiinpanon
+        try:
+            nimike_id = int(tutkintonimike_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Invalid tutkintonimike id") from exc
+
+        with self._lock:
+            with self._conn:
+                cursor = self._conn.execute(
+                    """
+                    DELETE FROM tutkintonimike_notes
                     WHERE tutkintonimike_id = ?;
                     """,
                     (nimike_id,),
