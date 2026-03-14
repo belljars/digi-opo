@@ -206,6 +206,41 @@ class BackendApiTests(unittest.TestCase):
             payload = json.loads(results_path.read_text(encoding="utf-8"))
             self.assertEqual(len(payload["items"]), 2)
 
+    def test_quiz_result_can_be_removed(self) -> None:
+        with mock.patch.object(self.app, "_project_root", return_value=self.root):
+            api = self.app.Api()
+            result = api.save_quiz_result(
+                "amis-quiz",
+                {"winnerId": 2, "comparisons": 5},
+            )
+
+            removed = api.remove_quiz_result(result["id"])
+
+            self.assertTrue(removed)
+            self.assertEqual(api.list_quiz_results(), [])
+
+    def test_quiz_session_can_be_saved_loaded_and_cleared(self) -> None:
+        with mock.patch.object(self.app, "_project_root", return_value=self.root):
+            api = self.app.Api()
+            saved = api.save_quiz_session(
+                "opintopolku",
+                {"currentIndex": 2, "answers": [{"questionId": "q1", "optionId": "a"}]},
+            )
+
+            loaded = api.get_quiz_session("opintopolku")
+
+            self.assertIsNotNone(loaded)
+            self.assertEqual(loaded["quizId"], "opintopolku")
+            self.assertEqual(loaded["session"]["currentIndex"], 2)
+            self.assertEqual(saved["updatedAt"], loaded["updatedAt"])
+
+            cleared = api.clear_quiz_session("opintopolku")
+
+            self.assertTrue(cleared)
+            self.assertIsNone(api.get_quiz_session("opintopolku"))
+            sessions_path = self.root / "user" / "quiz_sessions.json"
+            self.assertTrue(sessions_path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -38,6 +38,19 @@ type OpiskeluSuunta = {
   kenelle: string;
 };
 
+type QuizResultEntry = {
+  id: string;
+  quizId: string;
+  createdAt: string;
+  result: Record<string, unknown>;
+};
+
+type QuizSessionEntry = {
+  quizId: string;
+  updatedAt: string;
+  session: Record<string, unknown>;
+};
+
 type PywebviewApi = {
   list_tutkinnot: () => Promise<TutkintoListItem[]>;
   list_hidden_tutkinnot: () => Promise<HiddenTutkintoListItem[]>;
@@ -54,6 +67,12 @@ type PywebviewApi = {
   unhide_tutkintonimike: (id: number) => Promise<boolean>;
   list_opiskelu_suunnat: () => Promise<OpiskeluSuunta[]>;
   get_opintopolku_quiz: () => Promise<unknown>;
+  list_quiz_results: (quizId?: string) => Promise<QuizResultEntry[]>;
+  save_quiz_result: (quizId: string, result: Record<string, unknown>) => Promise<QuizResultEntry>;
+  remove_quiz_result: (resultId: string) => Promise<boolean>;
+  get_quiz_session: (quizId: string) => Promise<QuizSessionEntry | null>;
+  save_quiz_session: (quizId: string, session: Record<string, unknown>) => Promise<QuizSessionEntry>;
+  clear_quiz_session: (quizId: string) => Promise<boolean>;
 };
 
 declare global {

@@ -1,0 +1,118 @@
+{
+  "items": [
+    {
+      "quizId": "amis-quiz",
+      "updatedAt": "2026-03-14T15:38:13Z",
+      "session": {
+        "queue": [
+          [
+            143
+          ],
+          [
+            131
+          ],
+          [
+            132
+          ],
+          [
+            156
+          ],
+          [
+            160
+          ],
+          [
+            154
+          ],
+          [
+            138
+          ],
+          [
+            140
+          ],
+          [
+            134
+          ],
+          [
+            139
+          ],
+          [
+            144
+          ],
+          [
+            150
+          ],
+          [
+            142
+          ],
+          [
+            129
+          ],
+          [
+            149
+          ],
+          [
+            145
+          ],
+          [
+            136
+          ],
+          [
+            137
+          ],
+          [
+            146
+          ],
+          [
+            141
+          ],
+          [
+            153
+          ],
+          [
+            155
+          ],
+          [
+            130
+          ],
+          [
+            158
+          ],
+          [
+            133
+          ],
+          [
+            135
+          ],
+          [
+            147
+          ],
+          [
+            151
+          ],
+          [
+            159
+          ],
+          [
+            157
+          ]
+        ],
+        "currentLeft": [
+          148
+        ],
+        "currentRight": [
+          152
+        ],
+        "merged": [],
+        "leftIndex": 0,
+        "rightIndex": 0,
+        "completedComparisons": 0,
+        "estimatedComparisons": 129,
+        "completedMerges": 0,
+        "totalMerges": 31,
+        "startedAt": 1773502693368,
+        "currentOrientation": "normal"
+      }
+    }
+  ],
+  "updatedAt": "2026-03-14T15:38:13Z"
+}
