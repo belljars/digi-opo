@@ -51,6 +51,11 @@ type QuizSessionEntry = {
   session: Record<string, unknown>;
 };
 
+type TutkintonimikeNoteItem = TutkintonimikeItem & {
+  noteText: string;
+  updatedAt: string;
+};
+
 type PywebviewApi = {
   list_tutkinnot: () => Promise<TutkintoListItem[]>;
   list_hidden_tutkinnot: () => Promise<HiddenTutkintoListItem[]>;
@@ -61,6 +66,9 @@ type PywebviewApi = {
   list_saved_tutkintonimikkeet: () => Promise<(TutkintonimikeItem & { savedAt: string })[]>;
   save_tutkintonimike: (id: number) => Promise<TutkintonimikeItem & { savedAt: string }>;
   remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
+  list_tutkintonimike_notes: () => Promise<TutkintonimikeNoteItem[]>;
+  save_tutkintonimike_note: (id: number, noteText: string) => Promise<TutkintonimikeNoteItem>;
+  remove_tutkintonimike_note: (id: number) => Promise<boolean>;
   hide_tutkinto: (id: number) => Promise<boolean>;
   unhide_tutkinto: (id: number) => Promise<boolean>;
   hide_tutkintonimike: (id: number) => Promise<boolean>;

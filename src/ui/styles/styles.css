@@ -586,6 +586,19 @@ body {
   gap: var(--space-8);
 }
 
+.saved-section {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.saved-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
 .asetukset-page {
   display: grid;
   gap: var(--space-9);
@@ -609,6 +622,10 @@ body {
 }
 
 .saved-page-header h2 {
+  margin: 0 0 var(--space-3);
+}
+
+.saved-section-header h3 {
   margin: 0 0 var(--space-3);
 }
 
@@ -663,6 +680,32 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 320px));
   justify-content: start;
   gap: var(--space-8);
+}
+
+.saved-note-editor {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.saved-note-label {
+  font-weight: 600;
+}
+
+.saved-note-input {
+  width: 100%;
+  min-height: 7rem;
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-transparent);
+  color: inherit;
+  font: inherit;
+  padding: var(--space-4);
+  resize: vertical;
+}
+
+.saved-note-preview {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 .opintopolut-grid {

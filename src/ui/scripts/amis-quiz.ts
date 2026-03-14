@@ -35,9 +35,7 @@ type Api = {
   list_saved_tutkintonimikkeet: () => Promise<{ id: number }[]>;
   save_tutkintonimike: (id: number) => Promise<unknown>;
   remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
-  list_quiz_results: (quizId?: string) => Promise<QuizResultEntry[]>;
   save_quiz_result: (quizId: string, result: Record<string, unknown>) => Promise<QuizResultEntry>;
-  remove_quiz_result: (resultId: string) => Promise<boolean>;
   get_quiz_session: (quizId: string) => Promise<QuizSessionEntry | null>;
   save_quiz_session: (quizId: string, session: Record<string, unknown>) => Promise<QuizSessionEntry>;
   clear_quiz_session: (quizId: string) => Promise<boolean>;
@@ -97,7 +95,6 @@ const quizFinishedEl = document.getElementById("quiz-valmis");
 const quizSummaryEl = document.getElementById("quiz-summary");
 const quizTop3El = document.getElementById("quiz-top3");
 const quizRankingListEl = document.getElementById("quiz-ranking-list");
-const quizResultsListEl = document.getElementById("quiz-results-list");
 
 let allItems: TutkintonimikeItem[] = [];
 let itemMap = new Map<number, TutkintonimikeItem>();
@@ -250,17 +247,6 @@ function formatDuration(startedAt: number, endedAt: number): string {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes} min ${remainingSeconds} s`;
-}
-
-function formatTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("fi-FI", {
-    dateStyle: "short",
-    timeStyle: "short"
-  }).format(date);
 }
 
 function updateMeta(): void {
@@ -604,70 +590,6 @@ function renderCurrentPair(): void {
   persistSession();
 }
 
-async function loadSavedResults(): Promise<void> {
-  if (!activeApi || !quizResultsListEl) {
-    return;
-  }
-
-  try {
-    const items = await activeApi.list_quiz_results(QUIZ_ID);
-    if (items.length === 0) {
-      quizResultsListEl.textContent = "Ei tallennettuja tuloksia viela.";
-      return;
-    }
-
-    const rows = items.map((item) => {
-      const row = document.createElement("article");
-      row.className = "quiz-saved-result";
-
-      const copy = document.createElement("div");
-      copy.className = "quiz-saved-result-copy";
-
-      const title = document.createElement("strong");
-      title.textContent = String(item.result.topName ?? "Tallennettu ranking");
-
-      const meta = document.createElement("p");
-      const comparisons = typeof item.result.comparisons === "number" ? `${item.result.comparisons} vertailua.` : "";
-      meta.textContent = `Tallennettu ${formatTimestamp(item.createdAt)}. ${comparisons}`.trim();
-
-      copy.append(title, meta);
-
-      const actions = document.createElement("div");
-      actions.className = "quiz-result-footer";
-
-      const deleteButton = document.createElement("button");
-      deleteButton.type = "button";
-      deleteButton.className = "tutkintonimike-action";
-      deleteButton.textContent = "Poista";
-      deleteButton.addEventListener("click", () => {
-        void removeSavedResult(item.id);
-      });
-
-      actions.append(deleteButton);
-      row.append(copy, actions);
-      return row;
-    });
-
-    quizResultsListEl.replaceChildren(...rows);
-  } catch {
-    quizResultsListEl.textContent = "Tallennettujen tulosten lataus epaonnistui.";
-  }
-}
-
-async function removeSavedResult(resultId: string): Promise<void> {
-  if (!activeApi) {
-    return;
-  }
-
-  try {
-    const removed = await activeApi.remove_quiz_result(resultId);
-    setFeedback(removed ? "Tallennettu tulos poistettiin." : "Tulosta ei loytynyt.");
-    await loadSavedResults();
-  } catch {
-    setFeedback("Tallennetun tuloksen poistaminen epaonnistui.");
-  }
-}
-
 async function saveFinishedResult(ranking: TutkintonimikeItem[], comparisons: number, durationMs: number | null): Promise<void> {
   if (!activeApi || ranking.length === 0) {
     return;
@@ -685,7 +607,6 @@ async function saveFinishedResult(ranking: TutkintonimikeItem[], comparisons: nu
 
   await activeApi.save_quiz_result(QUIZ_ID, payload);
   await clearSession();
-  await loadSavedResults();
 }
 
 function finishQuiz(ranking: TutkintonimikeItem[]): void {
@@ -901,8 +822,6 @@ async function init(): Promise<void> {
     allItems = items;
     itemMap = new Map(allItems.map((item) => [item.id, item]));
     savedIds = new Set(savedItems.map((item) => item.id));
-
-    await loadSavedResults();
 
     const restoredSession = parseRestoredSession(sessionEntry);
     if (restoredSession && restoreSession(restoredSession)) {

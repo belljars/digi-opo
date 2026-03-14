@@ -181,6 +181,24 @@ class BackendApiTests(unittest.TestCase):
             self.assertTrue(removed)
             self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
 
+    def test_tutkintonimike_note_can_be_saved_listed_and_removed(self) -> None:
+        with mock.patch.object(self.app, "_project_root", return_value=self.root):
+            api = self.app.Api()
+            all_items = api.list_tutkintonimikkeet()
+
+            saved_note = api.save_tutkintonimike_note(all_items[0]["id"], "Kiinnostaa erityisesti.")
+
+            self.assertEqual(saved_note["id"], all_items[0]["id"])
+            self.assertEqual(saved_note["noteText"], "Kiinnostaa erityisesti.")
+
+            notes = api.list_tutkintonimike_notes()
+            self.assertEqual(len(notes), 1)
+            self.assertEqual(notes[0]["id"], all_items[0]["id"])
+
+            removed = api.remove_tutkintonimike_note(all_items[0]["id"])
+            self.assertTrue(removed)
+            self.assertEqual(api.list_tutkintonimike_notes(), [])
+
     def test_quiz_results_are_persisted_in_user_directory(self) -> None:
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
             api = self.app.Api()
