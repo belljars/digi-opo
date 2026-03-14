@@ -1,5 +1,7 @@
 export {};
 
+const QUIZ_ID = "opintopolku";
+
 type QuizPath = {
   id: string;
   label: string;
@@ -45,6 +47,48 @@ type Answer = {
   optionId: string;
 };
 
+type RankedScore = {
+  path: QuizPath;
+  score: number;
+};
+
+type QuizResultEntry = {
+  id: string;
+  quizId: string;
+  createdAt: string;
+  result: Record<string, unknown>;
+};
+
+type QuizSessionEntry = {
+  quizId: string;
+  updatedAt: string;
+  session: Record<string, unknown>;
+};
+
+type QuizResultPayload = {
+  topPathId: string;
+  topPathLabel: string;
+  runnerUpPathId: string | null;
+  runnerUpPathLabel: string | null;
+  scores: Record<string, number>;
+  answerCount: number;
+};
+
+type QuizSessionState = {
+  currentIndex: number;
+  answers: Answer[];
+};
+
+type Api = {
+  get_opintopolku_quiz: () => Promise<unknown>;
+  list_quiz_results: (quizId?: string) => Promise<QuizResultEntry[]>;
+  save_quiz_result: (quizId: string, result: QuizResultPayload) => Promise<QuizResultEntry>;
+  remove_quiz_result: (resultId: string) => Promise<boolean>;
+  get_quiz_session: (quizId: string) => Promise<QuizSessionEntry | null>;
+  save_quiz_session: (quizId: string, session: QuizSessionState) => Promise<QuizSessionEntry>;
+  clear_quiz_session: (quizId: string) => Promise<boolean>;
+};
+
 const quizLoadingEl = document.getElementById("quiz-loading");
 const quizFormEl = document.getElementById("quiz-form") as HTMLFormElement | null;
 const quizQuestionEl = document.getElementById("quiz-question");
@@ -52,23 +96,28 @@ const quizOptionsEl = document.getElementById("quiz-options");
 const quizNextEl = document.getElementById("quiz-next") as HTMLButtonElement | null;
 const quizProgressEl = document.getElementById("quiz-progress");
 const quizStatusEl = document.getElementById("quiz-status");
+const quizFeedbackEl = document.getElementById("quiz-feedback");
 const quizResultsEl = document.getElementById("quiz-results");
 const quizTopEl = document.getElementById("quiz-top");
 const quizRunnerUpEl = document.getElementById("quiz-runner-up");
 const quizRestartEl = document.getElementById("quiz-restart") as HTMLButtonElement | null;
-
-type Api = {
-  get_opintopolku_quiz: () => Promise<unknown>;
-};
+const quizResultsListEl = document.getElementById("quiz-results-list");
 
 let quizData: QuizData | null = null;
 let currentIndex = 0;
 let answers: Answer[] = [];
 let selectedOptionId: string | null = null;
+let activeApi: Api | null = null;
 
 function setStatus(message: string): void {
   if (quizStatusEl) {
     quizStatusEl.textContent = message;
+  }
+}
+
+function setFeedback(message: string): void {
+  if (quizFeedbackEl) {
+    quizFeedbackEl.textContent = message;
   }
 }
 
@@ -153,15 +202,21 @@ function findCurrentQuestion(): QuizQuestion | null {
   return quizData.questions[currentIndex] ?? null;
 }
 
+function findAnswer(questionId: string): Answer | null {
+  return answers.find((answer) => answer.questionId === questionId) ?? null;
+}
+
 function renderQuestion(): void {
   const question = findCurrentQuestion();
   if (!quizData || !question || !quizQuestionEl) {
     return;
   }
-  selectedOptionId = null;
+
+  const existingAnswer = findAnswer(question.id);
+  selectedOptionId = existingAnswer?.optionId ?? null;
   quizQuestionEl.textContent = question.text;
   clearOptions();
-  setNextEnabled(false);
+  setNextEnabled(Boolean(selectedOptionId));
   setProgress();
 
   question.options.forEach((option) => {
@@ -169,6 +224,9 @@ function renderQuestion(): void {
     button.type = "button";
     button.className = "quiz-option";
     button.textContent = option.text;
+    if (option.id === selectedOptionId) {
+      button.classList.add("is-selected");
+    }
     button.addEventListener("click", () => {
       selectedOptionId = option.id;
       setNextEnabled(true);
@@ -187,7 +245,7 @@ function renderQuestion(): void {
   }
 }
 
-function computeScores(): Array<{ path: QuizPath; score: number }> {
+function computeScores(): RankedScore[] {
   if (!quizData) {
     return [];
   }
@@ -213,8 +271,7 @@ function computeScores(): Array<{ path: QuizPath; score: number }> {
   return quizData.paths.map((path) => ({ path, score: scores[path.id] ?? 0 }));
 }
 
-function rankScores(items: Array<{ path: QuizPath; score: number }>):
-  Array<{ path: QuizPath; score: number }> {
+function rankScores(items: RankedScore[]): RankedScore[] {
   if (!quizData) {
     return items;
   }
@@ -231,11 +288,16 @@ function rankScores(items: Array<{ path: QuizPath; score: number }>):
   });
 }
 
-function renderResultCard(target: HTMLElement | null, item: { path: QuizPath; score: number } | null): void {
-  if (!target || !item) {
+function renderResultCard(target: HTMLElement | null, item: RankedScore | null): void {
+  if (!target) {
     return;
   }
+
   target.replaceChildren();
+  if (!item) {
+    return;
+  }
+
   const title = document.createElement("h4");
   title.textContent = item.path.label;
   const summary = document.createElement("p");
@@ -246,19 +308,175 @@ function renderResultCard(target: HTMLElement | null, item: { path: QuizPath; sc
   target.append(title, summary, score);
 }
 
-function showResultsView(): void {
+function buildResultPayload(scores: RankedScore[]): QuizResultPayload | null {
+  const top = scores[0];
+  if (!top) {
+    return null;
+  }
+  const runnerUp = scores[1] ?? null;
+  return {
+    topPathId: top.path.id,
+    topPathLabel: top.path.label,
+    runnerUpPathId: runnerUp?.path.id ?? null,
+    runnerUpPathLabel: runnerUp?.path.label ?? null,
+    scores: Object.fromEntries(scores.map((item) => [item.path.id, item.score])),
+    answerCount: answers.length,
+  };
+}
+
+function isAnswer(value: unknown): value is Answer {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const answer = value as Answer;
+  return typeof answer.questionId === "string" && typeof answer.optionId === "string";
+}
+
+function parseSessionState(entry: QuizSessionEntry | null): QuizSessionState | null {
+  if (!entry || !entry.session || typeof entry.session !== "object") {
+    return null;
+  }
+  const currentIndexValue = (entry.session as { currentIndex?: unknown }).currentIndex;
+  const answersValue = (entry.session as { answers?: unknown }).answers;
+  if (typeof currentIndexValue !== "number" || !Array.isArray(answersValue)) {
+    return null;
+  }
+  const parsedAnswers = answersValue.filter(isAnswer);
+  return {
+    currentIndex: currentIndexValue,
+    answers: parsedAnswers,
+  };
+}
+
+function formatTimestamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat("fi-FI", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function renderResultsList(items: QuizResultEntry[]): void {
+  if (!quizResultsListEl) {
+    return;
+  }
+
+  if (items.length === 0) {
+    quizResultsListEl.textContent = "Ei tallennettuja tuloksia viela.";
+    return;
+  }
+
+  const rows = items.map((item) => {
+    const row = document.createElement("article");
+    row.className = "quiz-saved-result";
+
+    const copy = document.createElement("div");
+    copy.className = "quiz-saved-result-copy";
+
+    const title = document.createElement("strong");
+    title.textContent = String(item.result.topPathLabel ?? item.result.topPathId ?? "Tallennettu tulos");
+
+    const meta = document.createElement("p");
+    const runnerUp = item.result.runnerUpPathLabel ? ` Myos: ${item.result.runnerUpPathLabel}.` : "";
+    meta.textContent = `Tallennettu ${formatTimestamp(item.createdAt)}.${runnerUp}`;
+
+    copy.append(title, meta);
+
+    const actions = document.createElement("div");
+    actions.className = "quiz-result-footer";
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "tutkintonimike-action";
+    deleteButton.textContent = "Poista";
+    deleteButton.addEventListener("click", () => {
+      void removeSavedResult(item.id);
+    });
+
+    actions.append(deleteButton);
+    row.append(copy, actions);
+    return row;
+  });
+
+  quizResultsListEl.replaceChildren(...rows);
+}
+
+async function loadSavedResults(): Promise<void> {
+  if (!activeApi) {
+    return;
+  }
+
+  try {
+    const items = await activeApi.list_quiz_results(QUIZ_ID);
+    renderResultsList(items);
+  } catch {
+    if (quizResultsListEl) {
+      quizResultsListEl.textContent = "Tallennettujen tulosten lataus epaonnistui.";
+    }
+  }
+}
+
+async function removeSavedResult(resultId: string): Promise<void> {
+  if (!activeApi) {
+    return;
+  }
+
+  try {
+    const removed = await activeApi.remove_quiz_result(resultId);
+    setFeedback(removed ? "Tallennettu tulos poistettiin." : "Tulosta ei loytynyt.");
+    await loadSavedResults();
+  } catch {
+    setFeedback("Tallennetun tuloksen poistaminen epaonnistui.");
+  }
+}
+
+async function saveSession(): Promise<void> {
+  if (!activeApi || !quizData || answers.length === 0 || currentIndex >= quizData.questions.length) {
+    return;
+  }
+
+  await activeApi.save_quiz_session(QUIZ_ID, {
+    currentIndex,
+    answers: answers.slice(),
+  });
+}
+
+async function clearSession(): Promise<void> {
+  if (!activeApi) {
+    return;
+  }
+  await activeApi.clear_quiz_session(QUIZ_ID);
+}
+
+async function showResultsView(): Promise<void> {
   if (!quizData) {
     return;
   }
+
   const scores = rankScores(computeScores());
   const top = scores[0] ?? null;
   const runnerUp = scores[1] ?? null;
+  const payload = buildResultPayload(scores);
 
   renderResultCard(quizTopEl, top);
   renderResultCard(quizRunnerUpEl, runnerUp);
-
   showForm(false);
   showResults(true);
+
+  try {
+    if (payload && activeApi) {
+      await activeApi.save_quiz_result(QUIZ_ID, payload);
+      await clearSession();
+      await loadSavedResults();
+      setFeedback("Tulos tallennettiin.");
+    }
+  } catch {
+    setFeedback("Tuloksen tallennus epaonnistui.");
+  }
+
   setStatus("Valmis");
 }
 
@@ -271,21 +489,31 @@ function storeAnswer(questionId: string, optionId: string): void {
   answers.push({ questionId, optionId });
 }
 
-function handleNext(): void {
+async function handleNext(): Promise<void> {
   const question = findCurrentQuestion();
   if (!quizData || !question || !selectedOptionId) {
     return;
   }
+
   storeAnswer(question.id, selectedOptionId);
+
   if (currentIndex >= quizData.questions.length - 1) {
-    showResultsView();
+    await showResultsView();
     return;
   }
+
   currentIndex += 1;
   renderQuestion();
+
+  try {
+    await saveSession();
+    setStatus("Edistyminen tallennettu");
+  } catch {
+    setFeedback("Edistymisen tallennus epaonnistui.");
+  }
 }
 
-function resetQuiz(): void {
+async function resetQuiz(clearSavedSession = true): Promise<void> {
   currentIndex = 0;
   answers = [];
   selectedOptionId = null;
@@ -293,25 +521,73 @@ function resetQuiz(): void {
   showForm(true);
   renderQuestion();
   setStatus("");
+  setFeedback("");
+
+  if (clearSavedSession) {
+    try {
+      await clearSession();
+    } catch {
+      setFeedback("Aiemman quiz-tilan poistaminen epaonnistui.");
+    }
+  }
+}
+
+function restoreSession(session: QuizSessionState): boolean {
+  if (!quizData) {
+    return false;
+  }
+
+  const maxIndex = quizData.questions.length - 1;
+  if (maxIndex < 0) {
+    return false;
+  }
+
+  const validQuestionIds = new Set(quizData.questions.map((question) => question.id));
+  const validAnswers = session.answers.filter((answer) => validQuestionIds.has(answer.questionId));
+  const nextIndex = Math.min(Math.max(session.currentIndex, 0), maxIndex);
+
+  answers = validAnswers;
+  currentIndex = nextIndex;
+  selectedOptionId = null;
+  showResults(false);
+  showForm(true);
+  renderQuestion();
+  setStatus("Jatkuu aiemmasta");
+  setFeedback("Aiempi kysely palautettiin.");
+  return true;
 }
 
 async function loadQuiz(): Promise<void> {
   setLoading(true);
   setStatus("");
+  setFeedback("");
 
   try {
     const api = await waitForApi();
     if (!api) {
-      setStatus("Pywebview API ei ole käytettävissä.");
+      setStatus("Pywebview API ei ole kaytettavissa.");
       showForm(false);
       return;
     }
-    const data = await api.get_opintopolku_quiz();
+
+    activeApi = api;
+    const [data, sessionEntry] = await Promise.all([
+      api.get_opintopolku_quiz(),
+      api.get_quiz_session(QUIZ_ID),
+    ]);
+
+    await loadSavedResults();
+
     if (!isQuizData(data) || data.questions.length === 0) {
       throw new Error("quiz-empty");
     }
+
     quizData = data;
-    resetQuiz();
+    const restoredSession = parseSessionState(sessionEntry);
+    const restored = restoredSession ? restoreSession(restoredSession) : false;
+    if (!restored) {
+      await resetQuiz(false);
+    }
   } catch {
     setStatus("Kyselyn lataus epaonnistui.");
     showForm(false);
@@ -321,14 +597,14 @@ async function loadQuiz(): Promise<void> {
 }
 
 quizNextEl?.addEventListener("click", () => {
-  handleNext();
+  void handleNext();
 });
 
 quizRestartEl?.addEventListener("click", () => {
   if (!quizData) {
     return;
   }
-  resetQuiz();
+  void resetQuiz(true);
 });
 
 window.addEventListener("DOMContentLoaded", () => {

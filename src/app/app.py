@@ -130,6 +130,10 @@ def quiz_vastaus_polku() -> Path:
     return _user_data_dir() / "quiz_results.json"
 
 
+def quiz_tila_polku() -> Path:
+    return _user_data_dir() / "quiz_sessions.json"
+
+
 def _start_static_server() -> tuple[ThreadingHTTPServer, int]:
     handler = partial(SimpleHTTPRequestHandler, directory=str(_project_root()))
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
@@ -387,6 +391,20 @@ class Api:
     def _write_quiz_results(self, items: list[dict]) -> None:
         _write_json_object(
             quiz_vastaus_polku(),
+            {
+                "items": items,
+                "updatedAt": _utc_now_iso(),
+            },
+        )
+
+    def _load_quiz_sessions(self) -> list[dict]:
+        data = _read_json_object(quiz_tila_polku(), {"items": []})
+        items = data.get("items", [])
+        return items if isinstance(items, list) else []
+
+    def _write_quiz_sessions(self, items: list[dict]) -> None:
+        _write_json_object(
+            quiz_tila_polku(),
             {
                 "items": items,
                 "updatedAt": _utc_now_iso(),
@@ -779,6 +797,76 @@ class Api:
             items.append(entry)
             self._write_quiz_results(items)
         return entry
+
+    def remove_quiz_result(self, result_id: str) -> bool:
+        # Poistaa yksittaisen quiz-tuloksen
+        normalized_result_id = str(result_id or "").strip()
+        if not normalized_result_id:
+            raise ValueError("result_id is required")
+
+        with self._lock:
+            items = self._load_quiz_results()
+            filtered_items = [
+                item for item in items if str(item.get("id", "")).strip() != normalized_result_id
+            ]
+            if len(filtered_items) == len(items):
+                return False
+            self._write_quiz_results(filtered_items)
+        return True
+
+    def get_quiz_session(self, quiz_id: str) -> dict | None:
+        # Palauttaa quizin keskeneraisen tilan, jos sellainen on tallennettu
+        normalized_quiz_id = str(quiz_id or "").strip()
+        if not normalized_quiz_id:
+            raise ValueError("quiz_id is required")
+
+        with self._lock:
+            items = self._load_quiz_sessions()
+
+        for item in items:
+            if str(item.get("quizId", "")).strip() == normalized_quiz_id:
+                return item
+        return None
+
+    def save_quiz_session(self, quiz_id: str, session: dict) -> dict:
+        # Tallentaa quizin keskeneraisen tilan jatkamista varten
+        normalized_quiz_id = str(quiz_id or "").strip()
+        if not normalized_quiz_id:
+            raise ValueError("quiz_id is required")
+        if not isinstance(session, dict):
+            raise ValueError("session must be an object")
+
+        updated_at = _utc_now_iso()
+        entry = {
+            "quizId": normalized_quiz_id,
+            "updatedAt": updated_at,
+            "session": session,
+        }
+
+        with self._lock:
+            items = self._load_quiz_sessions()
+            filtered_items = [
+                item for item in items if str(item.get("quizId", "")).strip() != normalized_quiz_id
+            ]
+            filtered_items.append(entry)
+            self._write_quiz_sessions(filtered_items)
+        return entry
+
+    def clear_quiz_session(self, quiz_id: str) -> bool:
+        # Poistaa quizin keskeneraisen tilan
+        normalized_quiz_id = str(quiz_id or "").strip()
+        if not normalized_quiz_id:
+            raise ValueError("quiz_id is required")
+
+        with self._lock:
+            items = self._load_quiz_sessions()
+            filtered_items = [
+                item for item in items if str(item.get("quizId", "")).strip() != normalized_quiz_id
+            ]
+            if len(filtered_items) == len(items):
+                return False
+            self._write_quiz_sessions(filtered_items)
+        return True
 
     def list_opiskelu_suunnat(self) -> list[dict[str, str | int]]:
         # Lukee Opintopolut-sivun sisallon suoraan JSON-tiedostosta

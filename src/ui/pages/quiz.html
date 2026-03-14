@@ -12,12 +12,20 @@
 
       <section class="panel panel-quiz">
         <header class="quiz-header">
-          <h2>Opintopolku-kysely</h2>
+          <div>
+            <h2>Opintopolku-kysely</h2>
+            <p class="quiz-lead">Vastaukset tallentuvat myos kesken kaiken, joten voit jatkaa myohemmin.</p>
+          </div>
+          <button id="quiz-restart" type="button">Aloita alusta</button>
+        </header>
+
+        <section class="quiz-overview" aria-label="Quiz tila">
           <div class="quiz-meta">
             <span id="quiz-progress"></span>
             <span id="quiz-status"></span>
           </div>
-        </header>
+          <p id="quiz-feedback" class="saved-feedback" aria-live="polite"></p>
+        </section>
 
         <div class="quiz-body">
           <div id="quiz-loading" class="quiz-loading">Ladataan...</div>
@@ -35,9 +43,14 @@
             <div id="quiz-top" class="quiz-result-card"></div>
             <h4>Myös tämä voi sopia</h4>
             <div id="quiz-runner-up" class="quiz-result-card secondary"></div>
-            <div class="quiz-actions">
-              <button id="quiz-restart" type="button">Aloita alusta</button>
+          </section>
+
+          <section class="quiz-history" aria-labelledby="quiz-history-title">
+            <div class="quiz-play-header">
+              <h3 id="quiz-history-title">Tallennetut tulokset</h3>
+              <p class="quiz-shortcuts">Valmis tulos tallentuu automaattisesti.</p>
             </div>
+            <div id="quiz-results-list" class="quiz-results-list"></div>
           </section>
         </div>
       </section>

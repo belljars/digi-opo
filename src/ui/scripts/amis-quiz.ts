@@ -6,6 +6,8 @@ import {
   type TutkintonimikeCardItem
 } from "./tutkintonimike-card.js";
 
+const QUIZ_ID = "amis-quiz";
+
 type TutkintonimikeItem = {
   id: number;
   nimi: string;
@@ -15,15 +17,35 @@ type TutkintonimikeItem = {
   tutkinto_nimi: string;
 };
 
+type QuizResultEntry = {
+  id: string;
+  quizId: string;
+  createdAt: string;
+  result: Record<string, unknown>;
+};
+
+type QuizSessionEntry = {
+  quizId: string;
+  updatedAt: string;
+  session: Record<string, unknown>;
+};
+
 type Api = {
   list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
   list_saved_tutkintonimikkeet: () => Promise<{ id: number }[]>;
   save_tutkintonimike: (id: number) => Promise<unknown>;
   remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
+  list_quiz_results: (quizId?: string) => Promise<QuizResultEntry[]>;
+  save_quiz_result: (quizId: string, result: Record<string, unknown>) => Promise<QuizResultEntry>;
+  remove_quiz_result: (resultId: string) => Promise<boolean>;
+  get_quiz_session: (quizId: string) => Promise<QuizSessionEntry | null>;
+  save_quiz_session: (quizId: string, session: Record<string, unknown>) => Promise<QuizSessionEntry>;
+  clear_quiz_session: (quizId: string) => Promise<boolean>;
 };
 
 type CardSide = "left" | "right";
 type BucketSide = "leftBucket" | "rightBucket";
+type PairOrientation = "normal" | "swapped" | null;
 
 type ActivePair = {
   left: TutkintonimikeItem;
@@ -44,6 +66,22 @@ type QuizSession = {
   completedMerges: number;
   totalMerges: number;
   startedAt: number;
+  currentOrientation: PairOrientation;
+};
+
+type SerializedQuizSession = {
+  queue: number[][];
+  currentLeft: number[] | null;
+  currentRight: number[] | null;
+  merged: number[];
+  leftIndex: number;
+  rightIndex: number;
+  completedComparisons: number;
+  estimatedComparisons: number;
+  completedMerges: number;
+  totalMerges: number;
+  startedAt: number;
+  currentOrientation: PairOrientation;
 };
 
 const quizLeftEl = document.getElementById("quiz-vasen") as HTMLDivElement | null;
@@ -59,8 +97,10 @@ const quizFinishedEl = document.getElementById("quiz-valmis");
 const quizSummaryEl = document.getElementById("quiz-summary");
 const quizTop3El = document.getElementById("quiz-top3");
 const quizRankingListEl = document.getElementById("quiz-ranking-list");
+const quizResultsListEl = document.getElementById("quiz-results-list");
 
 let allItems: TutkintonimikeItem[] = [];
+let itemMap = new Map<number, TutkintonimikeItem>();
 let activeSession: QuizSession | null = null;
 let activePair: ActivePair | null = null;
 let finalRanking: TutkintonimikeItem[] = [];
@@ -70,6 +110,7 @@ let initialized = false;
 let activeApi: Api | null = null;
 let savedIds = new Set<number>();
 let saveInFlightIds = new Set<number>();
+let sessionWriteChain: Promise<void> = Promise.resolve();
 
 function setFeedback(message = ""): void {
   if (quizFeedbackEl) {
@@ -211,6 +252,17 @@ function formatDuration(startedAt: number, endedAt: number): string {
   return `${minutes} min ${remainingSeconds} s`;
 }
 
+function formatTimestamp(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat("fi-FI", {
+    dateStyle: "short",
+    timeStyle: "short"
+  }).format(date);
+}
+
 function updateMeta(): void {
   if (quizCountEl) {
     if (activeSession) {
@@ -276,179 +328,150 @@ function createSession(items: TutkintonimikeItem[]): QuizSession {
     estimatedComparisons: estimateComparisons(queue.map((group) => group.length)),
     completedMerges: 0,
     totalMerges: Math.max(items.length - 1, 0),
-    startedAt: Date.now()
+    startedAt: Date.now(),
+    currentOrientation: null
   };
 }
 
-function finishQuiz(ranking: TutkintonimikeItem[]): void {
-  const durationMs = activeSession ? Date.now() - activeSession.startedAt : null;
-  finalRanking = ranking;
-  finishedAt = Date.now();
-  lastSessionDurationMs = durationMs;
-  activeSession = null;
-  activePair = null;
-  setFinishedVisible(true);
-  renderInactiveSlot(quizLeftEl, "Ranking valmis.");
-  renderInactiveSlot(quizRightEl, "Aloita alusta jos haluat uuden jarjestyksen.");
-  renderSummary();
-  renderTop3();
-  renderRankingList();
-  updateMeta();
-  setPrompt("Ranking valmis");
-  setHelp("Valmis. Voit tallentaa suosikkeja tai kaynnistaa quizin uudelleen.");
+function serializeSession(session: QuizSession): SerializedQuizSession {
+  return {
+    queue: session.queue.map((group) => group.map((item) => item.id)),
+    currentLeft: session.currentLeft?.map((item) => item.id) ?? null,
+    currentRight: session.currentRight?.map((item) => item.id) ?? null,
+    merged: session.merged.map((item) => item.id),
+    leftIndex: session.leftIndex,
+    rightIndex: session.rightIndex,
+    completedComparisons: session.completedComparisons,
+    estimatedComparisons: session.estimatedComparisons,
+    completedMerges: session.completedMerges,
+    totalMerges: session.totalMerges,
+    startedAt: session.startedAt,
+    currentOrientation: session.currentOrientation
+  };
 }
 
-function startNextMerge(): void {
-  if (!activeSession) {
-    return;
+function mapIdGroups(groups: unknown): TutkintonimikeItem[][] | null {
+  if (!Array.isArray(groups)) {
+    return null;
   }
 
-  if (activeSession.currentLeft && activeSession.currentRight) {
-    renderCurrentPair();
-    return;
+  const mappedGroups: TutkintonimikeItem[][] = [];
+  for (const group of groups) {
+    if (!Array.isArray(group)) {
+      return null;
+    }
+    const mappedGroup: TutkintonimikeItem[] = [];
+    for (const rawId of group) {
+      if (typeof rawId !== "number") {
+        return null;
+      }
+      const item = itemMap.get(rawId);
+      if (!item) {
+        return null;
+      }
+      mappedGroup.push(item);
+    }
+    mappedGroups.push(mappedGroup);
   }
 
-  if (activeSession.queue.length === 1) {
-    finishQuiz(activeSession.queue[0] ?? []);
-    return;
-  }
-
-  const left = activeSession.queue.shift() ?? null;
-  const right = activeSession.queue.shift() ?? null;
-
-  if (!left || !right) {
-    finishQuiz(left ?? right ?? []);
-    return;
-  }
-
-  activeSession.currentLeft = left;
-  activeSession.currentRight = right;
-  activeSession.merged = [];
-  activeSession.leftIndex = 0;
-  activeSession.rightIndex = 0;
-  renderCurrentPair();
+  return mappedGroups;
 }
 
-function renderCurrentPair(): void {
-  if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
-    return;
+function mapIdList(list: unknown): TutkintonimikeItem[] | null | undefined {
+  if (list === null) {
+    return null;
+  }
+  if (!Array.isArray(list)) {
+    return undefined;
   }
 
-  const leftCandidate = activeSession.currentLeft[activeSession.leftIndex] ?? null;
-  const rightCandidate = activeSession.currentRight[activeSession.rightIndex] ?? null;
-
-  if (!leftCandidate || !rightCandidate) {
-    return;
+  const mappedList: TutkintonimikeItem[] = [];
+  for (const rawId of list) {
+    if (typeof rawId !== "number") {
+      return undefined;
+    }
+    const item = itemMap.get(rawId);
+    if (!item) {
+      return undefined;
+    }
+    mappedList.push(item);
   }
-
-  setFinishedVisible(false);
-  setPrompt("Kumpi kiinnostaa enemman?");
-  setHelp("Valitse kiinnostavampi vaihtoehto. Voit kayttaa myos nuolinappaimia.");
-
-  if (Math.random() < 0.5) {
-    activePair = {
-      left: leftCandidate,
-      right: rightCandidate,
-      leftBucket: "leftBucket",
-      rightBucket: "rightBucket"
-    };
-  } else {
-    activePair = {
-      left: rightCandidate,
-      right: leftCandidate,
-      leftBucket: "rightBucket",
-      rightBucket: "leftBucket"
-    };
-  }
-
-  renderChoiceSlot(quizLeftEl, activePair.left, "left");
-  renderChoiceSlot(quizRightEl, activePair.right, "right");
-  updateMeta();
+  return mappedList;
 }
 
-function completeCurrentMerge(): void {
-  if (!activeSession) {
-    return;
+function parseRestoredSession(entry: QuizSessionEntry | null): QuizSession | null {
+  if (!entry || !entry.session || typeof entry.session !== "object") {
+    return null;
   }
 
-  activeSession.queue.push(activeSession.merged.slice());
-  activeSession.currentLeft = null;
-  activeSession.currentRight = null;
-  activeSession.merged = [];
-  activeSession.leftIndex = 0;
-  activeSession.rightIndex = 0;
-  activeSession.completedMerges += 1;
-  startNextMerge();
+  const session = entry.session as Partial<SerializedQuizSession>;
+  const queue = mapIdGroups(session.queue);
+  const currentLeft = session.currentLeft === null ? null : mapIdList(session.currentLeft);
+  const currentRight = session.currentRight === null ? null : mapIdList(session.currentRight);
+  const merged = mapIdList(session.merged);
+
+  if (!queue || currentLeft === undefined || currentRight === undefined || merged === null || merged === undefined) {
+    return null;
+  }
+
+  if (
+    typeof session.leftIndex !== "number" ||
+    typeof session.rightIndex !== "number" ||
+    typeof session.completedComparisons !== "number" ||
+    typeof session.estimatedComparisons !== "number" ||
+    typeof session.completedMerges !== "number" ||
+    typeof session.totalMerges !== "number" ||
+    typeof session.startedAt !== "number"
+  ) {
+    return null;
+  }
+
+  const orientation = session.currentOrientation;
+  if (orientation !== null && orientation !== "normal" && orientation !== "swapped") {
+    return null;
+  }
+
+  return {
+    queue,
+    currentLeft,
+    currentRight,
+    merged,
+    leftIndex: session.leftIndex,
+    rightIndex: session.rightIndex,
+    completedComparisons: session.completedComparisons,
+    estimatedComparisons: session.estimatedComparisons,
+    completedMerges: session.completedMerges,
+    totalMerges: session.totalMerges,
+    startedAt: session.startedAt,
+    currentOrientation: orientation
+  };
 }
 
-function chooseBucket(bucketSide: BucketSide): void {
-  if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
-    return;
-  }
-
-  const chosenFromLeft = bucketSide === "leftBucket";
-  const chosenItem = chosenFromLeft
-    ? activeSession.currentLeft[activeSession.leftIndex]
-    : activeSession.currentRight[activeSession.rightIndex];
-
-  if (!chosenItem) {
-    return;
-  }
-
-  activeSession.merged.push(chosenItem);
-  activeSession.completedComparisons += 1;
-
-  if (chosenFromLeft) {
-    activeSession.leftIndex += 1;
-  } else {
-    activeSession.rightIndex += 1;
-  }
-
-  if (activeSession.leftIndex >= activeSession.currentLeft.length) {
-    activeSession.merged.push(...activeSession.currentRight.slice(activeSession.rightIndex));
-    completeCurrentMerge();
-    return;
-  }
-
-  if (activeSession.rightIndex >= activeSession.currentRight.length) {
-    activeSession.merged.push(...activeSession.currentLeft.slice(activeSession.leftIndex));
-    completeCurrentMerge();
-    return;
-  }
-
-  renderCurrentPair();
+function enqueueSessionWrite(task: () => Promise<void>): Promise<void> {
+  sessionWriteChain = sessionWriteChain.then(task, task).catch(() => {
+    setFeedback("Quizin tallennus epaonnistui.");
+  });
+  return sessionWriteChain;
 }
 
-function chooseSide(side: CardSide): void {
-  if (!activePair) {
+function persistSession(): void {
+  if (!activeApi || !activeSession) {
     return;
   }
 
-  const bucketSide = side === "left" ? activePair.leftBucket : activePair.rightBucket;
-  chooseBucket(bucketSide);
+  const snapshot = serializeSession(activeSession);
+  void enqueueSessionWrite(async () => {
+    await activeApi?.save_quiz_session(QUIZ_ID, snapshot);
+  });
 }
 
-function renderSummary(): void {
-  if (!quizSummaryEl) {
-    return;
+function clearSession(): Promise<void> {
+  if (!activeApi) {
+    return Promise.resolve();
   }
-
-  quizSummaryEl.replaceChildren();
-
-  if (finalRanking.length === 0) {
-    quizSummaryEl.textContent = "Quizia ei voitu muodostaa.";
-    return;
-  }
-
-  const top = finalRanking[0];
-  const summary = document.createElement("p");
-  const duration =
-    lastSessionDurationMs !== null ? formatDuration(0, lastSessionDurationMs) : null;
-
-  summary.textContent = duration
-    ? `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa ${duration} aikana.`
-    : `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa.`;
-  quizSummaryEl.append(summary);
+  return enqueueSessionWrite(async () => {
+    await activeApi?.clear_quiz_session(QUIZ_ID);
+  });
 }
 
 function createResultCard(item: TutkintonimikeItem, label: string): HTMLElement {
@@ -508,6 +531,29 @@ function renderRankingList(): void {
   quizRankingListEl.replaceChildren(...rows);
 }
 
+function renderSummary(): void {
+  if (!quizSummaryEl) {
+    return;
+  }
+
+  quizSummaryEl.replaceChildren();
+
+  if (finalRanking.length === 0) {
+    quizSummaryEl.textContent = "Quizia ei voitu muodostaa.";
+    return;
+  }
+
+  const top = finalRanking[0];
+  const summary = document.createElement("p");
+  const duration =
+    lastSessionDurationMs !== null ? formatDuration(0, lastSessionDurationMs) : null;
+
+  summary.textContent = duration
+    ? `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa ${duration} aikana.`
+    : `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa.`;
+  quizSummaryEl.append(summary);
+}
+
 function renderInitialState(message: string): void {
   setFinishedVisible(false);
   setPrompt("Valmistellaan quizia");
@@ -516,30 +562,252 @@ function renderInitialState(message: string): void {
   updateMeta();
 }
 
-function restartQuiz(): void {
-  setFeedback("");
-  finalRanking = [];
-  finishedAt = null;
-  lastSessionDurationMs = null;
-
-  if (allItems.length < 2) {
-    renderInitialState("Tarvitaan vahintaan kaksi tutkintonimiketta.");
-    setHelp("Quiziin tarvitaan enemman dataa.");
+function renderCurrentPair(): void {
+  if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
     return;
   }
 
-  activeSession = createSession(allItems);
+  const leftCandidate = activeSession.currentLeft[activeSession.leftIndex] ?? null;
+  const rightCandidate = activeSession.currentRight[activeSession.rightIndex] ?? null;
+
+  if (!leftCandidate || !rightCandidate) {
+    return;
+  }
+
+  setFinishedVisible(false);
+  setPrompt("Kumpi kiinnostaa enemman?");
+  setHelp("Valitse kiinnostavampi vaihtoehto. Voit kayttaa myos nuolinappaimia.");
+
+  if (activeSession.currentOrientation === null) {
+    activeSession.currentOrientation = Math.random() < 0.5 ? "normal" : "swapped";
+  }
+
+  if (activeSession.currentOrientation === "normal") {
+    activePair = {
+      left: leftCandidate,
+      right: rightCandidate,
+      leftBucket: "leftBucket",
+      rightBucket: "rightBucket"
+    };
+  } else {
+    activePair = {
+      left: rightCandidate,
+      right: leftCandidate,
+      leftBucket: "rightBucket",
+      rightBucket: "leftBucket"
+    };
+  }
+
+  renderChoiceSlot(quizLeftEl, activePair.left, "left");
+  renderChoiceSlot(quizRightEl, activePair.right, "right");
+  updateMeta();
+  persistSession();
+}
+
+async function loadSavedResults(): Promise<void> {
+  if (!activeApi || !quizResultsListEl) {
+    return;
+  }
+
+  try {
+    const items = await activeApi.list_quiz_results(QUIZ_ID);
+    if (items.length === 0) {
+      quizResultsListEl.textContent = "Ei tallennettuja tuloksia viela.";
+      return;
+    }
+
+    const rows = items.map((item) => {
+      const row = document.createElement("article");
+      row.className = "quiz-saved-result";
+
+      const copy = document.createElement("div");
+      copy.className = "quiz-saved-result-copy";
+
+      const title = document.createElement("strong");
+      title.textContent = String(item.result.topName ?? "Tallennettu ranking");
+
+      const meta = document.createElement("p");
+      const comparisons = typeof item.result.comparisons === "number" ? `${item.result.comparisons} vertailua.` : "";
+      meta.textContent = `Tallennettu ${formatTimestamp(item.createdAt)}. ${comparisons}`.trim();
+
+      copy.append(title, meta);
+
+      const actions = document.createElement("div");
+      actions.className = "quiz-result-footer";
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "tutkintonimike-action";
+      deleteButton.textContent = "Poista";
+      deleteButton.addEventListener("click", () => {
+        void removeSavedResult(item.id);
+      });
+
+      actions.append(deleteButton);
+      row.append(copy, actions);
+      return row;
+    });
+
+    quizResultsListEl.replaceChildren(...rows);
+  } catch {
+    quizResultsListEl.textContent = "Tallennettujen tulosten lataus epaonnistui.";
+  }
+}
+
+async function removeSavedResult(resultId: string): Promise<void> {
+  if (!activeApi) {
+    return;
+  }
+
+  try {
+    const removed = await activeApi.remove_quiz_result(resultId);
+    setFeedback(removed ? "Tallennettu tulos poistettiin." : "Tulosta ei loytynyt.");
+    await loadSavedResults();
+  } catch {
+    setFeedback("Tallennetun tuloksen poistaminen epaonnistui.");
+  }
+}
+
+async function saveFinishedResult(ranking: TutkintonimikeItem[], comparisons: number, durationMs: number | null): Promise<void> {
+  if (!activeApi || ranking.length === 0) {
+    return;
+  }
+
+  const payload = {
+    topId: ranking[0].id,
+    topName: ranking[0].nimi,
+    rankingIds: ranking.map((item) => item.id),
+    rankingNames: ranking.map((item) => item.nimi),
+    comparisons,
+    durationMs,
+    count: ranking.length
+  };
+
+  await activeApi.save_quiz_result(QUIZ_ID, payload);
+  await clearSession();
+  await loadSavedResults();
+}
+
+function finishQuiz(ranking: TutkintonimikeItem[]): void {
+  const comparisons = activeSession?.completedComparisons ?? 0;
+  const durationMs = activeSession ? Date.now() - activeSession.startedAt : null;
+  finalRanking = ranking;
+  finishedAt = Date.now();
+  lastSessionDurationMs = durationMs;
+  activeSession = null;
+  activePair = null;
+  setFinishedVisible(true);
+  renderInactiveSlot(quizLeftEl, "Ranking valmis.");
+  renderInactiveSlot(quizRightEl, "Aloita alusta jos haluat uuden jarjestyksen.");
+  renderSummary();
+  renderTop3();
+  renderRankingList();
+  updateMeta();
+  setPrompt("Ranking valmis");
+  setHelp("Valmis. Voit tallentaa suosikkeja tai kaynnistaa quizin uudelleen.");
+  void saveFinishedResult(ranking, comparisons, durationMs)
+    .then(() => {
+      setFeedback("Ranking tallennettiin.");
+    })
+    .catch(() => {
+      setFeedback("Rankingin tallennus epaonnistui.");
+    });
+}
+
+function completeCurrentMerge(): void {
+  if (!activeSession) {
+    return;
+  }
+
+  activeSession.queue.push(activeSession.merged.slice());
+  activeSession.currentLeft = null;
+  activeSession.currentRight = null;
+  activeSession.merged = [];
+  activeSession.leftIndex = 0;
+  activeSession.rightIndex = 0;
+  activeSession.completedMerges += 1;
+  activeSession.currentOrientation = null;
   startNextMerge();
 }
 
-async function loadSavedIds(): Promise<void> {
-  if (!activeApi) {
-    savedIds = new Set<number>();
+function startNextMerge(): void {
+  if (!activeSession) {
     return;
   }
 
-  const items = await activeApi.list_saved_tutkintonimikkeet();
-  savedIds = new Set(items.map((item) => item.id));
+  if (activeSession.currentLeft && activeSession.currentRight) {
+    renderCurrentPair();
+    return;
+  }
+
+  if (activeSession.queue.length === 1) {
+    finishQuiz(activeSession.queue[0] ?? []);
+    return;
+  }
+
+  const left = activeSession.queue.shift() ?? null;
+  const right = activeSession.queue.shift() ?? null;
+
+  if (!left || !right) {
+    finishQuiz(left ?? right ?? []);
+    return;
+  }
+
+  activeSession.currentLeft = left;
+  activeSession.currentRight = right;
+  activeSession.merged = [];
+  activeSession.leftIndex = 0;
+  activeSession.rightIndex = 0;
+  activeSession.currentOrientation = null;
+  renderCurrentPair();
+}
+
+function chooseBucket(bucketSide: BucketSide): void {
+  if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
+    return;
+  }
+
+  const chosenFromLeft = bucketSide === "leftBucket";
+  const chosenItem = chosenFromLeft
+    ? activeSession.currentLeft[activeSession.leftIndex]
+    : activeSession.currentRight[activeSession.rightIndex];
+
+  if (!chosenItem) {
+    return;
+  }
+
+  activeSession.merged.push(chosenItem);
+  activeSession.completedComparisons += 1;
+
+  if (chosenFromLeft) {
+    activeSession.leftIndex += 1;
+  } else {
+    activeSession.rightIndex += 1;
+  }
+
+  if (activeSession.leftIndex >= activeSession.currentLeft.length) {
+    activeSession.merged.push(...activeSession.currentRight.slice(activeSession.rightIndex));
+    completeCurrentMerge();
+    return;
+  }
+
+  if (activeSession.rightIndex >= activeSession.currentRight.length) {
+    activeSession.merged.push(...activeSession.currentLeft.slice(activeSession.leftIndex));
+    completeCurrentMerge();
+    return;
+  }
+
+  activeSession.currentOrientation = null;
+  renderCurrentPair();
+}
+
+function chooseSide(side: CardSide): void {
+  if (!activePair) {
+    return;
+  }
+
+  const bucketSide = side === "left" ? activePair.leftBucket : activePair.rightBucket;
+  chooseBucket(bucketSide);
 }
 
 async function toggleSavedTutkintonimike(item: TutkintonimikeItem): Promise<void> {
@@ -575,6 +843,41 @@ async function toggleSavedTutkintonimike(item: TutkintonimikeItem): Promise<void
   }
 }
 
+function restartQuiz(clearSavedSession = true): void {
+  setFeedback("");
+  finalRanking = [];
+  finishedAt = null;
+  lastSessionDurationMs = null;
+
+  if (allItems.length < 2) {
+    renderInitialState("Tarvitaan vahintaan kaksi tutkintonimiketta.");
+    setHelp("Quiziin tarvitaan enemman dataa.");
+    return;
+  }
+
+  activeSession = createSession(allItems);
+  if (clearSavedSession) {
+    void clearSession();
+  }
+  startNextMerge();
+}
+
+function restoreSession(session: QuizSession): boolean {
+  if (allItems.length < 2) {
+    return false;
+  }
+
+  activeSession = session;
+  activePair = null;
+  finalRanking = [];
+  finishedAt = null;
+  lastSessionDurationMs = null;
+  setFeedback("Aiempi ranking palautettiin.");
+  setHelp("Jatka siita mihin jait.");
+  startNextMerge();
+  return true;
+}
+
 async function init(): Promise<void> {
   setFeedback("");
   setHelp("Ladataan tutkintonimikkeita...");
@@ -589,9 +892,29 @@ async function init(): Promise<void> {
     }
 
     activeApi = api;
-    await loadSavedIds();
-    allItems = await api.list_tutkintonimikkeet();
-    restartQuiz();
+    const [items, savedItems, sessionEntry] = await Promise.all([
+      api.list_tutkintonimikkeet(),
+      api.list_saved_tutkintonimikkeet(),
+      api.get_quiz_session(QUIZ_ID)
+    ]);
+
+    allItems = items;
+    itemMap = new Map(allItems.map((item) => [item.id, item]));
+    savedIds = new Set(savedItems.map((item) => item.id));
+
+    await loadSavedResults();
+
+    const restoredSession = parseRestoredSession(sessionEntry);
+    if (restoredSession && restoreSession(restoredSession)) {
+      return;
+    }
+
+    if (sessionEntry) {
+      setFeedback("Aiempi quiz-tila ei ollut enaa kaytettavissa, joten aloitettiin alusta.");
+      await clearSession();
+    }
+
+    restartQuiz(false);
   } catch {
     renderInitialState("Quizin lataus epaonnistui.");
     setHelp("Yrita kaynnistaa sovellus uudelleen.");
@@ -629,5 +952,5 @@ window.addEventListener("keydown", (event) => {
 });
 
 quizRestartEl?.addEventListener("click", () => {
-  restartQuiz();
+  restartQuiz(true);
 });
