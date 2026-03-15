@@ -36,6 +36,20 @@ type QuizSessionEntry = {
   session: Record<string, unknown>;
 };
 
+type SavedTutkintoStat = {
+  tutkintoId: number;
+  tutkintoNimi: string;
+  count: number;
+  share: number;
+  items: SavedTutkintonimikeItem[];
+};
+
+type SavedStatsMetric = {
+  label: string;
+  value: string;
+  accent?: "default" | "strong";
+};
+
 type Api = {
   list_saved_tutkintonimikkeet: () => Promise<SavedTutkintonimikeItem[]>;
   remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
@@ -54,6 +68,9 @@ const QUIZ_PAGES: Record<string, string> = {
 };
 
 const summaryEl = document.getElementById("saved-summary");
+const statsCountEl = document.getElementById("saved-stats-count");
+const statsSummaryEl = document.getElementById("saved-stats-summary");
+const statsChartEl = document.getElementById("saved-stats-chart");
 const countEl = document.getElementById("saved-count");
 const resultsCountEl = document.getElementById("saved-results-count");
 const sessionsCountEl = document.getElementById("saved-sessions-count");
@@ -67,6 +84,11 @@ const feedbackEl = document.getElementById("saved-feedback");
 let initialized = false;
 let noteSaveInFlightIds = new Set<number>();
 let noteDeleteInFlightIds = new Set<number>();
+
+const percentFormatter = new Intl.NumberFormat("fi-FI", {
+  style: "percent",
+  maximumFractionDigits: 0
+});
 
 function getApi(): Api | null {
   return window.pywebview?.api ?? null;
@@ -139,6 +161,136 @@ function setCounts(itemCount: number, resultCount: number, sessionCount: number,
 function renderEmpty(container: HTMLElement | null, message: string): void {
   if (container) {
     container.innerHTML = `<p class="empty">${message}</p>`;
+  }
+}
+
+function buildSavedTutkintoStats(items: SavedTutkintonimikeItem[]): SavedTutkintoStat[] {
+  const total = items.length;
+  const grouped = new Map<number, SavedTutkintoStat>();
+
+  items.forEach((item) => {
+    const existing = grouped.get(item.tutkinto_id);
+    if (existing) {
+      existing.count += 1;
+      existing.items.push(item);
+      return;
+    }
+
+    grouped.set(item.tutkinto_id, {
+      tutkintoId: item.tutkinto_id,
+      tutkintoNimi: item.tutkinto_nimi,
+      count: 1,
+      share: 0,
+      items: [item]
+    });
+  });
+
+  return Array.from(grouped.values())
+    .map((entry) => ({
+      ...entry,
+      share: total > 0 ? entry.count / total : 0,
+      items: [...entry.items].sort((left, right) => left.nimi.localeCompare(right.nimi, "fi"))
+    }))
+    .sort((left, right) => right.count - left.count || left.tutkintoNimi.localeCompare(right.tutkintoNimi, "fi"));
+}
+
+function buildSavedStatsMetrics(items: SavedTutkintonimikeItem[], stats: SavedTutkintoStat[]): SavedStatsMetric[] {
+  if (!items.length) {
+    return [
+      { label: "Tallennettuja", value: "0" },
+      { label: "Tutkintoja mukana", value: "0" },
+      { label: "Suurin keskittyma", value: "-" }
+    ];
+  }
+
+  const topStat = stats[0];
+  return [
+    { label: "Tallennettuja", value: String(items.length), accent: "strong" },
+    { label: "Tutkintoja mukana", value: String(stats.length) },
+    { label: "Suurin keskittyma", value: `${topStat.tutkintoNimi} (${topStat.count})` }
+  ];
+}
+
+function createStatsMetricCard(metric: SavedStatsMetric): HTMLElement {
+  const card = document.createElement("article");
+  card.className = "saved-stats-metric";
+  card.dataset.accent = metric.accent ?? "default";
+
+  const label = document.createElement("p");
+  label.className = "saved-stats-metric-label";
+  label.textContent = metric.label;
+
+  const value = document.createElement("strong");
+  value.className = "saved-stats-metric-value";
+  value.textContent = metric.value;
+
+  card.append(label, value);
+  return card;
+}
+
+function createStatsRow(stat: SavedTutkintoStat, maxCount: number): HTMLElement {
+  const row = document.createElement("article");
+  row.className = "saved-stat-row";
+  row.style.setProperty("--saved-stat-ratio", maxCount > 0 ? String(stat.count / maxCount) : "0");
+
+  const header = document.createElement("div");
+  header.className = "saved-stat-row-header";
+
+  const titleGroup = document.createElement("div");
+  titleGroup.className = "saved-stat-row-title-group";
+
+  const title = document.createElement("strong");
+  title.className = "saved-stat-row-title";
+  title.textContent = stat.tutkintoNimi;
+
+  const meta = document.createElement("p");
+  meta.className = "saved-stat-row-meta";
+  meta.textContent = `${stat.count} tutkintonimiketta | ${percentFormatter.format(stat.share)}`;
+
+  titleGroup.append(title, meta);
+
+  const barValue = document.createElement("span");
+  barValue.className = "saved-stat-row-value";
+  barValue.textContent = String(stat.count);
+
+  header.append(titleGroup, barValue);
+
+  const barTrack = document.createElement("div");
+  barTrack.className = "saved-stat-bar-track";
+  barTrack.setAttribute("aria-hidden", "true");
+
+  const barFill = document.createElement("div");
+  barFill.className = "saved-stat-bar-fill";
+  barTrack.append(barFill);
+
+  const itemList = document.createElement("p");
+  itemList.className = "saved-stat-row-items";
+  itemList.textContent = stat.items.map((item) => item.nimi).join(", ");
+
+  row.append(header, barTrack, itemList);
+  return row;
+}
+
+function renderSavedStats(items: SavedTutkintonimikeItem[]): void {
+  const stats = buildSavedTutkintoStats(items);
+
+  if (statsCountEl) {
+    statsCountEl.textContent = `${stats.length} tutkintoa`;
+  }
+
+  if (statsSummaryEl) {
+    const metrics = buildSavedStatsMetrics(items, stats);
+    statsSummaryEl.replaceChildren(...metrics.map((metric) => createStatsMetricCard(metric)));
+  }
+
+  if (!items.length) {
+    renderEmpty(statsChartEl, "Tilasto ilmestyy, kun tallennat tutkintonimikkeita.");
+    return;
+  }
+
+  if (statsChartEl) {
+    const maxCount = stats[0]?.count ?? 0;
+    statsChartEl.replaceChildren(...stats.map((stat) => createStatsRow(stat, maxCount)));
   }
 }
 
@@ -346,6 +498,7 @@ async function renderSavedHub(): Promise<void> {
   const sessions = [amisSession, opintopolkuSession].filter((item): item is QuizSessionEntry => item !== null);
 
   setCounts(items.length, results.length, sessions.length, notes.length);
+  renderSavedStats(items);
 
   if (!items.length) {
     renderEmpty(listEl, "Et ole viela tallentanut tutkintonimikkeita.");
@@ -461,6 +614,7 @@ async function init(): Promise<void> {
     renderEmpty(resultsListEl, "Quiz-tuloksia ei voitu ladata.");
     renderEmpty(sessionsListEl, "Quizien keskeneraisia tiloja ei voitu ladata.");
     renderEmpty(notesListEl, "Muistiinpanoja ei voitu ladata.");
+    renderEmpty(statsChartEl, "Tilastoa ei voitu ladata.");
     return;
   }
   await renderSavedHub();
