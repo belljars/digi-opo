@@ -834,7 +834,6 @@ body {
 .site-footer {
   margin-top: var(--space-10);
   padding-top: var(--space-8);
-  border-top: var(--border-width) solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -1,6 +1,11 @@
 export {};
 
 import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
+import {
+  createRetryingPageInit,
+  waitForPywebviewApi,
+  type InitAttemptResult
+} from "./pywebview-init.js";
 
 type TutkintoListItem = {
   id: number;
@@ -50,7 +55,6 @@ const hiddenTutkintonimikkeetCountEl = document.getElementById("asetukset-hidden
 const visibleTutkintonimikkeetEl = document.getElementById("asetukset-visible-tutkintonimikkeet");
 const hiddenTutkintonimikkeetEl = document.getElementById("asetukset-hidden-tutkintonimikkeet");
 
-let initialized = false;
 let activeApi: Api | null = null;
 let visibleTutkinnot: TutkintoListItem[] = [];
 let hiddenTutkinnot: HiddenTutkintoListItem[] = [];
@@ -61,29 +65,6 @@ function setFeedback(message = ""): void {
   if (feedbackEl) {
     feedbackEl.textContent = message;
   }
-}
-
-function getApi(): Api | null {
-  return window.pywebview?.api ?? null;
-}
-
-async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
-  const start = Date.now();
-  return new Promise((resolve) => {
-    const tick = (): void => {
-      const api = getApi();
-      if (api) {
-        resolve(api);
-        return;
-      }
-      if (Date.now() - start >= timeoutMs) {
-        resolve(null);
-        return;
-      }
-      window.requestAnimationFrame(tick);
-    };
-    tick();
-  });
 }
 
 function setCount(host: HTMLElement | null, label: string, count: number): void {
@@ -328,46 +309,50 @@ async function unhideTutkintonimike(item: HiddenTutkintonimikeItem): Promise<voi
   }
 }
 
-async function init(): Promise<void> {
+async function init(): Promise<InitAttemptResult> {
   setFeedback("");
   renderEmpty(visibleTutkinnotEl, "Ladataan...");
   renderEmpty(hiddenTutkinnotEl, "Ladataan...");
   renderEmpty(visibleTutkintonimikkeetEl, "Ladataan...");
   renderEmpty(hiddenTutkintonimikkeetEl, "Ladataan...");
 
-  const api = await waitForApi();
+  const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Backend ei ollut viela valmis. Yritetaan uudelleen...");
     renderEmpty(visibleTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
-    return;
+    return { success: false, retryDelayMs: 500 };
   }
 
-  activeApi = api;
-  await reloadAll();
+  try {
+    activeApi = api;
+    await reloadAll();
 
-  tutkintoSearchEl?.addEventListener("input", () => {
-    renderVisibleTutkinnot();
-  });
-  tutkintonimikeSearchEl?.addEventListener("input", () => {
-    renderVisibleTutkintonimikkeet();
-  });
-}
-
-function initOnce(): void {
-  if (initialized) {
-    return;
+    tutkintoSearchEl?.addEventListener("input", () => {
+      renderVisibleTutkinnot();
+    });
+    tutkintonimikeSearchEl?.addEventListener("input", () => {
+      renderVisibleTutkintonimikkeet();
+    });
+    return { success: true };
+  } catch {
+    setFeedback("Asetusten lataus epaonnistui. Yritetaan uudelleen...");
+    renderEmpty(visibleTutkinnotEl, "Asetuksia ei voitu ladata.");
+    renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
+    renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
+    renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
+    return { success: false, retryDelayMs: 1000 };
   }
-  initialized = true;
-  void init();
 }
+
+const initPage = createRetryingPageInit(init);
 
 window.addEventListener("pywebviewready", () => {
-  initOnce();
+  initPage();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  initOnce();
+  initPage();
 });

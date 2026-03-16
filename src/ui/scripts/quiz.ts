@@ -1,5 +1,11 @@
 export {};
 
+import {
+  createRetryingPageInit,
+  waitForPywebviewApi,
+  type InitAttemptResult
+} from "./pywebview-init.js";
+
 const QUIZ_ID = "opintopolku";
 
 type QuizPath = {
@@ -157,29 +163,6 @@ function isQuizData(value: unknown): value is QuizData {
     return false;
   }
   return true;
-}
-
-function getApi(): Api | null {
-  return window.pywebview?.api ?? null;
-}
-
-async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
-  const start = Date.now();
-  return new Promise((resolve) => {
-    const tick = (): void => {
-      const api = getApi();
-      if (api) {
-        resolve(api);
-        return;
-      }
-      if (Date.now() - start >= timeoutMs) {
-        resolve(null);
-        return;
-      }
-      window.requestAnimationFrame(tick);
-    };
-    tick();
-  });
 }
 
 function clearOptions(): void {
@@ -481,17 +464,17 @@ function restoreSession(session: QuizSessionState): boolean {
   return true;
 }
 
-async function loadQuiz(): Promise<void> {
+async function loadQuiz(): Promise<InitAttemptResult> {
   setLoading(true);
   setStatus("");
   setFeedback("");
 
   try {
-    const api = await waitForApi();
+    const api = await waitForPywebviewApi<Api>();
     if (!api) {
-      setStatus("Pywebview API ei ole kaytettavissa.");
+      setStatus("Backend ei ollut viela valmis. Yritetaan uudelleen...");
       showForm(false);
-      return;
+      return { success: false, retryDelayMs: 500 };
     }
 
     activeApi = api;
@@ -510,13 +493,17 @@ async function loadQuiz(): Promise<void> {
     if (!restored) {
       await resetQuiz(false);
     }
+    return { success: true };
   } catch {
-    setStatus("Kyselyn lataus epaonnistui.");
+    setStatus("Kyselyn lataus epaonnistui. Yritetaan uudelleen...");
     showForm(false);
+    return { success: false, retryDelayMs: 1000 };
   } finally {
     setLoading(false);
   }
 }
+
+const initPage = createRetryingPageInit(loadQuiz);
 
 quizNextEl?.addEventListener("click", () => {
   void handleNext();
@@ -530,5 +517,9 @@ quizRestartEl?.addEventListener("click", () => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  void loadQuiz();
+  initPage();
+});
+
+window.addEventListener("pywebviewready", () => {
+  initPage();
 });

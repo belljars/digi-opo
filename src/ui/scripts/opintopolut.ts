@@ -1,5 +1,11 @@
 export {};
 
+import {
+  createRetryingPageInit,
+  waitForPywebviewApi,
+  type InitAttemptResult
+} from "./pywebview-init.js";
+
 type OpiskeluSuunta = {
   id: number;
   img: string;
@@ -14,8 +20,6 @@ type Api = {
 
 const statusEl = document.getElementById("opintopolut-status");
 const listEl = document.getElementById("opintopolut-list");
-let initialized = false;
-
 function setStatus(message: string): void {
   if (statusEl) {
     statusEl.textContent = message;
@@ -28,29 +32,6 @@ function parseKenelleList(value: string): string[] {
     .map((line) => line.trim())
     .filter((line) => line.length > 0)
     .map((line) => line.replace(/^-+\s*/, ""));
-}
-
-function getApi(): Api | null {
-  return window.pywebview?.api ?? null;
-}
-
-async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
-  const start = Date.now();
-  return new Promise((resolve) => {
-    const tick = (): void => {
-      const api = getApi();
-      if (api) {
-        resolve(api);
-        return;
-      }
-      if (Date.now() - start >= timeoutMs) {
-        resolve(null);
-        return;
-      }
-      window.requestAnimationFrame(tick);
-    };
-    tick();
-  });
 }
 
 function renderItems(items: OpiskeluSuunta[]): void {
@@ -106,34 +87,30 @@ function renderItems(items: OpiskeluSuunta[]): void {
   }
 }
 
-async function init(): Promise<void> {
-  const api = await waitForApi();
+async function init(): Promise<InitAttemptResult> {
+  const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    setStatus("Pywebview API ei ole kaytettavissa.");
-    return;
+    setStatus("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+    return { success: false, retryDelayMs: 500 };
   }
 
   try {
     setStatus("Ladataan...");
     const items = await api.list_opiskelu_suunnat();
     renderItems(items);
+    return { success: true };
   } catch {
-    setStatus("Opintopolkujen lataus epaonnistui.");
+    setStatus("Opintopolkujen lataus epaonnistui. Yritetaan uudelleen...");
+    return { success: false, retryDelayMs: 1000 };
   }
 }
 
-function initOnce(): void {
-  if (initialized) {
-    return;
-  }
-  initialized = true;
-  void init();
-}
+const initPage = createRetryingPageInit(init);
 
 window.addEventListener("pywebviewready", () => {
-  initOnce();
+  initPage();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  initOnce();
+  initPage();
 });

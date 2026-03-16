@@ -1,6 +1,11 @@
 export {};
 
 import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
+import {
+  createRetryingPageInit,
+  waitForPywebviewApi,
+  type InitAttemptResult
+} from "./pywebview-init.js";
 
 type TutkintoListItem = {
   id: number;
@@ -51,7 +56,6 @@ const savedOnlyFilterEl = document.getElementById("saved-only-filter") as HTMLIn
 
 let activeId: number | null = null;
 let activeApi: Api | null = null;
-let initialized = false;
 let savedIds = new Set<number>();
 let allTutkinnot: TutkintoListItem[] = [];
 let allTutkintonimikkeet: TutkintonimikeItem[] = [];
@@ -79,29 +83,6 @@ function setFeedback(message = ""): void {
   if (feedbackEl) {
     feedbackEl.textContent = message;
   }
-}
-
-function getApi(): Api | null {
-  return window.pywebview?.api ?? null;
-}
-
-async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
-  const start = Date.now();
-  return new Promise((resolve) => {
-    const tick = (): void => {
-      const api = getApi();
-      if (api) {
-        resolve(api);
-        return;
-      }
-      if (Date.now() - start >= timeoutMs) {
-        resolve(null);
-        return;
-      }
-      window.requestAnimationFrame(tick);
-    };
-    tick();
-  });
 }
 
 function normalizeValue(value: string): string {
@@ -387,11 +368,12 @@ function bindEvents(): void {
   }
 }
 
-async function init(): Promise<void> {
-  const api = await waitForApi();
+async function init(): Promise<InitAttemptResult> {
+  const api = await waitForPywebviewApi<Api>();
   if (!api) {
     renderEmpty("Pywebview API ei ole kaytettavissa.");
-    return;
+    setFeedback("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+    return { success: false, retryDelayMs: 500 };
   }
 
   activeApi = api;
@@ -399,23 +381,20 @@ async function init(): Promise<void> {
   try {
     await loadInitial(api);
     bindEvents();
+    return { success: true };
   } catch {
     renderEmpty("Tutkintopankin lataus epaonnistui.");
+    setFeedback("Lataus epaonnistui. Yritetaan uudelleen...");
+    return { success: false, retryDelayMs: 1000 };
   }
 }
 
-function initOnce(): void {
-  if (initialized) {
-    return;
-  }
-  initialized = true;
-  void init();
-}
+const initPage = createRetryingPageInit(init);
 
 window.addEventListener("pywebviewready", () => {
-  initOnce();
+  initPage();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  initOnce();
+  initPage();
 });

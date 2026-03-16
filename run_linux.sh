@@ -66,12 +66,14 @@ ensure_venv() {
 build_frontend() {
   local tsc_bin="./node_modules/.bin/tsc"
   local -a expected_files=(
-    "dist/ui/scripts/pankki.js"
-    "dist/ui/scripts/quiz.js"
-    "dist/ui/scripts/layout.js"
-    "dist/ui/scripts/opintopolut.js"
-    "dist/ui/scripts/amis-quiz.js"
-    "dist/ui/scripts/saved-tutkintonimikkeet.js"
+    "src/ui/scripts/pankki.js"
+    "src/ui/scripts/quiz.js"
+    "src/ui/scripts/layout.js"
+    "src/ui/scripts/opintopolut.js"
+    "src/ui/scripts/amis-quiz.js"
+    "src/ui/scripts/saved-tutkintonimikkeet.js"
+    "src/ui/scripts/asetukset.js"
+    "src/ui/scripts/tutkintonimike-card.js"
   )
   local file
 
@@ -98,9 +100,6 @@ build_frontend() {
   for file in "${expected_files[@]}"; do
     [[ -f "$file" ]] || fail "Buildin tulostiedosto puuttuu: $file"
   done
-
-  log "Kopioidaan buildatut JavaScript-tiedostot kansioon src/ui/scripts"
-  cp dist/ui/scripts/*.js src/ui/scripts/
 }
 
 main() {

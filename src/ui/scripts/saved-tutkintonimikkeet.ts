@@ -1,6 +1,11 @@
 export {};
 
 import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
+import {
+  createRetryingPageInit,
+  waitForPywebviewApi,
+  type InitAttemptResult
+} from "./pywebview-init.js";
 
 type SavedTutkintonimikeItem = {
   id: number;
@@ -81,7 +86,6 @@ const sessionsListEl = document.getElementById("saved-sessions-list");
 const notesListEl = document.getElementById("saved-notes-list");
 const feedbackEl = document.getElementById("saved-feedback");
 
-let initialized = false;
 let noteSaveInFlightIds = new Set<number>();
 let noteDeleteInFlightIds = new Set<number>();
 
@@ -91,26 +95,7 @@ const percentFormatter = new Intl.NumberFormat("fi-FI", {
 });
 
 function getApi(): Api | null {
-  return window.pywebview?.api ?? null;
-}
-
-async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
-  const start = Date.now();
-  return new Promise((resolve) => {
-    const tick = (): void => {
-      const api = getApi();
-      if (api) {
-        resolve(api);
-        return;
-      }
-      if (Date.now() - start >= timeoutMs) {
-        resolve(null);
-        return;
-      }
-      window.requestAnimationFrame(tick);
-    };
-    tick();
-  });
+  return (window.pywebview?.api as Api | undefined) ?? null;
 }
 
 function setFeedback(message = ""): void {
@@ -605,33 +590,39 @@ async function removeQuizSession(quizId: string): Promise<void> {
   await renderSavedHub();
 }
 
-async function init(): Promise<void> {
+async function init(): Promise<InitAttemptResult> {
   setFeedback("");
-  const api = await waitForApi();
+  const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Backend ei ollut viela valmis. Yritetaan uudelleen...");
     renderEmpty(listEl, "Tallennuksia ei voitu ladata.");
     renderEmpty(resultsListEl, "Quiz-tuloksia ei voitu ladata.");
     renderEmpty(sessionsListEl, "Quizien keskeneraisia tiloja ei voitu ladata.");
     renderEmpty(notesListEl, "Muistiinpanoja ei voitu ladata.");
     renderEmpty(statsChartEl, "Tilastoa ei voitu ladata.");
-    return;
+    return { success: false, retryDelayMs: 500 };
   }
-  await renderSavedHub();
+
+  try {
+    await renderSavedHub();
+    return { success: true };
+  } catch {
+    setFeedback("Tallennettujen tietojen lataus epaonnistui. Yritetaan uudelleen...");
+    renderEmpty(listEl, "Tallennuksia ei voitu ladata.");
+    renderEmpty(resultsListEl, "Quiz-tuloksia ei voitu ladata.");
+    renderEmpty(sessionsListEl, "Quizien keskeneraisia tiloja ei voitu ladata.");
+    renderEmpty(notesListEl, "Muistiinpanoja ei voitu ladata.");
+    renderEmpty(statsChartEl, "Tilastoa ei voitu ladata.");
+    return { success: false, retryDelayMs: 1000 };
+  }
 }
 
-function initOnce(): void {
-  if (initialized) {
-    return;
-  }
-  initialized = true;
-  void init();
-}
+const initPage = createRetryingPageInit(init);
 
 window.addEventListener("pywebviewready", () => {
-  initOnce();
+  initPage();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  initOnce();
+  initPage();
 });

@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "check": "tsc --noEmit --project tsconfig.json",
+    "test:frontend-init": "node tests/test_pywebview_init.mjs",
     "run": "python3 src/app/app.py"
   },
   "devDependencies": {

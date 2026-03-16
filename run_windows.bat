@@ -61,49 +61,45 @@ echo [INFO] Ajetaan TypeScript-build: npm run build
 call npm run build
 if errorlevel 1 exit /b %errorlevel%
 
-if not exist "dist\ui\scripts\pankki.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\pankki.js
+if not exist "src\ui\scripts\pankki.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\pankki.js
   exit /b 1
 )
 
-if not exist "dist\ui\scripts\quiz.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\quiz.js
+if not exist "src\ui\scripts\quiz.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\quiz.js
   exit /b 1
 )
 
-if not exist "dist\ui\scripts\layout.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\layout.js
+if not exist "src\ui\scripts\layout.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\layout.js
   exit /b 1
 )
 
-if not exist "dist\ui\scripts\opintopolut.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\opintopolut.js
+if not exist "src\ui\scripts\opintopolut.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\opintopolut.js
   exit /b 1
 )
 
-if not exist "dist\ui\scripts\amis-quiz.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\amis-quiz.js
+if not exist "src\ui\scripts\amis-quiz.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\amis-quiz.js
   exit /b 1
 )
 
-if not exist "dist\ui\scripts\saved-tutkintonimikkeet.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\saved-tutkintonimikkeet.js
+if not exist "src\ui\scripts\saved-tutkintonimikkeet.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\saved-tutkintonimikkeet.js
   exit /b 1
 )
 
-if not exist "dist\ui\scripts\asetukset.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\asetukset.js
+if not exist "src\ui\scripts\asetukset.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\asetukset.js
   exit /b 1
 )
 
-if not exist "dist\ui\scripts\tutkintonimike-card.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\tutkintonimike-card.js
+if not exist "src\ui\scripts\tutkintonimike-card.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tutkintonimike-card.js
   exit /b 1
 )
-
-echo [INFO] Kopioidaan buildatut JavaScript-tiedostot kansioon src\ui\scripts.
-copy /Y dist\ui\scripts\*.js src\ui\scripts\ >nul
-if errorlevel 1 exit /b %errorlevel%
 
 echo [INFO] Kaynnistetaan sovellus: "%VENV_PY%" src\app\app.py
 "%VENV_PY%" src\app\app.py

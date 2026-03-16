@@ -54,7 +54,8 @@ function renderFooter(): void {
   const year = new Date().getFullYear();
 
   footerHost.innerHTML = `
-    <p class="site-footer-copy">(c) ${year} <em>digi-opo</em></p>
+    <p class="site-footer-copy">© ${year} <em>digi-opo</em> • <a href="https://www.luovi.fi" target="_blank" rel="noopener noreferrer">Ammattiopisto Luovi</a></p>
+    <p class="site-footer-copy"><a href="./tietosuoja.html">Tietosuojakäytäntö</a> • <a href="https://www.github.com/belljars/digi-opo" target="_blank" rel="noopener noreferrer">Lähdekoodi</a></p>
   `;
 }
 

@@ -5,6 +5,11 @@ import {
   createTutkintonimikeLinkAction,
   type TutkintonimikeCardItem
 } from "./tutkintonimike-card.js";
+import {
+  createRetryingPageInit,
+  waitForPywebviewApi,
+  type InitAttemptResult
+} from "./pywebview-init.js";
 
 const QUIZ_ID = "amis-quiz";
 
@@ -103,7 +108,6 @@ let activePair: ActivePair | null = null;
 let finalRanking: TutkintonimikeItem[] = [];
 let finishedAt: number | null = null;
 let lastSessionDurationMs: number | null = null;
-let initialized = false;
 let activeApi: Api | null = null;
 let savedIds = new Set<number>();
 let saveInFlightIds = new Set<number>();
@@ -125,29 +129,6 @@ function setPrompt(message: string): void {
   if (quizPromptEl) {
     quizPromptEl.textContent = message;
   }
-}
-
-function getApi(): Api | null {
-  return window.pywebview?.api ?? null;
-}
-
-async function waitForApi(timeoutMs = 4000): Promise<Api | null> {
-  const start = Date.now();
-  return new Promise((resolve) => {
-    const tick = (): void => {
-      const api = getApi();
-      if (api) {
-        resolve(api);
-        return;
-      }
-      if (Date.now() - start >= timeoutMs) {
-        resolve(null);
-        return;
-      }
-      window.requestAnimationFrame(tick);
-    };
-    tick();
-  });
 }
 
 function setFinishedVisible(visible: boolean): void {
@@ -799,17 +780,17 @@ function restoreSession(session: QuizSession): boolean {
   return true;
 }
 
-async function init(): Promise<void> {
+async function init(): Promise<InitAttemptResult> {
   setFeedback("");
   setHelp("Ladataan tutkintonimikkeita...");
   renderInitialState("Ladataan...");
 
   try {
-    const api = await waitForApi();
+    const api = await waitForPywebviewApi<Api>();
     if (!api) {
       renderInitialState("Pywebview API ei ole kaytettavissa.");
-      setHelp("Quizia ei voitu kaynnistaa ilman backendia.");
-      return;
+      setHelp("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+      return { success: false, retryDelayMs: 500 };
     }
 
     activeApi = api;
@@ -825,7 +806,7 @@ async function init(): Promise<void> {
 
     const restoredSession = parseRestoredSession(sessionEntry);
     if (restoredSession && restoreSession(restoredSession)) {
-      return;
+      return { success: true };
     }
 
     if (sessionEntry) {
@@ -834,26 +815,22 @@ async function init(): Promise<void> {
     }
 
     restartQuiz(false);
+    return { success: true };
   } catch {
     renderInitialState("Quizin lataus epaonnistui.");
-    setHelp("Yrita kaynnistaa sovellus uudelleen.");
+    setHelp("Lataus epaonnistui. Yritetaan uudelleen...");
+    return { success: false, retryDelayMs: 1000 };
   }
 }
 
-function initOnce(): void {
-  if (initialized) {
-    return;
-  }
-  initialized = true;
-  void init();
-}
+const initPage = createRetryingPageInit(init);
 
 window.addEventListener("pywebviewready", () => {
-  initOnce();
+  initPage();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  initOnce();
+  initPage();
 });
 
 window.addEventListener("keydown", (event) => {

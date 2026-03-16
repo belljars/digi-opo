@@ -84,8 +84,7 @@ Skripti:
 3. asentaa Python-riippuvuudet
 4. asentaa Node-riippuvuudet tarvittaessa
 5. buildaa TypeScript-tiedostot
-6. kopioi buildatut JavaScript-tiedostot käyttöön
-7. käynnistää sovelluksen
+6. käynnistää sovelluksen
 
 ### Linux ja NixOS
 
@@ -102,8 +101,7 @@ Skripti:
 3. asentaa Python-riippuvuudet
 4. asentaa Node-riippuvuudet tarvittaessa
 5. buildaa TypeScript-tiedostot
-6. kopioi buildatut JavaScript-tiedostot käyttöön
-7. käynnistää sovelluksen
+6. käynnistää sovelluksen
 
 NixOS:ssa helpoin tapa on käyttää flakea:
 
@@ -145,14 +143,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 npm install
 npm run build
-cp dist/ui/scripts/*.js src/ui/scripts/
 python src/app/app.py
 ```
 
 Huomio:
 
-- `npm run build` kääntää TypeScript-tiedostot `dist/`-kansioon.
-- sovellus käyttää ajossa tiedostoja kansiosta `src/ui/scripts/`, joten buildatut `.js`-tiedostot kopioidaan takaisin sinne
+- `npm run build` kääntää TypeScript-tiedostot suoraan kansioon `src/ui/scripts/`
 - sovellus luo tietokannan automaattisesti tiedostoon `data/tutkinnot.db`
 - tutkintodata luetaan muokattavasta lähteestä `src/data/ammatit.json` ja tuodaan SQLiteen automaattisesti
 
@@ -165,12 +161,6 @@ npm install
 npm run check
 npm run build
 python src/app/app.py
-```
-
-Jos ajat buildin käsin, kopioi lopuksi käyttöön buildatut tiedostot:
-
-```bash
-cp dist/ui/scripts/*.js src/ui/scripts/
 ```
 
 ## Testit
@@ -191,7 +181,6 @@ python -m unittest tests.test_ui_smoke
 digi-opo/
 ├── doc/                  # Projektin dokumentaatio suomeksi
 ├── data/                 # SQLite-tietokannat
-├── dist/                 # TypeScript-buildin tulosteet
 ├── src/
 │   ├── app/              # pywebview-sovellus ja Python API
 │   ├── data/             # JSON-lähdedata
