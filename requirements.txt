@@ -1,0 +1,5 @@
+pywebview
+PyQt6
+PyQt6-WebEngine
+QtPy
+typing-extensions
