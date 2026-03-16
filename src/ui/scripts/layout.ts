@@ -11,7 +11,8 @@ const navItems: NavItem[] = [
   { id: "index", href: "./pankki.html", label: "Tutkintopankki" },
   { id: "saved", href: "./saved-tutkintonimikkeet.html", label: "Tallennetut" },
   { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" },
-  { id: "asetukset", href: "./asetukset.html", label: "Asetukset" }
+  { id: "asetukset", href: "./asetukset.html", label: "Asetukset" },
+  { id: "esteettomyys", href: "./esteettomyys.html", label: "Esteettömyys" }
 ];
 
 function renderHeader(): void {
