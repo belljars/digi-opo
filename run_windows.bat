@@ -1,5 +1,3 @@
-REM ÄLÄ KOSKE TAI MUOKKAA
-
 @echo off
 setlocal
 
@@ -93,23 +91,18 @@ if not exist "dist\ui\scripts\saved-tutkintonimikkeet.js" (
   exit /b 1
 )
 
+if not exist "dist\ui\scripts\asetukset.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\asetukset.js
+  exit /b 1
+)
+
+if not exist "dist\ui\scripts\tutkintonimike-card.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: dist\ui\scripts\tutkintonimike-card.js
+  exit /b 1
+)
+
 echo [INFO] Kopioidaan buildatut JavaScript-tiedostot kansioon src\ui\scripts.
-copy /Y dist\ui\scripts\pankki.js src\ui\scripts\pankki.js >nul
-if errorlevel 1 exit /b %errorlevel%
-
-copy /Y dist\ui\scripts\quiz.js src\ui\scripts\quiz.js >nul
-if errorlevel 1 exit /b %errorlevel%
-
-copy /Y dist\ui\scripts\layout.js src\ui\scripts\layout.js >nul
-if errorlevel 1 exit /b %errorlevel%
-
-copy /Y dist\ui\scripts\opintopolut.js src\ui\scripts\opintopolut.js >nul
-if errorlevel 1 exit /b %errorlevel%
-
-copy /Y dist\ui\scripts\amis-quiz.js src\ui\scripts\amis-quiz.js >nul
-if errorlevel 1 exit /b %errorlevel%
-
-copy /Y dist\ui\scripts\saved-tutkintonimikkeet.js src\ui\scripts\saved-tutkintonimikkeet.js >nul
+copy /Y dist\ui\scripts\*.js src\ui\scripts\ >nul
 if errorlevel 1 exit /b %errorlevel%
 
 echo [INFO] Kaynnistetaan sovellus: "%VENV_PY%" src\app\app.py

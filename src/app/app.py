@@ -12,7 +12,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 
-# Pywebview käyttää tässä projektissa PyQt6:ta, joten sidotaan qtpy siihen ennen GUI-backendin latausta.
+# Pywebview käyttää tässä projektissa PyQt6:ta, joten sidotaan qtpy siihen ennen GUI-backendin latausta
 if sys.platform.startswith("linux"):
     os.environ.setdefault("QT_API", "pyqt6")
 
