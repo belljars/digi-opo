@@ -9,17 +9,18 @@
 - Python 3.11 tai 3.12
 - Node.js ja npm
 - Windowsissa `py`-launcher on suositeltava
+- Linuxissa Qt-riippuvuudet joko järjestelmätasolla tai `flake.nix`:n kautta
 - Python-riippuvuudet tiedostosta `requirements.txt`
 
 ## Nopea käynnistys Windowsissa
 
 Projektissa on valmis skripti `run_windows.bat`, joka:
 
-1. etsii tuetun Python-version
-2. luo tarvittaessa `.venv`-virtuaaliympäristön
+1. etsii Python 3.12:n tai 3.11:n
+2. luo tai päivittää tarvittaessa `.venv`-virtuaaliympäristön
 3. asentaa Python-riippuvuudet
-4. buildaa TypeScript-tiedostot
-5. kopioi buildatut JavaScript-tiedostot käyttöliittymän kansioon
+4. ajaa TypeScript-buildin komennolla `npm run build`
+5. tarkistaa tarvittavat käyttöliittymän `.js`-tiedostot
 6. käynnistää sovelluksen
 
 Käyttö:
@@ -32,14 +33,15 @@ Käyttö:
 
 Projektissa on valmis skripti `run_linux.sh`, joka:
 
-1. etsii tuetun Python-version
-2. luo tarvittaessa `.venv`-virtuaaliympariston
-3. asentaa Python-riippuvuudet
-4. buildaa TypeScript-tiedostot
-5. kopioi buildatut `.js`-tiedostot takaisin `src/ui/scripts/`-kansioon
-6. kaynnistaa sovelluksen
+1. etsii Python 3.12:n tai 3.11:n
+2. käyttää tarvittaessa `nix develop` -ympäristöä automaattisesti, jos tuettua Pythonia ei löydy
+3. luo `.venv`-virtuaaliympäristön, jos ei ajeta Nix-shellissä
+4. asentaa Python-riippuvuudet, jos käytössä on `.venv`
+5. ajaa TypeScript-buildin
+6. tarkistaa buildin tulostiedostot
+7. käynnistää sovelluksen
 
-Kaytto:
+Käyttö:
 
 ```bash
 ./run_linux.sh
@@ -54,7 +56,7 @@ nix develop
 ./run_linux.sh
 ```
 
-Voit kaynnistaa sovelluksen myos suoraan repojuuresta:
+Voit käynnistää sovelluksen myös suoraan repojuuresta:
 
 ```bash
 nix run
@@ -87,25 +89,27 @@ source .venv/bin/activate
 pip install -r requirements.txt
 npm install
 npm run build
-cp dist/ui/scripts/*.js src/ui/scripts/
 python src/app/app.py
 ```
 
 Huomio:
 
-- `npm run build` kaantaa TypeScript-tiedostot `dist/`-kansioon.
-- `npm run build` kääntää TypeScript-tiedostot `dist/`-kansioon.
-- Windows-skripti kopioi buildatut `.js`-tiedostot takaisin `src/ui/scripts/`-kansioon, koska sovellus palvelee tiedostoja projektipuusta.
-- SQLite-tietokanta luodaan automaattisesti tiedostoon `data/tutkinnot.db`.
+- `npm run build` kääntää TypeScript-tiedostot suoraan kansioon `src/ui/scripts/`
+- sovellus palvelee käyttöliittymän tiedostoja suoraan projektipuusta
+- SQLite-tietokanta luodaan automaattisesti tiedostoon `data/tutkinnot.db`
+- käyttäjäkohtaiset quiz-tulokset ja keskeneräiset istunnot tallennetaan `user/`-kansioon
 
 ## Testit
 
-Projektissa on ainakin backend-testejä ja UI-smoke-testejä `tests/`-kansiossa.
+Projektissa on backend-testejä, UI-smoke-testejä ja frontendin alustustesti.
 
-Esimerkki backend-testien ajosta:
+Esimerkkikomennot:
 
-```powershell
+```bash
+npm run check
+npm run test:frontend-init
 python -m unittest tests.test_backend_api
+python -m unittest tests.test_ui_smoke
 ```
 
 ## Yleisimmät kansiot

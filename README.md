@@ -2,7 +2,7 @@
 
 ## Yleiskuva
 
-**digi-opo** on paikallinen `pywebview`-pohjainen työpöytäsovellus suomalaisten tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun.
+`digi-opo` on paikallinen `pywebview`-pohjainen työpöytäsovellus suomalaisten tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun.
 
 Sovellus yhdistää:
 
@@ -11,21 +11,9 @@ Sovellus yhdistää:
 - SQLite-tietokannan
 - JSON-muotoisen lähdedatan
 
-## Datan rakenne
+Sovellus käynnistää paikallisen HTTP-palvelimen osoitteeseen `127.0.0.1`, avaa käyttöliittymän `pywebview`-ikkunaan ja tarjoaa sivuille Python-API:n `window.pywebview.api`-rajapinnan kautta.
 
-Tutkintoihin liittyvä data kulkee sovelluksessa kahdessa muodossa:
-
-- `src/data/ammatit.json` on helposti muokattava lähdedata
-- `data/tutkinnot.db` on ajonaikainen SQLite-tietokanta
-
-Käytännössä tämä tarkoittaa:
-
-- muokkaa tutkintoja, tutkintonimikkeitä, linkkejä ja kuvia tiedostossa `src/data/ammatit.json`
-- sovellus tuo datan automaattisesti SQLiteen käynnistyksen yhteydessä
-- jos `ammatit.json` muuttuu, tietokannan tutkintodata rakennetaan uudelleen
-- käyttöliittymän TypeScript ei lue JSON:ia tai SQLitea suoraan, vaan hakee datan Pythonin `pywebview`-API:n kautta
-
-## Nykyiset näkymät
+## Ominaisuudet
 
 Sovelluksessa on tällä hetkellä seuraavat näkymät:
 
@@ -35,19 +23,45 @@ Sovelluksessa on tällä hetkellä seuraavat näkymät:
 - `Opintopolut` (`src/ui/pages/opintopolut.html`)
 - `Opintopolku-kysely` (`src/ui/pages/quiz.html`)
 - `Amis-korttivertailu` (`src/ui/pages/amis-quiz.html`)
+- `Asetukset` (`src/ui/pages/asetukset.html`)
+- `Esteettömyys` (`src/ui/pages/esteettomyys.html`)
+- `Tietosuojakäytäntö` (`src/ui/pages/tietosuoja.html`)
 
-## Mitä sovellus tekee
+Sovellus mahdollistaa esimerkiksi:
 
-- alustaa SQLite-tietokannan tiedostoon `data/tutkinnot.db`
-- käyttää `src/data/ammatit.json`-tiedostoa tutkintodatan muokattavana lähteenä
-- tuo `src/data/ammatit.json`-datan tietokantaan ensimmäisellä ajolla
-- päivittää tutkintodatan automaattisesti, jos lähde-JSON muuttuu
-- näyttää tutkintolistan sekä yksittäisen tutkinnon tutkintonimikkeet
-- mahdollistaa tutkintonimikkeiden tallentamisen
-- sisältää amis-korttivertailun, joka järjestää tutkintonimikkeet käyttäjän valintojen perusteella
-- lataa opintopolkujen sisällön tiedostosta `src/data/opiskeluSuunnat.json`
-- lataa kyselydatan tiedostosta `src/data/opintopolkuQuiz.json`
-- tallentaa quiz-tuloksia `user/`-kansioon
+- tutkintojen ja tutkintonimikkeiden selailun ja haun
+- yksittäisen tutkinnon tarkastelun nimikkeineen
+- tutkintonimikkeiden tallentamisen
+- omien muistiinpanojen kirjoittamisen tallennetuille tutkintonimikkeille
+- opintopolkujen selaamisen
+- opintopolku-kyselyn tulosten tallennuksen
+- quiz-istuntojen jatkamisen myöhemmin
+- tutkintojen ja tutkintonimikkeiden globaalin piilotuksen asetuksista
+
+## Data ja tallennus
+
+Projektissa käytetään kahta pääasiallista datamuotoa:
+
+- `src/data/` sisältää versionhallittavan lähdedatan
+- `data/tutkinnot.db` sisältää ajonaikaisen SQLite-tietokannan
+
+Keskeiset lähdetiedostot ovat:
+
+- `src/data/ammatit.json`
+- `src/data/opiskeluSuunnat.json`
+- `src/data/opintopolkuQuiz.json`
+
+Käytännössä tämä tarkoittaa:
+
+- muokkaa tutkintoja, tutkintonimikkeitä, linkkejä ja kuvia tiedostossa `src/data/ammatit.json`
+- sovellus tuo tutkintodatan automaattisesti SQLiteen käynnistyksen yhteydessä
+- jos lähdedata muuttuu, tietokannan tutkintosisältö rakennetaan uudelleen
+- käyttöliittymä ei lue JSON- tai SQLite-tiedostoja suoraan, vaan hakee datan Python-API:n kautta
+
+Käyttäjäkohtaisia tiedostoja tallennetaan `user/`-kansioon, esimerkiksi:
+
+- `quiz_results.json`
+- `quiz_sessions.json`
 
 ## Teknologiat
 
@@ -63,7 +77,7 @@ Sovelluksessa on tällä hetkellä seuraavat näkymät:
 - Python 3.11 tai 3.12
 - Node.js ja npm
 - Windowsissa `py`-launcher on suositeltava
-- Linuxissa Qt-riippuvuudet järjestelmätasolla
+- Linuxissa Qt-riippuvuudet järjestelmätasolla tai Nix-flaken kautta
 
 Python-riippuvuudet löytyvät tiedostosta `requirements.txt`.
 
@@ -79,16 +93,16 @@ Helpoin tapa käynnistää projekti on ajaa:
 
 Skripti:
 
-1. etsii tuetun Python-version
-2. luo tarvittaessa `.venv`-virtuaaliympäristön
+1. etsii Python 3.12:n tai 3.11:n
+2. luo tai päivittää tarvittaessa `.venv`-virtuaaliympäristön
 3. asentaa Python-riippuvuudet
-4. asentaa Node-riippuvuudet tarvittaessa
-5. buildaa TypeScript-tiedostot
+4. ajaa TypeScript-buildin komennolla `npm run build`
+5. tarkistaa, että tarvittavat käyttöliittymän `.js`-tiedostot syntyivät
 6. käynnistää sovelluksen
 
 ### Linux ja NixOS
 
-Projektissa on nyt valmis Linux-käynnistysskripti:
+Linuxissa projekti käynnistyy komennolla:
 
 ```bash
 ./run_linux.sh
@@ -96,21 +110,22 @@ Projektissa on nyt valmis Linux-käynnistysskripti:
 
 Skripti:
 
-1. etsii tuetun Python-version 3.12 tai 3.11
-2. luo tarvittaessa `.venv`-virtuaaliympäristön
-3. asentaa Python-riippuvuudet
-4. asentaa Node-riippuvuudet tarvittaessa
-5. buildaa TypeScript-tiedostot
-6. käynnistää sovelluksen
+1. etsii Python 3.12:n tai 3.11:n
+2. käyttää Nix-shelliä automaattisesti, jos sopivaa Pythonia ei löydy mutta `flake.nix` ja `nix` ovat saatavilla
+3. luo `.venv`-virtuaaliympäristön, jos ei ajeta Nix-ympäristössä
+4. asentaa Python-riippuvuudet, jos käytössä on `.venv`
+5. ajaa TypeScript-buildin paikallisella `tsc`:llä, `npm`:llä tai järjestelmän `tsc`:llä
+6. tarkistaa buildin tulostiedostot
+7. käynnistää sovelluksen
 
-NixOS:ssa helpoin tapa on käyttää flakea:
+NixOS:ssa helpoin tapa on:
 
 ```bash
 nix develop
 ./run_linux.sh
 ```
 
-Vaihtoehtoisesti:
+Voit myös ajaa:
 
 ```bash
 nix run
@@ -126,6 +141,8 @@ Tämä luo tiedoston `~/.local/share/applications/digi-opo.desktop`.
 
 ### Manuaalisesti
 
+Windows:
+
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
@@ -135,7 +152,7 @@ npm run build
 python src\app\app.py
 ```
 
-Linuxissa vastaavat komennot ovat:
+Linux:
 
 ```bash
 python3 -m venv .venv
@@ -150,7 +167,7 @@ Huomio:
 
 - `npm run build` kääntää TypeScript-tiedostot suoraan kansioon `src/ui/scripts/`
 - sovellus luo tietokannan automaattisesti tiedostoon `data/tutkinnot.db`
-- tutkintodata luetaan muokattavasta lähteestä `src/data/ammatit.json` ja tuodaan SQLiteen automaattisesti
+- käyttöliittymää palvellaan projektipuusta, eikä buildin jälkeen tarvitse kopioida tiedostoja erilliseen `dist/`-hakemistoon
 
 ## Kehitys
 
@@ -165,20 +182,25 @@ python src/app/app.py
 
 ## Testit
 
-Projektissa on backend- ja UI-smoke-testejä `tests/`-kansiossa.
+Projektissa on backend-, käyttöliittymä- ja frontend-init-testejä `tests/`-kansiossa.
 
 Esimerkkejä:
 
-```powershell
+```bash
 npm run check
 npm run test:frontend-init
 python -m unittest tests.test_backend_api
 python -m unittest tests.test_ui_smoke
 ```
 
-Huomio:
+`tests/test_backend_api.py` kattaa esimerkiksi:
 
-- `npm run test:frontend-init` ajaa ensin `npm run build`, jotta testin tarvitsemat JavaScript-tiedostot ovat varmasti olemassa puhtaassa checkoutissa
+- tutkintodatan tuonnin
+- haut ja yksityiskohtanäkymät
+- tallennettujen tutkintonimikkeiden pysyvyyden
+- muistiinpanojen tallennuksen
+- globaalin piilotuksen
+- quiz-tulosten ja quiz-istuntojen tallennuksen
 
 ## Projektin rakenne
 
@@ -198,6 +220,7 @@ digi-opo/
 ├── user/                 # Käyttäjäkohtaiset tallennukset
 ├── requirements.txt
 ├── package.json
+├── run_linux.sh
 ├── run_windows.bat
 └── README.md
 ```
@@ -209,6 +232,7 @@ Lisädokumentaatio löytyy `doc/`-kansiosta:
 - `doc/README.md`
 - `doc/kaynnistys.md`
 - `doc/arkkitehtuuri.md`
+- `doc/asetukset-ja-piilotus.md`
 
 ## Lisenssi
 
