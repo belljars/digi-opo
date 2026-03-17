@@ -171,9 +171,14 @@ Esimerkkejä:
 
 ```powershell
 npm run check
+npm run test:frontend-init
 python -m unittest tests.test_backend_api
 python -m unittest tests.test_ui_smoke
 ```
+
+Huomio:
+
+- `npm run test:frontend-init` ajaa ensin `npm run build`, jotta testin tarvitsemat JavaScript-tiedostot ovat varmasti olemassa puhtaassa checkoutissa
 
 ## Projektin rakenne
 
