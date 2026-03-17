@@ -15,7 +15,7 @@ if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
 from backend_rajapinta import Api as BackendApi
-from projekti_paths import ProjectPaths, start_static_server
+from projekti_paths import ProjectPaths, is_allowed_static_path, start_static_server
 import webview
 
 

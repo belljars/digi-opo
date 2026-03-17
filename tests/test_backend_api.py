@@ -36,8 +36,13 @@ class BackendApiTests(unittest.TestCase):
         self.root = Path(self.tmpdir.name)
         (self.root / "data").mkdir(parents=True, exist_ok=True)
         (self.root / "src" / "data").mkdir(parents=True, exist_ok=True)
+        (self.root / "src" / "ui" / "pages").mkdir(parents=True, exist_ok=True)
         (self.root / "src" / "ui" / "assets" / "opiskeluSuunnat").mkdir(
             parents=True, exist_ok=True
+        )
+        (self.root / "src" / "ui" / "pages" / "home.html").write_text(
+            "<!doctype html><title>digi-opo</title>",
+            encoding="utf-8",
         )
         (self.root / "src" / "ui" / "assets" / "opiskeluSuunnat" / "lukio.jpg").write_bytes(
             b"jpg"
@@ -258,6 +263,13 @@ class BackendApiTests(unittest.TestCase):
         self.assertIsNone(api.get_quiz_session("opintopolku"))
         sessions_path = self.root / "user" / "quiz_sessions.json"
         self.assertTrue(sessions_path.exists())
+
+    def test_static_server_allows_only_ui_paths(self) -> None:
+        self.assertTrue(self.app.is_allowed_static_path("/src/ui/pages/home.html"))
+        self.assertTrue(self.app.is_allowed_static_path("/src/ui/assets/ammatit/sahkoasentaja.png"))
+        self.assertFalse(self.app.is_allowed_static_path("/src/data/ammatit.json"))
+        self.assertFalse(self.app.is_allowed_static_path("/data/tutkinnot.db"))
+        self.assertFalse(self.app.is_allowed_static_path("/user/quiz_results.json"))
 
 
 if __name__ == "__main__":

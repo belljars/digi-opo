@@ -8,6 +8,11 @@ import threading
 from urllib.parse import urlparse
 
 
+def is_allowed_static_path(request_path: str) -> bool:
+    # Sallii HTTP-palvelimelta vain kayttoliittyman tiedostopolut
+    return urlparse(request_path).path.startswith("/src/ui/")
+
+
 @dataclass(frozen=True)
 class ProjectPaths:
     # Kokoaa projektin polut yhteen paikkaan
@@ -106,8 +111,15 @@ class ProjectPaths:
 
 def start_static_server(paths: ProjectPaths) -> tuple[ThreadingHTTPServer, int]:
     # Kaynnistaa kevyen paikallisen tiedostopalvelimen pywebviewta varten
-    
-    handler = partial(SimpleHTTPRequestHandler, directory=str(paths.project_root))
+
+    class UiOnlyRequestHandler(SimpleHTTPRequestHandler):
+        def send_head(self):
+            if not is_allowed_static_path(self.path):
+                self.send_error(404, "File not found")
+                return None
+            return super().send_head()
+
+    handler = partial(UiOnlyRequestHandler, directory=str(paths.project_root))
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
