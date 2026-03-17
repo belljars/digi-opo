@@ -190,6 +190,69 @@ class BackendApiTests(unittest.TestCase):
         self.assertTrue(removed)
         self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
 
+    def test_hidden_tutkinto_is_excluded_until_unhidden(self) -> None:
+        api = self.create_api()
+        tutkinnot = api.list_tutkinnot()
+        sahkoala = next(item for item in tutkinnot if item["nimi"] == "Sahkoala")
+
+        self.assertTrue(api.hide_tutkinto(sahkoala["id"]))
+        self.assertEqual([item["nimi"] for item in api.list_tutkinnot()], ["Kokki"])
+        self.assertEqual(api.search_tutkinnot("sahko"), [])
+        self.assertIsNone(api.get_tutkinto(sahkoala["id"]))
+
+        hidden_tutkinnot = api.list_hidden_tutkinnot()
+        self.assertEqual(len(hidden_tutkinnot), 1)
+        self.assertEqual(hidden_tutkinnot[0]["nimi"], "Sahkoala")
+        self.assertEqual(hidden_tutkinnot[0]["tutkintonimikeCount"], 1)
+        self.assertEqual(api.list_hidden_tutkintonimikkeet(), [])
+
+        self.assertTrue(api.unhide_tutkinto(sahkoala["id"]))
+        self.assertEqual(sorted(item["nimi"] for item in api.list_tutkinnot()), ["Kokki", "Sahkoala"])
+        self.assertEqual([item["nimi"] for item in api.search_tutkinnot("sahko")], ["Sahkoala"])
+        self.assertIsNotNone(api.get_tutkinto(sahkoala["id"]))
+
+    def test_hidden_tutkintonimike_is_excluded_from_lists_saved_and_notes_until_unhidden(self) -> None:
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
+        sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
+        kokki = next(item for item in all_items if item["nimi"] == "Kokki")
+
+        api.save_tutkintonimike(sahkoasentaja["id"])
+        api.save_tutkintonimike_note(sahkoasentaja["id"], "Kiinnostaa erityisesti.")
+
+        self.assertTrue(api.hide_tutkintonimike(sahkoasentaja["id"]))
+
+        visible_names = [item["nimi"] for item in api.list_tutkintonimikkeet()]
+        self.assertEqual(visible_names, ["Kokki"])
+        self.assertEqual(api.search_tutkinnot("asentaja"), [])
+
+        sahkoala = next(item for item in api.list_tutkinnot() if item["nimi"] == "Sahkoala")
+        detail = api.get_tutkinto(sahkoala["id"])
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail["tutkintonimikkeet"], [])
+
+        hidden_nimikkeet = api.list_hidden_tutkintonimikkeet()
+        self.assertEqual(len(hidden_nimikkeet), 1)
+        self.assertEqual(hidden_nimikkeet[0]["nimi"], "Sahkoasentaja")
+        self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
+        self.assertEqual(api.list_tutkintonimike_notes(), [])
+
+        self.assertTrue(api.unhide_tutkintonimike(sahkoasentaja["id"]))
+
+        visible_names = sorted(item["nimi"] for item in api.list_tutkintonimikkeet())
+        self.assertEqual(visible_names, ["Kokki", "Sahkoasentaja"])
+        self.assertEqual([item["nimi"] for item in api.search_tutkinnot("asentaja")], ["Sahkoala"])
+
+        detail = api.get_tutkinto(sahkoala["id"])
+        self.assertIsNotNone(detail)
+        self.assertEqual([item["nimi"] for item in detail["tutkintonimikkeet"]], ["Sahkoasentaja"])
+
+        saved_names = [item["nimi"] for item in api.list_saved_tutkintonimikkeet()]
+        self.assertEqual(saved_names, ["Sahkoasentaja"])
+        note_names = [item["nimi"] for item in api.list_tutkintonimike_notes()]
+        self.assertEqual(note_names, ["Sahkoasentaja"])
+        self.assertEqual(kokki["nimi"], "Kokki")
+
     def test_tutkintonimike_note_can_be_saved_listed_and_removed(self) -> None:
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
