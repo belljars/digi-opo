@@ -235,8 +235,17 @@ class Api:
         self._paths = paths
         self._conn = connect_db(paths)
         self._lock = threading.Lock()
+        self._closed = False
         ensure_data(self._conn, self._paths)
         migrate_saved_tutkintonimikkeet_from_json(self._conn, self._paths)
+
+    def close(self) -> None:
+        # Sulkee tietokantayhteyden hallitusti sovelluksen tai testin lopussa
+        with self._lock:
+            if self._closed:
+                return
+            self._conn.close()
+            self._closed = True
 
     def _load_quiz_results(self) -> list[dict]:
         # Lukee tallennetut quiz-tulokset kayttajan JSON-tiedostosta

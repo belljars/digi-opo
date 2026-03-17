@@ -49,6 +49,7 @@ def main() -> None:
     finally:
         server.shutdown()
         server.server_close()
+        api.close()
 
 
 if __name__ == "__main__":

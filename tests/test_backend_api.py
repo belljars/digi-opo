@@ -31,6 +31,7 @@ def load_app_module():
 class BackendApiTests(unittest.TestCase):
     def setUp(self) -> None:
         self.app = load_app_module()
+        self._apis = []
         self.tmpdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tmpdir.name)
         (self.root / "data").mkdir(parents=True, exist_ok=True)
@@ -103,161 +104,160 @@ class BackendApiTests(unittest.TestCase):
         )
 
     def tearDown(self) -> None:
+        for api in self._apis:
+            api.close()
         self.tmpdir.cleanup()
 
-    def test_api_imports_data_and_search_works(self) -> None:
+    def create_api(self):
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
             api = self.app.Api()
-            tutkinnot = api.list_tutkinnot()
-            self.assertEqual(len(tutkinnot), 2)
+        self._apis.append(api)
+        return api
 
-            results = api.search_tutkinnot("sahko")
-            self.assertEqual(len(results), 1)
-            self.assertEqual(results[0]["nimi"], "Sahkoala")
+    def test_api_imports_data_and_search_works(self) -> None:
+        api = self.create_api()
+        tutkinnot = api.list_tutkinnot()
+        self.assertEqual(len(tutkinnot), 2)
 
-            detail = api.get_tutkinto(results[0]["id"])
-            self.assertIsNotNone(detail)
-            self.assertEqual(detail["tutkintonimikkeet"][0]["nimi"], "Sahkoasentaja")
-            self.assertIn("id", detail["tutkintonimikkeet"][0])
-            self.assertEqual(
-                detail["tutkintonimikkeet"][0]["img"],
-                "/src/ui/assets/ammatit/sahkoasentaja.png",
-            )
+        results = api.search_tutkinnot("sahko")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["nimi"], "Sahkoala")
 
-            all_items = api.list_tutkintonimikkeet()
-            sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
-            self.assertEqual(
-                sahkoasentaja["img"],
-                "/src/ui/assets/ammatit/sahkoasentaja.png",
-            )
+        detail = api.get_tutkinto(results[0]["id"])
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail["tutkintonimikkeet"][0]["nimi"], "Sahkoasentaja")
+        self.assertIn("id", detail["tutkintonimikkeet"][0])
+        self.assertEqual(
+            detail["tutkintonimikkeet"][0]["img"],
+            "/src/ui/assets/ammatit/sahkoasentaja.png",
+        )
+
+        all_items = api.list_tutkintonimikkeet()
+        sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
+        self.assertEqual(
+            sahkoasentaja["img"],
+            "/src/ui/assets/ammatit/sahkoasentaja.png",
+        )
 
     def test_opiskelu_suunnat_image_is_normalized_for_http(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            items = api.list_opiskelu_suunnat()
-            self.assertEqual(len(items), 1)
-            self.assertEqual(items[0]["img"], "/src/ui/assets/opiskeluSuunnat/lukio.jpg")
+        api = self.create_api()
+        items = api.list_opiskelu_suunnat()
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["img"], "/src/ui/assets/opiskeluSuunnat/lukio.jpg")
 
     def test_opintopolku_quiz_payload_is_available(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            quiz = api.get_opintopolku_quiz()
-            self.assertIn("questions", quiz)
-            self.assertGreater(len(quiz["questions"]), 0)
+        api = self.create_api()
+        quiz = api.get_opintopolku_quiz()
+        self.assertIn("questions", quiz)
+        self.assertGreater(len(quiz["questions"]), 0)
 
     def test_saved_tutkintonimikkeet_are_persisted_in_sqlite(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            all_items = api.list_tutkintonimikkeet()
-            saved = api.save_tutkintonimike(all_items[0]["id"])
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
+        saved = api.save_tutkintonimike(all_items[0]["id"])
 
-            self.assertEqual(saved["nimi"], all_items[0]["nimi"])
+        self.assertEqual(saved["nimi"], all_items[0]["nimi"])
 
-            saved_items = api.list_saved_tutkintonimikkeet()
-            self.assertEqual(len(saved_items), 1)
-            self.assertEqual(saved_items[0]["id"], all_items[0]["id"])
+        saved_items = api.list_saved_tutkintonimikkeet()
+        self.assertEqual(len(saved_items), 1)
+        self.assertEqual(saved_items[0]["id"], all_items[0]["id"])
 
-            db_path = self.root / "data" / "tutkinnot.db"
-            self.assertTrue(db_path.exists())
-            import sqlite3
+        db_path = self.root / "data" / "tutkinnot.db"
+        self.assertTrue(db_path.exists())
+        import sqlite3
 
-            conn = sqlite3.connect(db_path)
-            try:
-                row = conn.execute(
-                    "SELECT tutkintonimike_id FROM saved_tutkintonimikkeet;"
-                ).fetchone()
-            finally:
-                conn.close()
-            self.assertIsNotNone(row)
-            self.assertEqual(row[0], all_items[0]["id"])
+        conn = sqlite3.connect(db_path)
+        try:
+            row = conn.execute(
+                "SELECT tutkintonimike_id FROM saved_tutkintonimikkeet;"
+            ).fetchone()
+        finally:
+            conn.close()
+        self.assertIsNotNone(row)
+        self.assertEqual(row[0], all_items[0]["id"])
 
     def test_saved_tutkintonimike_can_be_removed(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            all_items = api.list_tutkintonimikkeet()
-            api.save_tutkintonimike(all_items[0]["id"])
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
+        api.save_tutkintonimike(all_items[0]["id"])
 
-            removed = api.remove_saved_tutkintonimike(all_items[0]["id"])
-            self.assertTrue(removed)
-            self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
+        removed = api.remove_saved_tutkintonimike(all_items[0]["id"])
+        self.assertTrue(removed)
+        self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
 
     def test_tutkintonimike_note_can_be_saved_listed_and_removed(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            all_items = api.list_tutkintonimikkeet()
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
 
-            saved_note = api.save_tutkintonimike_note(all_items[0]["id"], "Kiinnostaa erityisesti.")
+        saved_note = api.save_tutkintonimike_note(all_items[0]["id"], "Kiinnostaa erityisesti.")
 
-            self.assertEqual(saved_note["id"], all_items[0]["id"])
-            self.assertEqual(saved_note["noteText"], "Kiinnostaa erityisesti.")
+        self.assertEqual(saved_note["id"], all_items[0]["id"])
+        self.assertEqual(saved_note["noteText"], "Kiinnostaa erityisesti.")
 
-            notes = api.list_tutkintonimike_notes()
-            self.assertEqual(len(notes), 1)
-            self.assertEqual(notes[0]["id"], all_items[0]["id"])
+        notes = api.list_tutkintonimike_notes()
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(notes[0]["id"], all_items[0]["id"])
 
-            removed = api.remove_tutkintonimike_note(all_items[0]["id"])
-            self.assertTrue(removed)
-            self.assertEqual(api.list_tutkintonimike_notes(), [])
+        removed = api.remove_tutkintonimike_note(all_items[0]["id"])
+        self.assertTrue(removed)
+        self.assertEqual(api.list_tutkintonimike_notes(), [])
 
     def test_quiz_results_are_persisted_in_user_directory(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            first = api.save_quiz_result(
-                "opintopolku",
-                {"topPathId": "lukio", "scores": {"lukio": 3}},
-            )
-            second = api.save_quiz_result(
-                "amis-quiz",
-                {"winnerId": 2, "comparisons": 5},
-            )
+        api = self.create_api()
+        first = api.save_quiz_result(
+            "opintopolku",
+            {"topPathId": "lukio", "scores": {"lukio": 3}},
+        )
+        second = api.save_quiz_result(
+            "amis-quiz",
+            {"winnerId": 2, "comparisons": 5},
+        )
 
-            all_results = api.list_quiz_results()
-            self.assertEqual(len(all_results), 2)
-            self.assertEqual({item["id"] for item in all_results}, {first["id"], second["id"]})
+        all_results = api.list_quiz_results()
+        self.assertEqual(len(all_results), 2)
+        self.assertEqual({item["id"] for item in all_results}, {first["id"], second["id"]})
 
-            opintopolku_results = api.list_quiz_results("opintopolku")
-            self.assertEqual(len(opintopolku_results), 1)
-            self.assertEqual(opintopolku_results[0]["id"], first["id"])
+        opintopolku_results = api.list_quiz_results("opintopolku")
+        self.assertEqual(len(opintopolku_results), 1)
+        self.assertEqual(opintopolku_results[0]["id"], first["id"])
 
-            results_path = self.root / "user" / "quiz_results.json"
-            self.assertTrue(results_path.exists())
-            payload = json.loads(results_path.read_text(encoding="utf-8"))
-            self.assertEqual(len(payload["items"]), 2)
+        results_path = self.root / "user" / "quiz_results.json"
+        self.assertTrue(results_path.exists())
+        payload = json.loads(results_path.read_text(encoding="utf-8"))
+        self.assertEqual(len(payload["items"]), 2)
 
     def test_quiz_result_can_be_removed(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            result = api.save_quiz_result(
-                "amis-quiz",
-                {"winnerId": 2, "comparisons": 5},
-            )
+        api = self.create_api()
+        result = api.save_quiz_result(
+            "amis-quiz",
+            {"winnerId": 2, "comparisons": 5},
+        )
 
-            removed = api.remove_quiz_result(result["id"])
+        removed = api.remove_quiz_result(result["id"])
 
-            self.assertTrue(removed)
-            self.assertEqual(api.list_quiz_results(), [])
+        self.assertTrue(removed)
+        self.assertEqual(api.list_quiz_results(), [])
 
     def test_quiz_session_can_be_saved_loaded_and_cleared(self) -> None:
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
-            api = self.app.Api()
-            saved = api.save_quiz_session(
-                "opintopolku",
-                {"currentIndex": 2, "answers": [{"questionId": "q1", "optionId": "a"}]},
-            )
+        api = self.create_api()
+        saved = api.save_quiz_session(
+            "opintopolku",
+            {"currentIndex": 2, "answers": [{"questionId": "q1", "optionId": "a"}]},
+        )
 
-            loaded = api.get_quiz_session("opintopolku")
+        loaded = api.get_quiz_session("opintopolku")
 
-            self.assertIsNotNone(loaded)
-            self.assertEqual(loaded["quizId"], "opintopolku")
-            self.assertEqual(loaded["session"]["currentIndex"], 2)
-            self.assertEqual(saved["updatedAt"], loaded["updatedAt"])
+        self.assertIsNotNone(loaded)
+        self.assertEqual(loaded["quizId"], "opintopolku")
+        self.assertEqual(loaded["session"]["currentIndex"], 2)
+        self.assertEqual(saved["updatedAt"], loaded["updatedAt"])
 
-            cleared = api.clear_quiz_session("opintopolku")
+        cleared = api.clear_quiz_session("opintopolku")
 
-            self.assertTrue(cleared)
-            self.assertIsNone(api.get_quiz_session("opintopolku"))
-            sessions_path = self.root / "user" / "quiz_sessions.json"
-            self.assertTrue(sessions_path.exists())
+        self.assertTrue(cleared)
+        self.assertIsNone(api.get_quiz_session("opintopolku"))
+        sessions_path = self.root / "user" / "quiz_sessions.json"
+        self.assertTrue(sessions_path.exists())
 
 
 if __name__ == "__main__":
