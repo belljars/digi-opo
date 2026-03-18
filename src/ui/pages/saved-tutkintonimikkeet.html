@@ -3,11 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Selaa tallennettuja tutkintonimikkeitä, quiz-tuloksia, keskeneräisiä quiz-sessioneita ja muistiinpanoja."
+    />
     <title>digi-opo - Tallennetut</title>
     <link rel="stylesheet" href="../styles/styles.css" />
   </head>
   <body data-page="saved" data-subtitle="Tallennetut">
-    <main class="app">
+    <a class="skip-link" href="#main-content">Siirry sisältöön</a>
+    <main class="app" id="main-content">
       <div id="app-header"></div>
 
       <section class="panel saved-page">
@@ -20,7 +25,7 @@
         <div id="saved-feedback" class="saved-feedback" aria-live="polite"></div>
 
         <details>
-          <summary><h2>Tallennetut tutkintonimikke tilasto</h2></summary>
+          <summary>Tallennettujen tutkintonimikkeiden tilasto</summary>
           <section class="saved-section" aria-labelledby="saved-stats-title">
           <div class="saved-section-header">
             <div>

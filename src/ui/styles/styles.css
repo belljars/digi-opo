@@ -41,6 +41,21 @@ body {
   font-family: var(--font-family-base);
 }
 
+.skip-link {
+  position: absolute;
+  left: var(--space-8);
+  top: 0;
+  transform: translateY(-140%);
+  padding: var(--space-4) var(--space-6);
+  border: var(--border-width) solid var(--color-border);
+  background: Canvas;
+  color: CanvasText;
+}
+
+.skip-link:focus {
+  transform: translateY(var(--space-6));
+}
+
 .app {
   max-width: 1100px;
   margin: var(--space-11) auto;

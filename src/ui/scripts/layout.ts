@@ -65,6 +65,8 @@ function initLayout(): void {
   renderFooter();
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", initLayout, { once: true });
+} else {
   initLayout();
-});
+}

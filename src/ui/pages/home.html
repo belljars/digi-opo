@@ -3,23 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="digi-opo on paikallinen tutkintopankki opiskelijoille ja tuleville opiskelijoille."
+    />
     <title>digi-opo - Digitaalinen tutkintopankki</title>
     <link rel="stylesheet" href="../styles/styles.css" />
   </head>
   <body data-page="home" data-subtitle="Paikallinen tutkintopankki opiskelijoille ja tuleville">
-    <main class="app">
+    <a class="skip-link" href="#main-content">Siirry sisältöön</a>
+    <main class="app" id="main-content">
       <div id="app-header"></div>
 
-      <div id="main-content">
+      <div>
         <h2>Aloita tutustuminen</h2>
         <div id="card-select">
           <a href="./pankki.html" class="card">
-            <img src="#" alt="Placeholder Image" class="card-image" />
+            <div class="card-image" aria-hidden="true"></div>
             <h2>Amis Tutkintopankki</h2>
             <p>Selaa tutkintopankin tietokantaa ja loyda sinua kiinnostavia tutkintoja.</p>
           </a>
           <a href="./opintopolut.html" class="card">
-            <img src="#" alt="Placeholder Image" class="card-image" />
+            <div class="card-image" aria-hidden="true"></div>
             <h2>Erilaiset opintopolut</h2>
             <p>Katso erilaisia opintopolkuja ja suunnittele oma reittisi kohti unelmiesi uraa.</p>
           </a>
@@ -29,12 +34,12 @@
           <p>Löydä sinulle sopivat tutkintokyselyt.</p>
           <div id="kyselyt-cards">
             <a href="./quiz.html" class="card">
-              <img src="#" alt="Placeholder Image" class="card-image" />
+              <div class="card-image" aria-hidden="true"></div>
               <h2>Opintopolku-kysely</h2>
               <p>Vastaa kysymyksiin ja loyda sinulle sopivin opintopolku.</p>
             </a>
             <a href="./amis-quiz.html" class="card">
-              <img src="#" alt="Placeholder Image" class="card-image" />
+              <div class="card-image" aria-hidden="true"></div>
               <h2>Amis-korttivertailu</h2>
               <p>Vertaile kahta tutkintonimiketta kerrallaan ja tee valintoja.</p>
             </a>
