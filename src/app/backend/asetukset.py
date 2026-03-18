@@ -1,9 +1,94 @@
 from __future__ import annotations
 
+import json
+
 from backend_apu import utc_now_iso
 
 
+DEFAULT_ACCESSIBILITY_SETTINGS = {
+    "contrast": "default",
+    "fontFamily": "system",
+    "fontSize": "100",
+    "lineHeight": "normal",
+    "reducedMotion": False,
+    "strongFocus": False,
+    "largerTargets": False,
+}
+
+
+def _normalize_accessibility_settings(raw: object) -> dict[str, str | bool]:
+    allowed_contrast = {"default", "light-high", "dark-high"}
+    allowed_font_family = {"system", "sans", "serif", "dyslexia"}
+    allowed_font_size = {"100", "112", "125", "150"}
+    allowed_line_height = {"normal", "comfortable", "loose"}
+    settings = dict(DEFAULT_ACCESSIBILITY_SETTINGS)
+
+    if not isinstance(raw, dict):
+        return settings
+
+    contrast = raw.get("contrast")
+    if contrast in allowed_contrast:
+        settings["contrast"] = contrast
+
+    font_family = raw.get("fontFamily")
+    if font_family in allowed_font_family:
+        settings["fontFamily"] = font_family
+
+    font_size = raw.get("fontSize")
+    if font_size in allowed_font_size:
+        settings["fontSize"] = font_size
+
+    line_height = raw.get("lineHeight")
+    if line_height in allowed_line_height:
+        settings["lineHeight"] = line_height
+
+    for key in ("reducedMotion", "strongFocus", "largerTargets"):
+        value = raw.get(key)
+        if isinstance(value, bool):
+            settings[key] = value
+
+    return settings
+
+
 class AsetuksetApiMixin:
+    def get_accessibility_settings(self) -> dict[str, str | bool]:
+        with self._lock:
+            row = self._conn.execute(
+                """
+                SELECT value
+                FROM app_settings
+                WHERE key = 'accessibility';
+                """
+            ).fetchone()
+
+        if not row:
+            return dict(DEFAULT_ACCESSIBILITY_SETTINGS)
+
+        try:
+            payload = json.loads(row["value"])
+        except json.JSONDecodeError:
+            return dict(DEFAULT_ACCESSIBILITY_SETTINGS)
+
+        return _normalize_accessibility_settings(payload)
+
+    def save_accessibility_settings(self, settings: object) -> dict[str, str | bool]:
+        normalized = _normalize_accessibility_settings(settings)
+
+        with self._lock:
+            with self._conn:
+                self._conn.execute(
+                    """
+                    INSERT INTO app_settings (key, value, updated_at)
+                    VALUES ('accessibility', ?, ?)
+                    ON CONFLICT(key) DO UPDATE SET
+                        value = excluded.value,
+                        updated_at = excluded.updated_at;
+                    """,
+                    (json.dumps(normalized), utc_now_iso()),
+                )
+
+        return normalized
+
     def list_hidden_tutkinnot(self) -> list[dict[str, str | int]]:
         # Palauttaa asetuksissa piilotetut tutkinnot
         with self._lock:

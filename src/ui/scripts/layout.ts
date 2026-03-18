@@ -1,5 +1,14 @@
 export {};
 
+import {
+  applyAccessibilitySettings,
+  loadStoredAccessibilitySettings,
+  normalizeAccessibilitySettings,
+  persistAccessibilitySettings,
+  type AccessibilitySettings
+} from "./accessibility-settings.js";
+import { waitForPywebviewApi } from "./pywebview-init.js";
+
 type NavItem = {
   id: string;
   href: string;
@@ -14,6 +23,28 @@ const navItems: NavItem[] = [
   { id: "asetukset", href: "./asetukset.html", label: "Asetukset" },
   { id: "esteettomyys", href: "./esteettomyys.html", label: "Esteettömyys" }
 ];
+
+type SettingsApi = {
+  get_accessibility_settings: () => Promise<AccessibilitySettings>;
+};
+
+async function initAccessibilitySettings(): Promise<void> {
+  const stored = loadStoredAccessibilitySettings();
+  applyAccessibilitySettings(stored);
+
+  const api = await waitForPywebviewApi<SettingsApi>(1500);
+  if (!api) {
+    return;
+  }
+
+  try {
+    const remote = normalizeAccessibilitySettings(await api.get_accessibility_settings());
+    applyAccessibilitySettings(remote);
+    persistAccessibilitySettings(remote);
+  } catch {
+    // Jatketaan paikallisilla asetuksilla, jos backend ei ole saatavilla.
+  }
+}
 
 function renderHeader(): void {
   const headerHost = document.getElementById("app-header");
@@ -63,6 +94,7 @@ function renderFooter(): void {
 function initLayout(): void {
   renderHeader();
   renderFooter();
+  void initAccessibilitySettings();
 }
 
 if (document.readyState === "loading") {

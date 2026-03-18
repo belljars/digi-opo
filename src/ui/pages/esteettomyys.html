@@ -15,14 +15,138 @@
     <main class="app" id="main-content">
       <div id="app-header"></div>
 
-      <div>
-        <h2>Esteettömyys asetukset</h2>
-        
-      </div>
+      <section class="panel accessibility-page" aria-labelledby="accessibility-title">
+        <div class="accessibility-page-header">
+          <div>
+            <h2 id="accessibility-title">Esteettömyysasetukset</h2>
+            <p class="saved-page-copy">
+              Tälle sivulle on valmisteltu perusasetukset kontrastille, fontille, tekstikoolle, rivivalille ja
+              liikkeen vahentamiselle.
+            </p>
+          </div>
+          <p class="accessibility-status" aria-live="polite">Esikatselu valmis, tallennus ja toiminnallisuus tulossa.</p>
+        </div>
+
+        <div class="accessibility-layout">
+          <form class="accessibility-form" aria-describedby="accessibility-form-note">
+            <p id="accessibility-form-note" class="accessibility-note">
+              Asetukset ovat viela suunnitteluvaiheessa. Kentat nayttavat tulevan rakenteen, mutta ne eivat muuta
+              sovelluksen ulkoasua toistaiseksi.
+            </p>
+
+            <fieldset class="accessibility-fieldset">
+              <legend>Kontrasti</legend>
+              <label class="accessibility-choice">
+                <input type="radio" name="contrast" value="default" checked />
+                <span>
+                  <strong>Oletus</strong>
+                  <small>Tavallinen vaalea teema nykyisillä väreillä.</small>
+                </span>
+              </label>
+              <label class="accessibility-choice">
+                <input type="radio" name="contrast" value="light-high" />
+                <span>
+                  <strong>Korkea kontrasti</strong>
+                  <small>Korostaa eroja tekstin, reunojen ja taustan välillä.</small>
+                </span>
+              </label>
+              <label class="accessibility-choice">
+                <input type="radio" name="contrast" value="dark-high" />
+                <span>
+                  <strong>Tumma korkea kontrasti</strong>
+                  <small>Sopii käyttäjille, jotka suosivat tummaa ja selkää esitystapaa.</small>
+                </span>
+              </label>
+            </fieldset>
+
+            <fieldset class="accessibility-fieldset">
+              <legend>Teksti</legend>
+              <div class="accessibility-control">
+                <label for="accessibility-font-family">Fontti</label>
+                <select id="accessibility-font-family" name="font-family">
+                  <option value="system" selected>Järjestelmän oletusfontti</option>
+                  <option value="sans">Selkeä groteski</option>
+                  <option value="serif">Pääteellinen fontti</option>
+                  <option value="dyslexia">Dysleksiaystavallinen fontti</option>
+                </select>
+              </div>
+
+              <div class="accessibility-control">
+                <label for="accessibility-font-size">Tekstikoko</label>
+                <select id="accessibility-font-size" name="font-size">
+                  <option value="100" selected>Oletus</option>
+                  <option value="112">Hieman suurempi</option>
+                  <option value="125">Suuri</option>
+                  <option value="150">Erittäin suuri</option>
+                </select>
+              </div>
+
+              <div class="accessibility-control">
+                <label for="accessibility-line-height">Riviväli</label>
+                <select id="accessibility-line-height" name="line-height">
+                  <option value="normal" selected>Normaali</option>
+                  <option value="comfortable">Valjempi</option>
+                  <option value="loose">Hyvin valja</option>
+                </select>
+              </div>
+            </fieldset>
+
+            <fieldset class="accessibility-fieldset">
+              <legend>Navigointi ja liike</legend>
+              <label class="accessibility-toggle">
+                <input type="checkbox" name="reduced-motion" />
+                <span>Vähennä animaatioita ja muuta liiketta</span>
+              </label>
+              <label class="accessibility-toggle">
+                <input type="checkbox" name="strong-focus" />
+                <span>Korosta kohdistuskehys painikkeissa ja linkeissa</span>
+              </label>
+              <label class="accessibility-toggle">
+                <input type="checkbox" name="larger-targets" />
+                <span>Suurenna painallusalueita</span>
+              </label>
+            </fieldset>
+
+            <div class="accessibility-actions">
+              <button type="button" disabled>Tallenna asetukset</button>
+              <button type="reset" disabled>Palauta oletukset</button>
+            </div>
+          </form>
+
+          <section class="accessibility-preview" aria-labelledby="accessibility-preview-title">
+            <div class="accessibility-preview-header">
+              <h3 id="accessibility-preview-title">Esikatselu</h3>
+              <p class="saved-page-copy">Mallisisalto auttaa hahmottamaan, miltä tulevat asetukset voivat näyttää.</p>
+            </div>
+
+            <article class="accessibility-preview-card">
+              <p class="accessibility-preview-eyebrow">Mallinäkymä</p>
+              <h4>Tutkintopankin kortti</h4>
+              <p>
+                Tässä esikatselussa näkyy otsikko, leipäteksti, toimintopainikkeet ja linkki samalla alueella. Kun
+                asetukset toteutetaan, vaikutus voidaan tarkistaa täältä ennen tallennusta.
+              </p>
+              <div class="accessibility-preview-actions">
+                <button type="button">Esimerkkipainike</button>
+                <a href="./pankki.html">Esimerkkilinkki</a>
+              </div>
+            </article>
+
+            <article class="accessibility-preview-card accessibility-preview-card-muted">
+              <h4>Lukuystavallinen teksti</h4>
+              <p>
+                Tavoitteena on antaa käyttäjälle mahdollisuus kasvattaa tekstiä, lisätä kontrastia ja tehdä sisällöstä
+                helpommin luettavaa ilman, ettei sovelluksen perusrakenne rikkoutuisi.
+              </p>
+            </article>
+          </section>
+        </div>
+      </section>
 
       <footer id="app-footer" class="site-footer"></footer>
     </main>
 
     <script type="module" src="../scripts/layout.js"></script>
+    <script type="module" src="../scripts/esteettomyys.js"></script>
   </body>
 </html>

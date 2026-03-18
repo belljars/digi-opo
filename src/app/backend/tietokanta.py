@@ -64,6 +64,15 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     )
     conn.execute(
         """
+        CREATE TABLE IF NOT EXISTS app_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        );
+        """
+    )
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS saved_tutkintonimikkeet (
             tutkintonimike_id INTEGER PRIMARY KEY,
             saved_at TEXT NOT NULL,

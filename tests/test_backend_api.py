@@ -270,6 +270,49 @@ class BackendApiTests(unittest.TestCase):
         self.assertTrue(removed)
         self.assertEqual(api.list_tutkintonimike_notes(), [])
 
+    def test_accessibility_settings_can_be_saved_and_loaded(self) -> None:
+        api = self.create_api()
+
+        self.assertEqual(
+            api.get_accessibility_settings(),
+            {
+                "contrast": "default",
+                "fontFamily": "system",
+                "fontSize": "100",
+                "lineHeight": "normal",
+                "reducedMotion": False,
+                "strongFocus": False,
+                "largerTargets": False,
+            },
+        )
+
+        saved = api.save_accessibility_settings(
+            {
+                "contrast": "dark-high",
+                "fontFamily": "serif",
+                "fontSize": "125",
+                "lineHeight": "comfortable",
+                "reducedMotion": True,
+                "strongFocus": True,
+                "largerTargets": True,
+                "unknown": "ignored",
+            }
+        )
+
+        self.assertEqual(
+            saved,
+            {
+                "contrast": "dark-high",
+                "fontFamily": "serif",
+                "fontSize": "125",
+                "lineHeight": "comfortable",
+                "reducedMotion": True,
+                "strongFocus": True,
+                "largerTargets": True,
+            },
+        )
+        self.assertEqual(api.get_accessibility_settings(), saved)
+
     def test_quiz_results_are_persisted_in_user_directory(self) -> None:
         api = self.create_api()
         first = api.save_quiz_result(
