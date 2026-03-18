@@ -8,6 +8,7 @@ import {
   persistAccessibilitySettings,
   type AccessibilitySettings
 } from "./accessibility-settings.js";
+import { areAccessibilitySettingsEqual } from "./accessibility-page-state.js";
 import { createRetryingPageInit, waitForPywebviewApi, type InitAttemptResult } from "./pywebview-init.js";
 
 type SettingsApi = {
@@ -25,6 +26,7 @@ const resetButtonEl = document.querySelector(
 ) as HTMLButtonElement | null;
 
 let activeApi: SettingsApi | null = null;
+let savedSettings: AccessibilitySettings = { ...defaultAccessibilitySettings };
 let currentSettings: AccessibilitySettings = { ...defaultAccessibilitySettings };
 
 function setStatus(message: string): void {
@@ -39,6 +41,15 @@ function setActionsDisabled(disabled: boolean): void {
   }
   if (resetButtonEl) {
     resetButtonEl.disabled = disabled;
+  }
+}
+
+function updateActionState(): void {
+  if (saveButtonEl) {
+    saveButtonEl.disabled = areAccessibilitySettingsEqual(currentSettings, savedSettings);
+  }
+  if (resetButtonEl) {
+    resetButtonEl.disabled = areAccessibilitySettingsEqual(currentSettings, defaultAccessibilitySettings);
   }
 }
 
@@ -101,17 +112,23 @@ function writeFormSettings(settings: AccessibilitySettings): void {
 function previewCurrentSettings(): void {
   currentSettings = readFormSettings();
   applyAccessibilitySettings(currentSettings);
-  persistAccessibilitySettings(currentSettings);
-  setStatus(activeApi ? "Esikatselu paivittyi. Voit tallentaa muutokset." : "Esikatselu paivittyi paikallisesti.");
+  updateActionState();
+  setStatus(
+    areAccessibilitySettingsEqual(currentSettings, savedSettings)
+      ? "Esikatselu vastaa tallennettuja asetuksia."
+      : "Esikatselu paivittyi. Muutokset eivat ole viela tallessa."
+  );
 }
 
 async function saveSettings(): Promise<void> {
   currentSettings = readFormSettings();
 
   if (!activeApi) {
+    savedSettings = { ...currentSettings };
     persistAccessibilitySettings(currentSettings);
     applyAccessibilitySettings(currentSettings);
-    setStatus("Asetukset paivitettiin paikalliseen esikatseluun. Pysyva tallennus vaatii sovellusympariston.");
+    updateActionState();
+    setStatus("Esteettomyysasetukset tallennettu selaimeen.");
     return;
   }
 
@@ -119,15 +136,17 @@ async function saveSettings(): Promise<void> {
   setStatus("Tallennetaan esteettomyysasetuksia...");
   try {
     const saved = normalizeAccessibilitySettings(await activeApi.save_accessibility_settings(currentSettings));
+    savedSettings = saved;
     currentSettings = saved;
     writeFormSettings(saved);
     applyAccessibilitySettings(saved);
     persistAccessibilitySettings(saved);
+    updateActionState();
     setStatus("Esteettomyysasetukset tallennettu.");
   } catch {
     setStatus("Esteettomyysasetusten tallennus epaonnistui.");
   } finally {
-    setActionsDisabled(false);
+    updateActionState();
   }
 }
 
@@ -135,11 +154,11 @@ function resetSettings(): void {
   currentSettings = { ...defaultAccessibilitySettings };
   writeFormSettings(currentSettings);
   applyAccessibilitySettings(currentSettings);
-  persistAccessibilitySettings(currentSettings);
+  updateActionState();
   setStatus(
     activeApi
       ? "Oletusasetukset palautettu esikatseluun. Tallenna muutokset, jos haluat ne pysyviksi."
-      : "Oletusasetukset palautettu paikalliseen esikatseluun."
+      : "Oletusasetukset palautettu esikatseluun. Tallenna, jos haluat ne kayttoon myos ensi kerralla."
   );
 }
 
@@ -154,6 +173,7 @@ async function initPage(): Promise<InitAttemptResult> {
     ? normalizeAccessibilitySettings(await activeApi.get_accessibility_settings())
     : loadStoredAccessibilitySettings();
 
+  savedSettings = initialSettings;
   currentSettings = initialSettings;
   writeFormSettings(initialSettings);
   applyAccessibilitySettings(initialSettings);
@@ -167,11 +187,11 @@ async function initPage(): Promise<InitAttemptResult> {
     window.setTimeout(resetSettings, 0);
   });
 
-  setActionsDisabled(false);
+  updateActionState();
   setStatus(
     activeApi
-      ? "Muokkaa asetuksia ja tallenna muutokset."
-      : "Muokkaa asetuksia. Tallennus toimii paikallisena esikatseluna selaimessa."
+      ? "Muokkaa asetuksia. Esikatselu paivittyy heti, mutta muutokset tallentuvat vasta painamalla Tallenna."
+      : "Muokkaa asetuksia. Esikatselu paivittyy heti, ja Tallenna sailyttaa valinnat selaimessa."
   );
 
   return { success: true };
