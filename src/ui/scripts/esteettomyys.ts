@@ -21,9 +21,13 @@ const statusEl = document.querySelector(".accessibility-status");
 const saveButtonEl = document.querySelector(
   '.accessibility-actions button[type="button"]'
 ) as HTMLButtonElement | null;
+const restoreButtonEl = document.querySelector(
+  '.accessibility-actions button[data-action="restore-saved"]'
+) as HTMLButtonElement | null;
 const resetButtonEl = document.querySelector(
   '.accessibility-actions button[type="reset"]'
 ) as HTMLButtonElement | null;
+const draftBadgeEl = document.querySelector(".accessibility-draft-badge") as HTMLElement | null;
 
 let activeApi: SettingsApi | null = null;
 let savedSettings: AccessibilitySettings = { ...defaultAccessibilitySettings };
@@ -39,17 +43,29 @@ function setActionsDisabled(disabled: boolean): void {
   if (saveButtonEl) {
     saveButtonEl.disabled = disabled;
   }
+  if (restoreButtonEl) {
+    restoreButtonEl.disabled = disabled;
+  }
   if (resetButtonEl) {
     resetButtonEl.disabled = disabled;
   }
 }
 
 function updateActionState(): void {
+  const hasUnsavedChanges = !areAccessibilitySettingsEqual(currentSettings, savedSettings);
+  const isDefaultPreview = areAccessibilitySettingsEqual(currentSettings, defaultAccessibilitySettings);
+
   if (saveButtonEl) {
-    saveButtonEl.disabled = areAccessibilitySettingsEqual(currentSettings, savedSettings);
+    saveButtonEl.disabled = !hasUnsavedChanges;
+  }
+  if (restoreButtonEl) {
+    restoreButtonEl.disabled = !hasUnsavedChanges;
   }
   if (resetButtonEl) {
-    resetButtonEl.disabled = areAccessibilitySettingsEqual(currentSettings, defaultAccessibilitySettings);
+    resetButtonEl.disabled = isDefaultPreview;
+  }
+  if (draftBadgeEl) {
+    draftBadgeEl.hidden = !hasUnsavedChanges;
   }
 }
 
@@ -162,8 +178,16 @@ function resetSettings(): void {
   );
 }
 
+function restoreSavedSettings(): void {
+  currentSettings = { ...savedSettings };
+  writeFormSettings(currentSettings);
+  applyAccessibilitySettings(currentSettings);
+  updateActionState();
+  setStatus("Tallennetut asetukset palautettu esikatseluun.");
+}
+
 async function initPage(): Promise<InitAttemptResult> {
-  if (!formEl || !saveButtonEl || !resetButtonEl) {
+  if (!formEl || !saveButtonEl || !restoreButtonEl || !resetButtonEl) {
     return { success: true };
   }
 
@@ -183,6 +207,7 @@ async function initPage(): Promise<InitAttemptResult> {
   saveButtonEl.addEventListener("click", () => {
     void saveSettings();
   });
+  restoreButtonEl.addEventListener("click", restoreSavedSettings);
   formEl.addEventListener("reset", () => {
     window.setTimeout(resetSettings, 0);
   });

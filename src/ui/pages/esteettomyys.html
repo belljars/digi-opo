@@ -24,7 +24,10 @@
               tallennusta.
             </p>
           </div>
-          <p class="accessibility-status" aria-live="polite">Asetuksia ladataan...</p>
+          <div class="accessibility-status-stack">
+            <p class="accessibility-status" aria-live="polite">Asetuksia ladataan...</p>
+            <p class="accessibility-draft-badge" hidden>Tallentamattomia muutoksia</p>
+          </div>
         </div>
 
         <div class="accessibility-layout">
@@ -109,6 +112,7 @@
 
             <div class="accessibility-actions">
               <button type="button" disabled>Tallenna asetukset</button>
+              <button type="button" data-action="restore-saved" disabled>Peru muutokset</button>
               <button type="reset" disabled>Palauta oletukset</button>
             </div>
           </form>
