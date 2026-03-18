@@ -1,0 +1,7 @@
+:root[data-contrast="dark-high"] {
+  --color-background: #0a0a0a;
+  --color-text: #fff;
+  --color-surface-muted: #202020;
+  --color-overlay-subtle: rgba(255, 255, 255, 0.14);
+  --border-width: 2px;
+}

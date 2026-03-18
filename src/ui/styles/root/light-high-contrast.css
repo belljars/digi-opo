@@ -1,0 +1,7 @@
+:root[data-contrast="light-high"] {
+  --color-background: #fff;
+  --color-text: #000;
+  --color-surface-muted: #f2f2f2;
+  --color-overlay-subtle: rgba(0, 0, 0, 0.12);
+  --border-width: 2px;
+}

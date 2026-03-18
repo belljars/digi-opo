@@ -1,92 +1,8 @@
-:root {
-  --font-scale: 1;
-  --font-family-base: system-ui, sans-serif;
-  --font-family-system: system-ui, sans-serif;
-  --font-family-sans: "Atkinson Hyperlegible", "Segoe UI", sans-serif;
-  --font-family-serif: Georgia, "Times New Roman", serif;
-  --font-family-dyslexia: "OpenDyslexic", "Comic Sans MS", sans-serif;
-  --color-background: #f5f5f2;
-  --color-text: #111;
-  --color-border: currentColor;
-  --color-surface-muted: #ddd;
-  --color-overlay-subtle: rgba(0, 0, 0, 0.06);
-  --color-transparent: transparent;
-  --space-1: 0.25rem;
-  --space-2: 0.35rem;
-  --space-3: 0.4rem;
-  --space-4: 0.5rem;
-  --space-5: 0.6rem;
-  --space-6: 0.75rem;
-  --space-7: 0.85rem;
-  --space-8: 1rem;
-  --space-9: 1.25rem;
-  --space-10: 1.5rem;
-  --space-11: 2rem;
-  --text-xs: calc(0.85rem * var(--font-scale));
-  --text-sm: calc(0.9rem * var(--font-scale));
-  --text-md: calc(0.95rem * var(--font-scale));
-  --text-lg: calc(1rem * var(--font-scale));
-  --text-xl: calc(1.05rem * var(--font-scale));
-  --text-2xl: calc(1.1rem * var(--font-scale));
-  --text-3xl: calc(1.2rem * var(--font-scale));
-  --text-4xl: calc(1.9rem * var(--font-scale));
-  --line-height-copy: 1.4;
-  --line-height-detail: 1.6;
-  --border-width: 1px;
-  --control-padding-y: var(--space-4);
-  --control-padding-x: var(--space-5);
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 2px;
-}
+@import url("./root/main.css");
+@import url("./root/light-high-contrast.css");
+@import url("./root/dark-high-contrast.css");
 
-:root[data-contrast="light-high"] {
-  --color-background: #fff;
-  --color-text: #000;
-  --color-surface-muted: #f2f2f2;
-  --color-overlay-subtle: rgba(0, 0, 0, 0.12);
-  --border-width: 2px;
-}
-
-:root[data-contrast="dark-high"] {
-  --color-background: #0a0a0a;
-  --color-text: #fff;
-  --color-surface-muted: #202020;
-  --color-overlay-subtle: rgba(255, 255, 255, 0.14);
-  --border-width: 2px;
-}
-
-:root[data-font-family="sans"] {
-  --font-family-base: var(--font-family-sans);
-}
-
-:root[data-font-family="serif"] {
-  --font-family-base: var(--font-family-serif);
-}
-
-:root[data-font-family="dyslexia"] {
-  --font-family-base: var(--font-family-dyslexia);
-}
-
-:root[data-line-height="comfortable"] {
-  --line-height-copy: 1.6;
-  --line-height-detail: 1.8;
-}
-
-:root[data-line-height="loose"] {
-  --line-height-copy: 1.8;
-  --line-height-detail: 2;
-}
-
-:root[data-larger-targets="true"] {
-  --control-padding-y: var(--space-6);
-  --control-padding-x: var(--space-7);
-}
-
-:root[data-strong-focus="true"] {
-  --focus-ring-width: 4px;
-  --focus-ring-offset: 3px;
-}
-
+/* Perusresetit */
 * {
   box-sizing: border-box;
 }
@@ -95,6 +11,7 @@
   display: none !important;
 }
 
+/* Sivun yleiset pohjatyylit */
 body {
   margin: 0;
   font-family: var(--font-family-base);
@@ -102,6 +19,7 @@ body {
   color: var(--color-text);
 }
 
+/* Vahennetyn liikkeen tila */
 :root[data-reduced-motion="true"] *,
 :root[data-reduced-motion="true"] *::before,
 :root[data-reduced-motion="true"] *::after {
@@ -111,11 +29,13 @@ body {
   transition-duration: 0.01ms !important;
 }
 
+/* Korostettu kohdistuskehys */
 :root[data-strong-focus="true"] :is(a, button, input, select, textarea, summary):focus-visible {
   outline: var(--focus-ring-width) solid currentColor;
   outline-offset: var(--focus-ring-offset);
 }
 
+/* Ohituslinkki näppäimistökäyttöön */
 .skip-link {
   position: absolute;
   left: var(--space-8);
@@ -131,6 +51,7 @@ body {
   transform: translateY(var(--space-6));
 }
 
+/* Sovelluksen pääkehys */
 .app {
   max-width: 1100px;
   margin: var(--space-11) auto;
@@ -139,6 +60,7 @@ body {
   background: var(--color-background);
 }
 
+/* Ylätunniste ja navigaatio */
 .header {
   display: flex;
   align-items: center;
@@ -168,6 +90,7 @@ body {
   margin: 0;
 }
 
+/* Pankin kaksipalstainen työtila */
 .workspace {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -180,6 +103,7 @@ body {
   padding: var(--space-8);
 }
 
+/* Etusivun kortit */
 .card-image {
   width: 100%;
   height: auto;
@@ -224,6 +148,7 @@ body {
   line-height: var(--line-height-copy);
 }
 
+/* Hakunäkymän suodattimet ja listat */
 .panel-list {
   display: flex;
   flex-direction: column;
@@ -286,6 +211,7 @@ body {
   background-color: var(--color-overlay-subtle);
 }
 
+/* Quizien yhteiset rakenteet */
 .quiz-header {
   display: flex;
   align-items: flex-start;
@@ -340,6 +266,7 @@ body {
   opacity: 0.82;
 }
 
+/* Korttivertailun pelialue */
 .quiz-play {
   display: grid;
   gap: var(--space-5);
@@ -440,6 +367,7 @@ body {
   padding: 0 var(--space-7) var(--space-7);
 }
 
+/* Monivalintakyselyn sisältö */
 .quiz-body {
   display: grid;
   gap: var(--space-8);
@@ -599,6 +527,7 @@ body {
   opacity: 0.75;
 }
 
+/* Tutkinnon detail ja tutkintonimikekortit */
 .detail p {
   line-height: var(--line-height-detail);
 }
@@ -676,6 +605,7 @@ body {
   margin: 0;
 }
 
+/* Korttien toimintopainikkeet */
 .tutkintonimike-action,
 .tutkintonimike-link-action {
   border: var(--border-width) solid var(--color-border);
@@ -690,6 +620,7 @@ body {
   justify-content: center;
 }
 
+/* Tallennetut ja esteettömyysnäkymät */
 .saved-page {
   display: grid;
   gap: var(--space-8);
@@ -838,6 +769,7 @@ body {
   background: var(--color-overlay-subtle);
 }
 
+/* Tallennettujen tilastot */
 .saved-section {
   display: grid;
   gap: var(--space-6);
@@ -933,6 +865,7 @@ body {
   flex-wrap: wrap;
 }
 
+/* Asetussivun hallintalistat */
 .asetukset-page {
   display: grid;
   gap: var(--space-9);
@@ -1042,6 +975,7 @@ body {
   white-space: pre-wrap;
 }
 
+/* Opintopolkujen korttinäkymä */
 .opintopolut-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1070,6 +1004,7 @@ body {
   font-style: italic;
 }
 
+/* Alatunniste ja yleiset linkkipainikkeet */
 .site-footer {
   margin-top: var(--space-10);
   padding-top: var(--space-8);
@@ -1097,6 +1032,7 @@ body {
   margin: 0;
 }
 
+/* Mobiiliasettelu */
 @media (max-width: 900px) {
   .workspace {
     grid-template-columns: 1fr;

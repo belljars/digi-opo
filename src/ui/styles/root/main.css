@@ -1,0 +1,72 @@
+:root {
+  --font-scale: 1;
+  --font-family-base: system-ui, sans-serif;
+  --font-family-system: system-ui, sans-serif;
+  --font-family-sans: "Atkinson Hyperlegible", "Segoe UI", sans-serif;
+  --font-family-serif: Georgia, "Times New Roman", serif;
+  --font-family-dyslexia: "OpenDyslexic", "Comic Sans MS", sans-serif;
+  --color-background: #f5f5f2;
+  --color-text: #111;
+  --color-border: currentColor;
+  --color-surface-muted: #ddd;
+  --color-overlay-subtle: rgba(0, 0, 0, 0.06);
+  --color-transparent: transparent;
+  --space-1: 0.25rem;
+  --space-2: 0.35rem;
+  --space-3: 0.4rem;
+  --space-4: 0.5rem;
+  --space-5: 0.6rem;
+  --space-6: 0.75rem;
+  --space-7: 0.85rem;
+  --space-8: 1rem;
+  --space-9: 1.25rem;
+  --space-10: 1.5rem;
+  --space-11: 2rem;
+  --text-xs: calc(0.85rem * var(--font-scale));
+  --text-sm: calc(0.9rem * var(--font-scale));
+  --text-md: calc(0.95rem * var(--font-scale));
+  --text-lg: calc(1rem * var(--font-scale));
+  --text-xl: calc(1.05rem * var(--font-scale));
+  --text-2xl: calc(1.1rem * var(--font-scale));
+  --text-3xl: calc(1.2rem * var(--font-scale));
+  --text-4xl: calc(1.9rem * var(--font-scale));
+  --line-height-copy: 1.4;
+  --line-height-detail: 1.6;
+  --border-width: 1px;
+  --control-padding-y: var(--space-4);
+  --control-padding-x: var(--space-5);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+}
+
+:root[data-font-family="sans"] {
+  --font-family-base: var(--font-family-sans);
+}
+
+:root[data-font-family="serif"] {
+  --font-family-base: var(--font-family-serif);
+}
+
+:root[data-font-family="dyslexia"] {
+  --font-family-base: var(--font-family-dyslexia);
+}
+
+:root[data-line-height="comfortable"] {
+  --line-height-copy: 1.6;
+  --line-height-detail: 1.8;
+}
+
+:root[data-line-height="loose"] {
+  --line-height-copy: 1.8;
+  --line-height-detail: 2;
+}
+
+:root[data-larger-targets="true"] {
+  --control-padding-y: var(--space-6);
+  --control-padding-x: var(--space-7);
+}
+
+:root[data-strong-focus="true"] {
+  --focus-ring-width: 4px;
+  --focus-ring-offset: 3px;
+}
