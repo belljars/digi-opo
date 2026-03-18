@@ -4,6 +4,37 @@ from backend_apu import utc_now_iso
 
 
 class TutkinnotApiMixin:
+    _ALLOWED_PLAN_PRIORITIES = {"", "ensisijainen", "selvitettava", "varavaihtoehto"}
+    _ALLOWED_PLAN_STATUSES = {"", "en-tieda-viela", "haluan-selvittaa-lisaa", "vahva-vaihtoehto"}
+
+    def _get_visible_tutkintonimike_row(self, nimike_id: int):
+        return self._conn.execute(
+            """
+            SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
+            FROM tutkintonimikkeet n
+            JOIN tutkinnot t ON t.id = n.tutkinto_id
+            LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
+            LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
+            WHERE n.id = ? AND ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL;
+            """,
+            (nimike_id,),
+        ).fetchone()
+
+    def _serialize_saved_item(self, row, saved_at: str, plan_priority, plan_status, next_step, plan_updated_at) -> dict:
+        return {
+            "id": row["id"],
+            "nimi": row["nimi"],
+            "linkki": row["linkki"],
+            "img": row["img"],
+            "tutkinto_id": row["tutkinto_id"],
+            "tutkinto_nimi": row["tutkinto_nimi"],
+            "savedAt": saved_at,
+            "planPriority": plan_priority or None,
+            "planStatus": plan_status or None,
+            "nextStep": next_step or None,
+            "planUpdatedAt": plan_updated_at or None,
+        }
+
     def list_tutkinnot(self) -> list[dict[str, str | int]]:
         # Palauttaa kaikki nakyvat tutkinnot listanakymaa varten
         with self._lock:
@@ -115,7 +146,18 @@ class TutkinnotApiMixin:
         with self._lock:
             rows = self._conn.execute(
                 """
-                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi, s.saved_at
+                SELECT
+                    n.id,
+                    n.nimi,
+                    n.linkki,
+                    n.img,
+                    n.tutkinto_id,
+                    t.nimi AS tutkinto_nimi,
+                    s.saved_at,
+                    s.plan_priority,
+                    s.plan_status,
+                    s.next_step,
+                    s.plan_updated_at
                 FROM saved_tutkintonimikkeet s
                 JOIN tutkintonimikkeet n ON n.id = s.tutkintonimike_id
                 JOIN tutkinnot t ON t.id = n.tutkinto_id
@@ -134,6 +176,10 @@ class TutkinnotApiMixin:
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
                 "savedAt": row["saved_at"],
+                "planPriority": row["plan_priority"],
+                "planStatus": row["plan_status"],
+                "nextStep": row["next_step"],
+                "planUpdatedAt": row["plan_updated_at"],
             }
             for row in rows
         ]
@@ -146,37 +192,22 @@ class TutkinnotApiMixin:
             raise ValueError("Invalid tutkintonimike id") from exc
 
         with self._lock:
-            row = self._conn.execute(
-                """
-                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
-                FROM tutkintonimikkeet n
-                JOIN tutkinnot t ON t.id = n.tutkinto_id
-                LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
-                LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
-                WHERE n.id = ? AND ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL;
-                """,
-                (nimike_id,),
-            ).fetchone()
+            row = self._get_visible_tutkintonimike_row(nimike_id)
             if row is None:
                 raise ValueError(f"Unknown tutkintonimike id: {nimike_id}")
             existing = self._conn.execute(
                 """
-                SELECT saved_at
+                SELECT saved_at, plan_priority, plan_status, next_step, plan_updated_at
                 FROM saved_tutkintonimikkeet
                 WHERE tutkintonimike_id = ?;
                 """,
                 (nimike_id,),
             ).fetchone()
             saved_at = existing["saved_at"] if existing else utc_now_iso()
-            item = {
-                "id": row["id"],
-                "nimi": row["nimi"],
-                "linkki": row["linkki"],
-                "img": row["img"],
-                "tutkinto_id": row["tutkinto_id"],
-                "tutkinto_nimi": row["tutkinto_nimi"],
-                "savedAt": saved_at,
-            }
+            plan_priority = existing["plan_priority"] if existing else None
+            plan_status = existing["plan_status"] if existing else None
+            next_step = existing["next_step"] if existing else None
+            plan_updated_at = existing["plan_updated_at"] if existing else None
             with self._conn:
                 self._conn.execute(
                     """
@@ -186,7 +217,14 @@ class TutkinnotApiMixin:
                     """,
                     (nimike_id, saved_at),
                 )
-        return item
+        return self._serialize_saved_item(
+            row,
+            saved_at,
+            plan_priority,
+            plan_status,
+            next_step,
+            plan_updated_at,
+        )
 
     def remove_saved_tutkintonimike(self, tutkintonimike_id: int) -> bool:
         # Poistaa tutkintonimikkeen suosikeista
@@ -283,6 +321,82 @@ class TutkinnotApiMixin:
             "noteText": normalized_note,
             "updatedAt": updated_at,
         }
+
+    def save_tutkintonimike_plan(
+        self,
+        tutkintonimike_id: int,
+        priority: str | None,
+        status: str | None,
+        next_step: str | None,
+    ) -> dict:
+        try:
+            nimike_id = int(tutkintonimike_id)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Invalid tutkintonimike id") from exc
+
+        normalized_priority = str(priority or "").strip()
+        normalized_status = str(status or "").strip()
+        normalized_next_step = str(next_step or "").strip()
+
+        if normalized_priority not in self._ALLOWED_PLAN_PRIORITIES:
+            raise ValueError("Invalid plan priority")
+        if normalized_status not in self._ALLOWED_PLAN_STATUSES:
+            raise ValueError("Invalid plan status")
+
+        plan_updated_at = utc_now_iso() if (normalized_priority or normalized_status or normalized_next_step) else None
+
+        with self._lock:
+            row = self._get_visible_tutkintonimike_row(nimike_id)
+            if row is None:
+                raise ValueError(f"Unknown tutkintonimike id: {nimike_id}")
+
+            existing = self._conn.execute(
+                """
+                SELECT saved_at
+                FROM saved_tutkintonimikkeet
+                WHERE tutkintonimike_id = ?;
+                """,
+                (nimike_id,),
+            ).fetchone()
+            saved_at = existing["saved_at"] if existing else utc_now_iso()
+
+            with self._conn:
+                self._conn.execute(
+                    """
+                    INSERT INTO saved_tutkintonimikkeet (
+                        tutkintonimike_id,
+                        saved_at,
+                        plan_priority,
+                        plan_status,
+                        next_step,
+                        plan_updated_at
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(tutkintonimike_id) DO UPDATE
+                    SET
+                        plan_priority = excluded.plan_priority,
+                        plan_status = excluded.plan_status,
+                        next_step = excluded.next_step,
+                        plan_updated_at = excluded.plan_updated_at;
+                    """,
+                    (
+                        nimike_id,
+                        saved_at,
+                        normalized_priority or None,
+                        normalized_status or None,
+                        normalized_next_step or None,
+                        plan_updated_at,
+                    ),
+                )
+
+        return self._serialize_saved_item(
+            row,
+            saved_at,
+            normalized_priority,
+            normalized_status,
+            normalized_next_step,
+            plan_updated_at,
+        )
 
     def remove_tutkintonimike_note(self, tutkintonimike_id: int) -> bool:
         # Poistaa tutkintonimikkeen muistiinpanon

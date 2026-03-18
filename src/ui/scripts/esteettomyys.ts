@@ -132,7 +132,7 @@ function previewCurrentSettings(): void {
   setStatus(
     areAccessibilitySettingsEqual(currentSettings, savedSettings)
       ? "Esikatselu vastaa tallennettuja asetuksia."
-      : "Esikatselu paivittyi. Muutokset eivat ole viela tallessa."
+      : "Esikatselu päivittyi. Muutokset eivät ole vielä tallessa."
   );
 }
 
@@ -144,12 +144,12 @@ async function saveSettings(): Promise<void> {
     persistAccessibilitySettings(currentSettings);
     applyAccessibilitySettings(currentSettings);
     updateActionState();
-    setStatus("Esteettomyysasetukset tallennettu selaimeen.");
+    setStatus("Esteettömyysasetukset tallennettu selaimeen.");
     return;
   }
 
   setActionsDisabled(true);
-  setStatus("Tallennetaan esteettomyysasetuksia...");
+  setStatus("Tallennetaan esteettömyysasetuksia...");
   try {
     const saved = normalizeAccessibilitySettings(await activeApi.save_accessibility_settings(currentSettings));
     savedSettings = saved;
@@ -158,9 +158,9 @@ async function saveSettings(): Promise<void> {
     applyAccessibilitySettings(saved);
     persistAccessibilitySettings(saved);
     updateActionState();
-    setStatus("Esteettomyysasetukset tallennettu.");
+    setStatus("Esteettömyysasetukset tallennettu.");
   } catch {
-    setStatus("Esteettomyysasetusten tallennus epaonnistui.");
+    setStatus("Esteettömyysasetusten tallennus epäonnistui.");
   } finally {
     updateActionState();
   }
@@ -174,7 +174,7 @@ function resetSettings(): void {
   setStatus(
     activeApi
       ? "Oletusasetukset palautettu esikatseluun. Tallenna muutokset, jos haluat ne pysyviksi."
-      : "Oletusasetukset palautettu esikatseluun. Tallenna, jos haluat ne kayttoon myos ensi kerralla."
+      : "Oletusasetukset palautettu esikatseluun. Tallenna, jos haluat ne käyttöön myös ensi kerralla."
   );
 }
 
@@ -215,8 +215,8 @@ async function initPage(): Promise<InitAttemptResult> {
   updateActionState();
   setStatus(
     activeApi
-      ? "Muokkaa asetuksia. Esikatselu paivittyy heti, mutta muutokset tallentuvat vasta painamalla Tallenna."
-      : "Muokkaa asetuksia. Esikatselu paivittyy heti, ja Tallenna sailyttaa valinnat selaimessa."
+      ? "Muokkaa asetuksia. Esikatselu päivittyy heti, mutta muutokset tallentuvat vasta painamalla Tallenna."
+      : "Muokkaa asetuksia. Esikatselu päivittyy heti, ja Tallenna säilyttää valinnat selaimessa."
   );
 
   return { success: true };

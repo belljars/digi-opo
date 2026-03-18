@@ -235,7 +235,7 @@ function updateMeta(): void {
     if (activeSession) {
       quizCountEl.textContent = `Vertailut: ${activeSession.completedComparisons}`;
     } else if (finalRanking.length > 0) {
-      quizCountEl.textContent = `Valmis jarjestys: ${finalRanking.length} tutkintonimiketta`;
+      quizCountEl.textContent = `Valmis järjestys: ${finalRanking.length} tutkintonimikettä`;
     } else {
       quizCountEl.textContent = "";
     }
@@ -245,7 +245,7 @@ function updateMeta(): void {
     if (activeSession) {
       const mergeNumber = Math.min(activeSession.completedMerges + 1, activeSession.totalMerges);
       const remainingEstimate = Math.max(activeSession.estimatedComparisons - activeSession.completedComparisons, 0);
-      quizStageEl.textContent = `Yhdistys ${mergeNumber}/${activeSession.totalMerges} | Arvio jaljella: ${remainingEstimate}`;
+      quizStageEl.textContent = `Yhdistys ${mergeNumber}/${activeSession.totalMerges} | Arvio jäljellä: ${remainingEstimate}`;
     } else if (finalRanking.length > 0 && finishedAt && activeSession === null) {
       quizStageEl.textContent = "Ranking valmis";
     } else {
@@ -416,7 +416,7 @@ function parseRestoredSession(entry: QuizSessionEntry | null): QuizSession | nul
 
 function enqueueSessionWrite(task: () => Promise<void>): Promise<void> {
   sessionWriteChain = sessionWriteChain.then(task, task).catch(() => {
-    setFeedback("Quizin tallennus epaonnistui.");
+    setFeedback("Kyselyn tallennus epäonnistui.");
   });
   return sessionWriteChain;
 }
@@ -506,7 +506,7 @@ function renderSummary(): void {
   quizSummaryEl.replaceChildren();
 
   if (finalRanking.length === 0) {
-    quizSummaryEl.textContent = "Quizia ei voitu muodostaa.";
+    quizSummaryEl.textContent = "Kyselyä ei voitu muodostaa.";
     return;
   }
 
@@ -516,14 +516,14 @@ function renderSummary(): void {
     lastSessionDurationMs !== null ? formatDuration(0, lastSessionDurationMs) : null;
 
   summary.textContent = duration
-    ? `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa ${duration} aikana.`
-    : `Suosikkisi on ${top.nimi}. Jarjestit ${finalRanking.length} vaihtoehtoa.`;
+    ? `Suosikkisi on ${top.nimi}. Järjestit ${finalRanking.length} vaihtoehtoa ${duration} aikana.`
+    : `Suosikkisi on ${top.nimi}. Järjestit ${finalRanking.length} vaihtoehtoa.`;
   quizSummaryEl.append(summary);
 }
 
 function renderInitialState(message: string): void {
   setFinishedVisible(false);
-  setPrompt("Valmistellaan quizia");
+  setPrompt("Valmistellaan kyselyä");
   renderInactiveSlot(quizLeftEl, message);
   renderInactiveSlot(quizRightEl, message);
   updateMeta();
@@ -542,8 +542,8 @@ function renderCurrentPair(): void {
   }
 
   setFinishedVisible(false);
-  setPrompt("Kumpi kiinnostaa enemman?");
-  setHelp("Valitse kiinnostavampi vaihtoehto. Voit kayttaa myos nuolinappaimia.");
+  setPrompt("Kumpi kiinnostaa enemmän?");
+  setHelp("Valitse kiinnostavampi vaihtoehto. Voit käyttää myös nuolinäppäimiä.");
 
   if (activeSession.currentOrientation === null) {
     activeSession.currentOrientation = Math.random() < 0.5 ? "normal" : "swapped";
@@ -600,19 +600,19 @@ function finishQuiz(ranking: TutkintonimikeItem[]): void {
   activePair = null;
   setFinishedVisible(true);
   renderInactiveSlot(quizLeftEl, "Ranking valmis.");
-  renderInactiveSlot(quizRightEl, "Aloita alusta jos haluat uuden jarjestyksen.");
+  renderInactiveSlot(quizRightEl, "Aloita alusta, jos haluat uuden järjestyksen.");
   renderSummary();
   renderTop3();
   renderRankingList();
   updateMeta();
   setPrompt("Ranking valmis");
-  setHelp("Valmis. Voit tallentaa suosikkeja tai kaynnistaa quizin uudelleen.");
+  setHelp("Valmis. Voit tallentaa suosikkeja tai käynnistää kyselyn uudelleen.");
   void saveFinishedResult(ranking, comparisons, durationMs)
     .then(() => {
       setFeedback("Ranking tallennettiin.");
     })
     .catch(() => {
-      setFeedback("Rankingin tallennus epaonnistui.");
+      setFeedback("Rankingin tallennus epäonnistui.");
     });
 }
 
@@ -752,8 +752,8 @@ function restartQuiz(clearSavedSession = true): void {
   lastSessionDurationMs = null;
 
   if (allItems.length < 2) {
-    renderInitialState("Tarvitaan vahintaan kaksi tutkintonimiketta.");
-    setHelp("Quiziin tarvitaan enemman dataa.");
+    renderInitialState("Tarvitaan vähintään kaksi tutkintonimikettä.");
+    setHelp("Kyselyyn tarvitaan enemmän dataa.");
     return;
   }
 
@@ -775,21 +775,21 @@ function restoreSession(session: QuizSession): boolean {
   finishedAt = null;
   lastSessionDurationMs = null;
   setFeedback("Aiempi ranking palautettiin.");
-  setHelp("Jatka siita mihin jait.");
+  setHelp("Jatka siitä, mihin jäit.");
   startNextMerge();
   return true;
 }
 
 async function init(): Promise<InitAttemptResult> {
   setFeedback("");
-  setHelp("Ladataan tutkintonimikkeita...");
+  setHelp("Ladataan tutkintonimikkeitä...");
   renderInitialState("Ladataan...");
 
   try {
     const api = await waitForPywebviewApi<Api>();
     if (!api) {
-      renderInitialState("Pywebview API ei ole kaytettavissa.");
-      setHelp("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+      renderInitialState("Pywebview-rajapinta ei ole käytettävissä.");
+      setHelp("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
       return { success: false, retryDelayMs: 500 };
     }
 
@@ -810,15 +810,15 @@ async function init(): Promise<InitAttemptResult> {
     }
 
     if (sessionEntry) {
-      setFeedback("Aiempi quiz-tila ei ollut enaa kaytettavissa, joten aloitettiin alusta.");
+      setFeedback("Aiempi kyselytila ei ollut enää käytettävissä, joten aloitettiin alusta.");
       await clearSession();
     }
 
     restartQuiz(false);
     return { success: true };
   } catch {
-    renderInitialState("Quizin lataus epaonnistui.");
-    setHelp("Lataus epaonnistui. Yritetaan uudelleen...");
+    renderInitialState("Kyselyn lataus epäonnistui.");
+    setHelp("Lataus epäonnistui. Yritetään uudelleen...");
     return { success: false, retryDelayMs: 1000 };
   }
 }

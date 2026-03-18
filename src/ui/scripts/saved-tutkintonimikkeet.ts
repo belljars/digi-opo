@@ -15,6 +15,10 @@ type SavedTutkintonimikeItem = {
   tutkinto_id: number;
   tutkinto_nimi: string;
   savedAt: string;
+  planPriority: string | null;
+  planStatus: string | null;
+  nextStep: string | null;
+  planUpdatedAt: string | null;
 };
 
 type TutkintonimikeNoteItem = {
@@ -58,6 +62,12 @@ type SavedStatsMetric = {
 type Api = {
   list_saved_tutkintonimikkeet: () => Promise<SavedTutkintonimikeItem[]>;
   remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
+  save_tutkintonimike_plan: (
+    id: number,
+    priority: string | null,
+    status: string | null,
+    nextStep: string | null
+  ) => Promise<SavedTutkintonimikeItem>;
   list_tutkintonimike_notes: () => Promise<TutkintonimikeNoteItem[]>;
   save_tutkintonimike_note: (id: number, noteText: string) => Promise<TutkintonimikeNoteItem>;
   remove_tutkintonimike_note: (id: number) => Promise<boolean>;
@@ -88,6 +98,21 @@ const feedbackEl = document.getElementById("saved-feedback");
 
 let noteSaveInFlightIds = new Set<number>();
 let noteDeleteInFlightIds = new Set<number>();
+let planSaveInFlightIds = new Set<number>();
+
+const PLAN_PRIORITY_OPTIONS = [
+  { value: "", label: "Ei valintaa" },
+  { value: "ensisijainen", label: "Ensisijainen" },
+  { value: "selvitettava", label: "Selvitettävä" },
+  { value: "varavaihtoehto", label: "Varavaihtoehto" }
+] as const;
+
+const PLAN_STATUS_OPTIONS = [
+  { value: "", label: "Ei valintaa" },
+  { value: "en-tieda-viela", label: "En tiedä vielä" },
+  { value: "haluan-selvittaa-lisaa", label: "Haluan selvittää lisää" },
+  { value: "vahva-vaihtoehto", label: "Vahva vaihtoehto" }
+] as const;
 
 const percentFormatter = new Intl.NumberFormat("fi-FI", {
   style: "percent",
@@ -139,7 +164,7 @@ function setCounts(itemCount: number, resultCount: number, sessionCount: number,
     notesCountEl.textContent = `${noteCount} muistiinpanoa`;
   }
   if (summaryEl) {
-    summaryEl.textContent = `${itemCount} tutkintonimiketta | ${resultCount} quiz-tulosta | ${sessionCount} keskeneraista | ${noteCount} muistiinpanoa`;
+    summaryEl.textContent = `${itemCount} tutkintonimikettä | ${resultCount} kyselytulosta | ${sessionCount} keskeneräistä | ${noteCount} muistiinpanoa`;
   }
 }
 
@@ -184,7 +209,7 @@ function buildSavedStatsMetrics(items: SavedTutkintonimikeItem[], stats: SavedTu
     return [
       { label: "Tallennettuja", value: "0" },
       { label: "Tutkintoja mukana", value: "0" },
-      { label: "Suurin keskittyma", value: "-" }
+      { label: "Suurin keskittymä", value: "-" }
     ];
   }
 
@@ -192,7 +217,7 @@ function buildSavedStatsMetrics(items: SavedTutkintonimikeItem[], stats: SavedTu
   return [
     { label: "Tallennettuja", value: String(items.length), accent: "strong" },
     { label: "Tutkintoja mukana", value: String(stats.length) },
-    { label: "Suurin keskittyma", value: `${topStat.tutkintoNimi} (${topStat.count})` }
+    { label: "Suurin keskittymä", value: `${topStat.tutkintoNimi} (${topStat.count})` }
   ];
 }
 
@@ -269,7 +294,7 @@ function renderSavedStats(items: SavedTutkintonimikeItem[]): void {
   }
 
   if (!items.length) {
-    renderEmpty(statsChartEl, "Tilasto ilmestyy, kun tallennat tutkintonimikkeita.");
+    renderEmpty(statsChartEl, "Tilasto ilmestyy, kun tallennat tutkintonimikkeitä.");
     return;
   }
 
@@ -338,11 +363,121 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
   noteActions.append(saveNoteButton, deleteNoteButton);
   noteArea.append(noteLabel, textarea, noteActions);
 
+  const planArea = document.createElement("div");
+  planArea.className = "saved-plan-editor";
+
+  const planTitle = document.createElement("p");
+  planTitle.className = "saved-note-label";
+  planTitle.textContent = "Oma suunnitelma";
+
+  const planGrid = document.createElement("div");
+  planGrid.className = "saved-plan-grid";
+
+  const priorityWrap = document.createElement("div");
+  priorityWrap.className = "accessibility-control";
+
+  const priorityLabel = document.createElement("label");
+  priorityLabel.htmlFor = `saved-plan-priority-${item.id}`;
+  priorityLabel.textContent = "Tärkeys";
+
+  const prioritySelect = document.createElement("select");
+  prioritySelect.id = `saved-plan-priority-${item.id}`;
+  prioritySelect.disabled = planSaveInFlightIds.has(item.id);
+  PLAN_PRIORITY_OPTIONS.forEach((option) => {
+    const optionEl = document.createElement("option");
+    optionEl.value = option.value;
+    optionEl.textContent = option.label;
+    optionEl.selected = option.value === (item.planPriority ?? "");
+    prioritySelect.append(optionEl);
+  });
+  priorityWrap.append(priorityLabel, prioritySelect);
+
+  const statusWrap = document.createElement("div");
+  statusWrap.className = "accessibility-control";
+
+  const statusLabel = document.createElement("label");
+  statusLabel.htmlFor = `saved-plan-status-${item.id}`;
+  statusLabel.textContent = "Tilanne";
+
+  const statusSelect = document.createElement("select");
+  statusSelect.id = `saved-plan-status-${item.id}`;
+  statusSelect.disabled = planSaveInFlightIds.has(item.id);
+  PLAN_STATUS_OPTIONS.forEach((option) => {
+    const optionEl = document.createElement("option");
+    optionEl.value = option.value;
+    optionEl.textContent = option.label;
+    optionEl.selected = option.value === (item.planStatus ?? "");
+    statusSelect.append(optionEl);
+  });
+  statusWrap.append(statusLabel, statusSelect);
+
+  planGrid.append(priorityWrap, statusWrap);
+
+  const nextStepWrap = document.createElement("div");
+  nextStepWrap.className = "saved-plan-next-step";
+
+  const nextStepLabel = document.createElement("label");
+  nextStepLabel.className = "saved-note-label";
+  nextStepLabel.htmlFor = `saved-plan-next-step-${item.id}`;
+  nextStepLabel.textContent = "Seuraava askel";
+
+  const nextStepInput = document.createElement("input");
+  nextStepInput.type = "text";
+  nextStepInput.id = `saved-plan-next-step-${item.id}`;
+  nextStepInput.className = "saved-plan-input";
+  nextStepInput.placeholder = "Esim. Kysy opolta harjoittelusta";
+  nextStepInput.value = item.nextStep ?? "";
+  nextStepInput.disabled = planSaveInFlightIds.has(item.id);
+  nextStepWrap.append(nextStepLabel, nextStepInput);
+
+  const planMeta = document.createElement("p");
+  planMeta.className = "saved-plan-meta";
+  planMeta.textContent = item.planUpdatedAt
+    ? `Suunnitelma päivitetty ${formatTimestamp(item.planUpdatedAt)}`
+    : "Valitse tärkeys, tilanne ja seuraava askel omalle vaihtoehdollesi.";
+
+  const planActions = document.createElement("div");
+  planActions.className = "tutkintonimike-card-actions";
+
+  const savePlanButton = document.createElement("button");
+  savePlanButton.type = "button";
+  savePlanButton.className = "tutkintonimike-action";
+  savePlanButton.textContent = "Tallenna suunnitelma";
+  savePlanButton.disabled = planSaveInFlightIds.has(item.id);
+  savePlanButton.addEventListener("click", () => {
+    void savePlan(item.id, item.nimi, prioritySelect.value, statusSelect.value, nextStepInput.value);
+  });
+
+  const clearPlanButton = document.createElement("button");
+  clearPlanButton.type = "button";
+  clearPlanButton.className = "tutkintonimike-action";
+  clearPlanButton.textContent = "Tyhjennä suunnitelma";
+  clearPlanButton.disabled =
+    planSaveInFlightIds.has(item.id) ||
+    ((item.planPriority ?? "") === "" && (item.planStatus ?? "") === "" && (item.nextStep ?? "").trim() === "");
+  clearPlanButton.addEventListener("click", () => {
+    void savePlan(item.id, item.nimi, "", "", "");
+  });
+
+  const updatePlanButtons = (): void => {
+    const hasAnyValue =
+      prioritySelect.value !== "" || statusSelect.value !== "" || nextStepInput.value.trim() !== "";
+    savePlanButton.disabled = planSaveInFlightIds.has(item.id);
+    clearPlanButton.disabled = planSaveInFlightIds.has(item.id) || !hasAnyValue;
+  };
+
+  prioritySelect.addEventListener("input", updatePlanButtons);
+  statusSelect.addEventListener("input", updatePlanButtons);
+  nextStepInput.addEventListener("input", updatePlanButtons);
+
+  planActions.append(savePlanButton, clearPlanButton);
+  planArea.append(planTitle, planGrid, nextStepWrap, planMeta, planActions);
+
   if (!body.contains(actions)) {
     body.append(actions);
   }
   actions.append(removeButton);
-  body.append(noteArea);
+  body.append(noteArea, planArea);
 
   return root;
 }
@@ -367,7 +502,7 @@ function createResultCard(item: QuizResultEntry): HTMLElement {
         ? `${item.result.comparisons} vertailua.`
         : ""
       : item.result.runnerUpPathLabel
-        ? `Myos: ${item.result.runnerUpPathLabel}.`
+        ? `Myös: ${item.result.runnerUpPathLabel}.`
         : "";
   meta.textContent = `${getQuizLabel(item.quizId)} | Tallennettu ${formatTimestamp(item.createdAt)}${extra ? ` | ${extra}` : ""}`;
 
@@ -400,7 +535,7 @@ function createSessionCard(item: QuizSessionEntry): HTMLElement {
   title.textContent = getQuizLabel(item.quizId);
 
   const meta = document.createElement("p");
-  meta.textContent = `Viimeksi paivitetty ${formatTimestamp(item.updatedAt)}.`;
+  meta.textContent = `Viimeksi päivitetty ${formatTimestamp(item.updatedAt)}.`;
 
   copy.append(title, meta);
 
@@ -436,7 +571,7 @@ function createNoteCard(item: TutkintonimikeNoteItem): HTMLElement {
   title.textContent = item.nimi;
 
   const meta = document.createElement("p");
-  meta.textContent = `${item.tutkinto_nimi} | Paivitetty ${formatTimestamp(item.updatedAt)}`;
+  meta.textContent = `${item.tutkinto_nimi} | Päivitetty ${formatTimestamp(item.updatedAt)}`;
 
   const text = document.createElement("p");
   text.className = "saved-note-preview";
@@ -463,10 +598,10 @@ function createNoteCard(item: TutkintonimikeNoteItem): HTMLElement {
 async function renderSavedHub(): Promise<void> {
   const api = getApi();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
     renderEmpty(listEl, "Tallennuksia ei voitu ladata.");
-    renderEmpty(resultsListEl, "Quiz-tuloksia ei voitu ladata.");
-    renderEmpty(sessionsListEl, "Quizien keskeneraisia tiloja ei voitu ladata.");
+    renderEmpty(resultsListEl, "Kyselytuloksia ei voitu ladata.");
+    renderEmpty(sessionsListEl, "Kyselyiden keskeneräisiä tiloja ei voitu ladata.");
     renderEmpty(notesListEl, "Muistiinpanoja ei voitu ladata.");
     return;
   }
@@ -486,25 +621,25 @@ async function renderSavedHub(): Promise<void> {
   renderSavedStats(items);
 
   if (!items.length) {
-    renderEmpty(listEl, "Et ole viela tallentanut tutkintonimikkeita.");
+    renderEmpty(listEl, "Et ole vielä tallentanut tutkintonimikkeitä.");
   } else if (listEl) {
     listEl.replaceChildren(...items.map((item) => createSavedCard(item, noteMap.get(item.id) ?? "")));
   }
 
   if (!results.length) {
-    renderEmpty(resultsListEl, "Et ole viela tallentanut quiz-tuloksia.");
+    renderEmpty(resultsListEl, "Et ole vielä tallentanut kyselytuloksia.");
   } else if (resultsListEl) {
     resultsListEl.replaceChildren(...results.map((item) => createResultCard(item)));
   }
 
   if (!sessions.length) {
-    renderEmpty(sessionsListEl, "Ei kesken jaaneita quizeja.");
+    renderEmpty(sessionsListEl, "Ei kesken jääneitä kyselyitä.");
   } else if (sessionsListEl) {
     sessionsListEl.replaceChildren(...sessions.map((item) => createSessionCard(item)));
   }
 
   if (!notes.length) {
-    renderEmpty(notesListEl, "Et ole viela kirjoittanut muistiinpanoja.");
+    renderEmpty(notesListEl, "Et ole vielä kirjoittanut muistiinpanoja.");
   } else if (notesListEl) {
     notesListEl.replaceChildren(...notes.map((item) => createNoteCard(item)));
   }
@@ -513,19 +648,19 @@ async function renderSavedHub(): Promise<void> {
 async function removeSavedItem(id: number, nimi: string): Promise<void> {
   const api = getApi();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
     return;
   }
 
   const removed = await api.remove_saved_tutkintonimike(id);
-  setFeedback(removed ? `"${nimi}" poistettiin tallennuksista.` : `"${nimi}" ei loytynyt tallennuksista.`);
+  setFeedback(removed ? `"${nimi}" poistettiin tallennuksista.` : `"${nimi}" ei löytynyt tallennuksista.`);
   await renderSavedHub();
 }
 
 async function saveNote(id: number, nimi: string, noteText: string): Promise<void> {
   const api = getApi();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
     return;
   }
 
@@ -541,26 +676,51 @@ async function saveNote(id: number, nimi: string, noteText: string): Promise<voi
     setFeedback(`Muistiinpano tallennettiin kohteelle "${nimi}".`);
     await renderSavedHub();
   } catch {
-    setFeedback(`Muistiinpanon tallennus epaonnistui kohteelle "${nimi}".`);
+    setFeedback(`Muistiinpanon tallennus epäonnistui kohteelle "${nimi}".`);
   } finally {
     noteSaveInFlightIds.delete(id);
+  }
+}
+
+async function savePlan(
+  id: number,
+  nimi: string,
+  priority: string,
+  status: string,
+  nextStep: string
+): Promise<void> {
+  const api = getApi();
+  if (!api) {
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
+    return;
+  }
+
+  planSaveInFlightIds.add(id);
+  try {
+    await api.save_tutkintonimike_plan(id, priority || null, status || null, nextStep.trim() || null);
+    setFeedback(`Suunnitelma tallennettiin kohteelle "${nimi}".`);
+    await renderSavedHub();
+  } catch {
+    setFeedback(`Suunnitelman tallennus epäonnistui kohteelle "${nimi}".`);
+  } finally {
+    planSaveInFlightIds.delete(id);
   }
 }
 
 async function removeNote(id: number, nimi: string): Promise<void> {
   const api = getApi();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
     return;
   }
 
   noteDeleteInFlightIds.add(id);
   try {
     const removed = await api.remove_tutkintonimike_note(id);
-    setFeedback(removed ? `Muistiinpano poistettiin kohteelta "${nimi}".` : `Muistiinpanoa ei loytynyt kohteelta "${nimi}".`);
+    setFeedback(removed ? `Muistiinpano poistettiin kohteelta "${nimi}".` : `Muistiinpanoa ei löytynyt kohteelta "${nimi}".`);
     await renderSavedHub();
   } catch {
-    setFeedback(`Muistiinpanon poisto epaonnistui kohteelle "${nimi}".`);
+    setFeedback(`Muistiinpanon poisto epäonnistui kohteelle "${nimi}".`);
   } finally {
     noteDeleteInFlightIds.delete(id);
   }
@@ -569,24 +729,24 @@ async function removeNote(id: number, nimi: string): Promise<void> {
 async function removeQuizResult(resultId: string): Promise<void> {
   const api = getApi();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
     return;
   }
 
   const removed = await api.remove_quiz_result(resultId);
-  setFeedback(removed ? "Quiz-tulos poistettiin." : "Quiz-tulosta ei loytynyt.");
+  setFeedback(removed ? "Kyselytulos poistettiin." : "Kyselytulosta ei löytynyt.");
   await renderSavedHub();
 }
 
 async function removeQuizSession(quizId: string): Promise<void> {
   const api = getApi();
   if (!api) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
     return;
   }
 
   const removed = await api.clear_quiz_session(quizId);
-  setFeedback(removed ? `${getQuizLabel(quizId)} poistettiin keskeneraisista.` : "Keskeneraista quiz-tilaa ei loytynyt.");
+  setFeedback(removed ? `${getQuizLabel(quizId)} poistettiin keskeneräisistä.` : "Keskeneräistä kyselytilaa ei löytynyt.");
   await renderSavedHub();
 }
 
@@ -594,10 +754,10 @@ async function init(): Promise<InitAttemptResult> {
   setFeedback("");
   const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    setFeedback("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+    setFeedback("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
     renderEmpty(listEl, "Tallennuksia ei voitu ladata.");
-    renderEmpty(resultsListEl, "Quiz-tuloksia ei voitu ladata.");
-    renderEmpty(sessionsListEl, "Quizien keskeneraisia tiloja ei voitu ladata.");
+    renderEmpty(resultsListEl, "Kyselytuloksia ei voitu ladata.");
+    renderEmpty(sessionsListEl, "Kyselyiden keskeneräisiä tiloja ei voitu ladata.");
     renderEmpty(notesListEl, "Muistiinpanoja ei voitu ladata.");
     renderEmpty(statsChartEl, "Tilastoa ei voitu ladata.");
     return { success: false, retryDelayMs: 500 };
@@ -607,10 +767,10 @@ async function init(): Promise<InitAttemptResult> {
     await renderSavedHub();
     return { success: true };
   } catch {
-    setFeedback("Tallennettujen tietojen lataus epaonnistui. Yritetaan uudelleen...");
+    setFeedback("Tallennettujen tietojen lataus epäonnistui. Yritetään uudelleen...");
     renderEmpty(listEl, "Tallennuksia ei voitu ladata.");
-    renderEmpty(resultsListEl, "Quiz-tuloksia ei voitu ladata.");
-    renderEmpty(sessionsListEl, "Quizien keskeneraisia tiloja ei voitu ladata.");
+    renderEmpty(resultsListEl, "Kyselytuloksia ei voitu ladata.");
+    renderEmpty(sessionsListEl, "Kyselyiden keskeneräisiä tiloja ei voitu ladata.");
     renderEmpty(notesListEl, "Muistiinpanoja ei voitu ladata.");
     renderEmpty(statsChartEl, "Tilastoa ei voitu ladata.");
     return { success: false, retryDelayMs: 1000 };

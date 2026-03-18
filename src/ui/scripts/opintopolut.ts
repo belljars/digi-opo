@@ -90,7 +90,7 @@ function renderItems(items: OpiskeluSuunta[]): void {
 async function init(): Promise<InitAttemptResult> {
   const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    setStatus("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+    setStatus("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
     return { success: false, retryDelayMs: 500 };
   }
 
@@ -100,7 +100,7 @@ async function init(): Promise<InitAttemptResult> {
     renderItems(items);
     return { success: true };
   } catch {
-    setStatus("Opintopolkujen lataus epaonnistui. Yritetaan uudelleen...");
+    setStatus("Opintopolkujen lataus epäonnistui. Yritetään uudelleen...");
     return { success: false, retryDelayMs: 1000 };
   }
 }

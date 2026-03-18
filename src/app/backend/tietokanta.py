@@ -81,6 +81,20 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
         """
     )
 
+    saved_columns = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(saved_tutkintonimikkeet);").fetchall()
+    }
+
+    if "plan_priority" not in saved_columns:
+        conn.execute("ALTER TABLE saved_tutkintonimikkeet ADD COLUMN plan_priority TEXT;")
+    if "plan_status" not in saved_columns:
+        conn.execute("ALTER TABLE saved_tutkintonimikkeet ADD COLUMN plan_status TEXT;")
+    if "next_step" not in saved_columns:
+        conn.execute("ALTER TABLE saved_tutkintonimikkeet ADD COLUMN next_step TEXT;")
+    if "plan_updated_at" not in saved_columns:
+        conn.execute("ALTER TABLE saved_tutkintonimikkeet ADD COLUMN plan_updated_at TEXT;")
+
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS hidden_tutkinnot (

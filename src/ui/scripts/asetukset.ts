@@ -142,7 +142,7 @@ function renderVisibleTutkinnot(): void {
     ? visibleTutkinnot.filter((item) => item.nimi.toLowerCase().includes(query))
     : visibleTutkinnot;
 
-  setCount(visibleTutkinnotCountEl, "nakyvissa", items.length);
+  setCount(visibleTutkinnotCountEl, "näkyvissä", items.length);
   if (!items.length) {
     renderEmpty(visibleTutkinnotEl, query ? "Ei hakutuloksia." : "Ei näkyviä tutkintoja.");
     return;
@@ -188,7 +188,7 @@ function renderVisibleTutkintonimikkeet(): void {
       )
     : visibleTutkintonimikkeet;
 
-  setCount(visibleTutkintonimikkeetCountEl, "nakyvissa", items.length);
+  setCount(visibleTutkintonimikkeetCountEl, "näkyvissä", items.length);
   if (!items.length) {
     renderEmpty(
       visibleTutkintonimikkeetEl,
@@ -263,7 +263,7 @@ async function hideTutkinto(item: TutkintoListItem): Promise<void> {
     setFeedback(`Tutkinto "${item.nimi}" piilotettiin koko sovelluksesta.`);
     await reloadAll();
   } catch {
-    setFeedback(`Tutkinnon "${item.nimi}" piilotus epaonnistui.`);
+    setFeedback(`Tutkinnon "${item.nimi}" piilotus epäonnistui.`);
   }
 }
 
@@ -277,7 +277,7 @@ async function unhideTutkinto(item: HiddenTutkintoListItem): Promise<void> {
     setFeedback(`Tutkinto "${item.nimi}" palautettiin näkyviin.`);
     await reloadAll();
   } catch {
-    setFeedback(`Tutkinnon "${item.nimi}" palautus epaonnistui.`);
+    setFeedback(`Tutkinnon "${item.nimi}" palautus epäonnistui.`);
   }
 }
 
@@ -291,7 +291,7 @@ async function hideTutkintonimike(item: TutkintonimikeItem): Promise<void> {
     setFeedback(`Tutkintonimike "${item.nimi}" piilotettiin koko sovelluksesta.`);
     await reloadAll();
   } catch {
-    setFeedback(`Tutkintonimikkeen "${item.nimi}" piilotus epaonnistui.`);
+    setFeedback(`Tutkintonimikkeen "${item.nimi}" piilotus epäonnistui.`);
   }
 }
 
@@ -305,7 +305,7 @@ async function unhideTutkintonimike(item: HiddenTutkintonimikeItem): Promise<voi
     setFeedback(`Tutkintonimike "${item.nimi}" palautettiin näkyviin.`);
     await reloadAll();
   } catch {
-    setFeedback(`Tutkintonimikkeen "${item.nimi}" palautus epaonnistui.`);
+    setFeedback(`Tutkintonimikkeen "${item.nimi}" palautus epäonnistui.`);
   }
 }
 
@@ -318,7 +318,7 @@ async function init(): Promise<InitAttemptResult> {
 
   const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    setFeedback("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+    setFeedback("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
     renderEmpty(visibleTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
@@ -338,7 +338,7 @@ async function init(): Promise<InitAttemptResult> {
     });
     return { success: true };
   } catch {
-    setFeedback("Asetusten lataus epaonnistui. Yritetaan uudelleen...");
+    setFeedback("Asetusten lataus epäonnistui. Yritetään uudelleen...");
     renderEmpty(visibleTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");

@@ -270,6 +270,42 @@ class BackendApiTests(unittest.TestCase):
         self.assertTrue(removed)
         self.assertEqual(api.list_tutkintonimike_notes(), [])
 
+    def test_tutkintonimike_plan_can_be_saved_listed_and_cleared(self) -> None:
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
+        sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
+
+        planned = api.save_tutkintonimike_plan(
+            sahkoasentaja["id"],
+            "ensisijainen",
+            "haluan-selvittaa-lisaa",
+            "Kysy opolta työssäoppimisesta.",
+        )
+
+        self.assertEqual(planned["id"], sahkoasentaja["id"])
+        self.assertEqual(planned["planPriority"], "ensisijainen")
+        self.assertEqual(planned["planStatus"], "haluan-selvittaa-lisaa")
+        self.assertEqual(planned["nextStep"], "Kysy opolta työssäoppimisesta.")
+        self.assertIsNotNone(planned["planUpdatedAt"])
+
+        saved_items = api.list_saved_tutkintonimikkeet()
+        self.assertEqual(len(saved_items), 1)
+        self.assertEqual(saved_items[0]["planPriority"], "ensisijainen")
+        self.assertEqual(saved_items[0]["planStatus"], "haluan-selvittaa-lisaa")
+        self.assertEqual(saved_items[0]["nextStep"], "Kysy opolta työssäoppimisesta.")
+
+        cleared = api.save_tutkintonimike_plan(sahkoasentaja["id"], "", "", "")
+        self.assertIsNone(cleared["planPriority"])
+        self.assertIsNone(cleared["planStatus"])
+        self.assertIsNone(cleared["nextStep"])
+        self.assertIsNone(cleared["planUpdatedAt"])
+
+        saved_items = api.list_saved_tutkintonimikkeet()
+        self.assertEqual(len(saved_items), 1)
+        self.assertIsNone(saved_items[0]["planPriority"])
+        self.assertIsNone(saved_items[0]["planStatus"])
+        self.assertIsNone(saved_items[0]["nextStep"])
+
     def test_accessibility_settings_can_be_saved_and_loaded(self) -> None:
         api = self.create_api()
 

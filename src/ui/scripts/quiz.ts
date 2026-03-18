@@ -381,7 +381,7 @@ async function showResultsView(): Promise<void> {
       setFeedback("Tulos tallennettiin.");
     }
   } catch {
-    setFeedback("Tuloksen tallennus epaonnistui.");
+    setFeedback("Tuloksen tallennus epäonnistui.");
   }
 
   setStatus("Valmis");
@@ -416,7 +416,7 @@ async function handleNext(): Promise<void> {
     await saveSession();
     setStatus("Edistyminen tallennettu");
   } catch {
-    setFeedback("Edistymisen tallennus epaonnistui.");
+    setFeedback("Edistymisen tallennus epäonnistui.");
   }
 }
 
@@ -434,7 +434,7 @@ async function resetQuiz(clearSavedSession = true): Promise<void> {
     try {
       await clearSession();
     } catch {
-      setFeedback("Aiemman quiz-tilan poistaminen epaonnistui.");
+      setFeedback("Aiemman kyselytilan poistaminen epäonnistui.");
     }
   }
 }
@@ -472,7 +472,7 @@ async function loadQuiz(): Promise<InitAttemptResult> {
   try {
     const api = await waitForPywebviewApi<Api>();
     if (!api) {
-      setStatus("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+      setStatus("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
       showForm(false);
       return { success: false, retryDelayMs: 500 };
     }
@@ -495,7 +495,7 @@ async function loadQuiz(): Promise<InitAttemptResult> {
     }
     return { success: true };
   } catch {
-    setStatus("Kyselyn lataus epaonnistui. Yritetaan uudelleen...");
+    setStatus("Kyselyn lataus epäonnistui. Yritetään uudelleen...");
     showForm(false);
     return { success: false, retryDelayMs: 1000 };
   } finally {

@@ -194,8 +194,8 @@ function renderDetail(detail: TutkintoDetail): void {
     const empty = document.createElement("p");
     empty.className = "empty";
     empty.textContent = filterState.savedOnly
-      ? "Ei tallennettuja tutkintonimikkeita valituilla suodattimilla."
-      : "Ei tutkintonimikkeita valituilla suodattimilla.";
+      ? "Ei tallennettuja tutkintonimikkeitä valituilla suodattimilla."
+      : "Ei tutkintonimikkeitä valituilla suodattimilla.";
     detailEl.append(empty);
     return;
   }
@@ -258,7 +258,7 @@ async function getTutkintoDetail(id: number): Promise<TutkintoDetail | null> {
 
 async function toggleSavedTutkintonimike(id: number, nimi: string): Promise<void> {
   if (!activeApi) {
-    setFeedback("Pywebview API ei ole kaytettavissa.");
+    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
     return;
   }
 
@@ -275,7 +275,7 @@ async function toggleSavedTutkintonimike(id: number, nimi: string): Promise<void
 
     await applyFilters();
   } catch {
-    setFeedback(`Tallennuksen paivitys epaonnistui kohteelle "${nimi}".`);
+    setFeedback(`Tallennuksen päivitys epäonnistui kohteelle "${nimi}".`);
   }
 }
 
@@ -283,7 +283,7 @@ async function selectTutkinto(id: number): Promise<void> {
   activeId = id;
   const detail = await getTutkintoDetail(id);
   if (!detail) {
-    renderEmpty("Tutkintoa ei loytynyt.");
+    renderEmpty("Tutkintoa ei löytynyt.");
     return;
   }
   renderDetail(detail);
@@ -311,7 +311,7 @@ async function applyFilters(): Promise<void> {
 
   if (!filteredTutkinnot.length) {
     activeId = null;
-    renderEmpty("Valituilla suodattimilla ei loytynyt tutkintoja.");
+    renderEmpty("Valituilla suodattimilla ei löytynyt tutkintoja.");
     return;
   }
 
@@ -371,8 +371,8 @@ function bindEvents(): void {
 async function init(): Promise<InitAttemptResult> {
   const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    renderEmpty("Pywebview API ei ole kaytettavissa.");
-    setFeedback("Backend ei ollut viela valmis. Yritetaan uudelleen...");
+    renderEmpty("Pywebview-rajapinta ei ole käytettävissä.");
+    setFeedback("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
     return { success: false, retryDelayMs: 500 };
   }
 
@@ -383,8 +383,8 @@ async function init(): Promise<InitAttemptResult> {
     bindEvents();
     return { success: true };
   } catch {
-    renderEmpty("Tutkintopankin lataus epaonnistui.");
-    setFeedback("Lataus epaonnistui. Yritetaan uudelleen...");
+    renderEmpty("Tutkintopankin lataus epäonnistui.");
+    setFeedback("Lataus epäonnistui. Yritetään uudelleen...");
     return { success: false, retryDelayMs: 1000 };
   }
 }

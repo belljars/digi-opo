@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
   { id: "home", href: "./home.html", label: "Etusivu" },
   { id: "index", href: "./pankki.html", label: "Tutkintopankki" },
   { id: "saved", href: "./saved-tutkintonimikkeet.html", label: "Tallennetut" },
+  { id: "my-plan", href: "./my-plan.html", label: "Oma suunnitelma" },
   { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" },
   { id: "asetukset", href: "./asetukset.html", label: "Asetukset" },
   { id: "esteettomyys", href: "./esteettomyys.html", label: "Esteettömyys" }
@@ -70,7 +71,7 @@ function renderHeader(): void {
         <h1>digi-opo</h1>
         <p>${subtitle}</p>
       </div>
-      <nav class="header-actions site-nav" aria-label="Paavalikko">
+      <nav class="header-actions site-nav" aria-label="Päävalikko">
         ${links}
       </nav>
     </header>
