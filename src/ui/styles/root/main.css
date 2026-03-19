@@ -1,3 +1,31 @@
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("../../assets/fonts/opendyslexic/OpenDyslexic-Regular.otf") format("opentype");
+  font-style: normal;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("../../assets/fonts/opendyslexic/OpenDyslexic-Italic.otf") format("opentype");
+  font-style: italic;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("../../assets/fonts/opendyslexic/OpenDyslexic-Bold.otf") format("opentype");
+  font-style: normal;
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("../../assets/fonts/opendyslexic/OpenDyslexic-BoldItalic.otf") format("opentype");
+  font-style: italic;
+  font-weight: 700;
+}
+
 :root {
   --font-scale: 1;
   --font-family-base: system-ui, sans-serif;
