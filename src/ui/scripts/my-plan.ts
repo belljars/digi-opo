@@ -6,7 +6,7 @@ import {
   type InitAttemptResult
 } from "./pywebview-init.js";
 
-type SavedTutkintonimikeItem = {
+type TallennettuTutkintonimikeTieto = {
   id: number;
   nimi: string;
   linkki: string | null;
@@ -20,7 +20,7 @@ type SavedTutkintonimikeItem = {
   planUpdatedAt: string | null;
 };
 
-type TutkintonimikeNoteItem = {
+type TutkintonimikeMuistiinpanoTieto = {
   id: number;
   nimi: string;
   tutkinto_nimi: string;
@@ -28,33 +28,33 @@ type TutkintonimikeNoteItem = {
   updatedAt: string;
 };
 
-type QuizResultEntry = {
+type KyselyTulosTieto = {
   id: string;
   quizId: string;
   createdAt: string;
   result: Record<string, unknown>;
 };
 
-type QuizSessionEntry = {
+type KyselyIstuntoTieto = {
   quizId: string;
   updatedAt: string;
   session: Record<string, unknown>;
 };
 
-type Api = {
-  list_saved_tutkintonimikkeet: () => Promise<SavedTutkintonimikeItem[]>;
-  list_tutkintonimike_notes: () => Promise<TutkintonimikeNoteItem[]>;
-  list_quiz_results: (quizId?: string) => Promise<QuizResultEntry[]>;
-  get_quiz_session: (quizId: string) => Promise<QuizSessionEntry | null>;
+type Rajapinta = {
+  list_saved_tutkintonimikkeet: () => Promise<TallennettuTutkintonimikeTieto[]>;
+  list_tutkintonimike_notes: () => Promise<TutkintonimikeMuistiinpanoTieto[]>;
+  list_quiz_results: (quizId?: string) => Promise<KyselyTulosTieto[]>;
+  get_quiz_session: (quizId: string) => Promise<KyselyIstuntoTieto | null>;
 };
 
-type PlanMetric = {
+type SuunnitelmaMittari = {
   label: string;
   value: string;
-  accent?: "default" | "strong";
+  korostus?: "default" | "strong";
 };
 
-type PlanStep = {
+type SuunnitelmaAskel = {
   id: string;
   title: string;
   description: string;
@@ -62,53 +62,102 @@ type PlanStep = {
   linkLabel?: string;
 };
 
-const PLAN_NOTE_KEY = "digi-opo.my-plan.note";
-const PLAN_STEP_STATE_KEY = "digi-opo.my-plan.steps";
+const SUUNNITELMA_MUISTIO_AVAIN = "digi-opo.my-plan.note";
+const SUUNNITELMA_ASKELTILA_AVAIN = "digi-opo.my-plan.steps";
+const SUUNNITELMA_YKSINKERTAINEN_TILA_AVAIN = "digi-opo.my-plan.simple-mode";
 
 const QUIZ_PAGES: Record<string, string> = {
   "amis-quiz": "./amis-quiz.html",
   opintopolku: "./quiz.html"
 };
 
-const PLAN_PRIORITY_LABELS: Record<string, string> = {
+const SUUNNITELMA_PRIORITEETTI_TEKSTIT: Record<string, string> = {
   ensisijainen: "Ensisijainen",
   selvitettava: "Selvitettävä",
   varavaihtoehto: "Varavaihtoehto"
 };
 
-const PLAN_STATUS_LABELS: Record<string, string> = {
+const SUUNNITELMA_TILA_TEKSTIT: Record<string, string> = {
   "en-tieda-viela": "En tiedä vielä",
   "haluan-selvittaa-lisaa": "Haluan selvittää lisää",
   "vahva-vaihtoehto": "Vahva vaihtoehto"
 };
 
-const feedbackEl = document.getElementById("my-plan-feedback");
-const metricsEl = document.getElementById("my-plan-metrics");
-const stepsEl = document.getElementById("my-plan-steps");
-const stepsCountEl = document.getElementById("my-plan-steps-count");
-const savedCountEl = document.getElementById("my-plan-saved-count");
-const savedItemsEl = document.getElementById("my-plan-saved-items");
-const sessionsCountEl = document.getElementById("my-plan-sessions-count");
-const sessionsEl = document.getElementById("my-plan-sessions");
-const resultsCountEl = document.getElementById("my-plan-results-count");
-const resultsEl = document.getElementById("my-plan-results");
-const notesCountEl = document.getElementById("my-plan-notes-count");
-const notesEl = document.getElementById("my-plan-notes");
-const planNoteEl = document.getElementById("my-plan-note") as HTMLTextAreaElement | null;
-const planNoteStatusEl = document.getElementById("my-plan-note-status");
-let planNoteInitialized = false;
+const palauteEl = document.getElementById("oma-suunnitelma-palaute");
+const omaSuunnitelmaSivuEl = document.querySelector(".oma-suunnitelma-sivu") as HTMLElement | null;
+const mittaritEl = document.getElementById("oma-suunnitelma-mittarit");
+const askeleetEl = document.getElementById("oma-suunnitelma-askeleet");
+const askeleetLkmEl = document.getElementById("oma-suunnitelma-askeleet-lkm");
+const vaihtoehdotLkmEl = document.getElementById("oma-suunnitelma-vaihtoehdot-lkm");
+const vaihtoehdotEl = document.getElementById("oma-suunnitelma-vaihtoehdot");
+const jatkaLkmEl = document.getElementById("oma-suunnitelma-jatka-lkm");
+const jatkaEl = document.getElementById("oma-suunnitelma-jatka");
+const tuloksetLkmEl = document.getElementById("oma-suunnitelma-tulokset-lkm");
+const tuloksetEl = document.getElementById("oma-suunnitelma-tulokset");
+const muistiinpanotLkmEl = document.getElementById("oma-suunnitelma-muistiinpanot-lkm");
+const muistiinpanotEl = document.getElementById("oma-suunnitelma-muistiinpanot");
+const yksinkertainenTilaKytkinEl = document.getElementById("oma-suunnitelma-yksinkertainen-tila") as HTMLInputElement | null;
+const yksinkertainenTilaVihjeEl = document.getElementById("oma-suunnitelma-yksinkertainen-tila-vihje");
+const muistioEl = document.getElementById("oma-suunnitelma-muistio") as HTMLTextAreaElement | null;
+const muistioTilaEl = document.getElementById("oma-suunnitelma-muistio-tila");
+let muistioAlustettu = false;
+let yksinkertainenTilaAlustettu = false;
 
-function getApi(): Api | null {
-  return (window.pywebview?.api as Api | undefined) ?? null;
+function haeRajapinta(): Rajapinta | null {
+  return (window.pywebview?.api as Rajapinta | undefined) ?? null;
 }
 
-function setFeedback(message = ""): void {
-  if (feedbackEl) {
-    feedbackEl.textContent = message;
+function naytaPalaute(message = ""): void {
+  if (palauteEl) {
+    palauteEl.textContent = message;
   }
 }
 
-function renderEmpty(container: HTMLElement | null, message: string): void {
+function lueYksinkertainenTila(): boolean {
+  try {
+    return window.localStorage.getItem(SUUNNITELMA_YKSINKERTAINEN_TILA_AVAIN) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function tallennaYksinkertainenTila(enabled: boolean): void {
+  try {
+    window.localStorage.setItem(SUUNNITELMA_YKSINKERTAINEN_TILA_AVAIN, enabled ? "true" : "false");
+  } catch {
+    return;
+  }
+}
+
+function otaYksinkertainenTilaKayttoon(enabled: boolean): void {
+  if (omaSuunnitelmaSivuEl) {
+    omaSuunnitelmaSivuEl.dataset.yksinkertainenTila = String(enabled);
+  }
+  if (yksinkertainenTilaKytkinEl) {
+    yksinkertainenTilaKytkinEl.checked = enabled;
+  }
+  if (yksinkertainenTilaVihjeEl) {
+    yksinkertainenTilaVihjeEl.textContent = enabled
+      ? "Yksinkertainen tila on päällä. Sisältö näytetään yhdessä pystysuuntaisessa kokonaisuudessa."
+      : "Yksinkertainen tila on pois päältä. Leveällä näytöllä osiot voivat asettua vierekkäin.";
+  }
+}
+
+function alustaYksinkertainenTila(): void {
+  if (yksinkertainenTilaAlustettu) {
+    return;
+  }
+
+  yksinkertainenTilaAlustettu = true;
+  otaYksinkertainenTilaKayttoon(lueYksinkertainenTila());
+
+  yksinkertainenTilaKytkinEl?.addEventListener("change", () => {
+    tallennaYksinkertainenTila(yksinkertainenTilaKytkinEl.checked);
+    otaYksinkertainenTilaKayttoon(yksinkertainenTilaKytkinEl.checked);
+  });
+}
+
+function naytaTyhja(container: HTMLElement | null, message: string): void {
   if (container) {
     if (container instanceof HTMLUListElement) {
       const item = document.createElement("li");
@@ -122,14 +171,14 @@ function renderEmpty(container: HTMLElement | null, message: string): void {
   }
 }
 
-function wrapListItem(content: HTMLElement): HTMLLIElement {
+function luoListarivi(content: HTMLElement): HTMLLIElement {
   const item = document.createElement("li");
-  item.className = "my-plan-list-item";
+  item.className = "oma-suunnitelma-listarivi";
   item.append(content);
   return item;
 }
 
-function formatTimestamp(value: string): string {
+function muotoileAikaleima(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;
@@ -141,7 +190,7 @@ function formatTimestamp(value: string): string {
   }).format(date);
 }
 
-function getQuizLabel(quizId: string): string {
+function haeKyselynNimi(quizId: string): string {
   if (quizId === "amis-quiz") {
     return "Amis-korttivertailu";
   }
@@ -151,16 +200,16 @@ function getQuizLabel(quizId: string): string {
   return quizId;
 }
 
-function getResultTitle(item: QuizResultEntry): string {
+function haeTuloksenOtsikko(item: KyselyTulosTieto): string {
   if (item.quizId === "amis-quiz") {
     return String(item.result.topName ?? "Tallennettu ranking");
   }
   return String(item.result.topPathLabel ?? item.result.topPathId ?? "Tallennettu tulos");
 }
 
-function readPlanStepState(): Record<string, boolean> {
+function lueAskelTila(): Record<string, boolean> {
   try {
-    const raw = window.localStorage.getItem(PLAN_STEP_STATE_KEY);
+    const raw = window.localStorage.getItem(SUUNNITELMA_ASKELTILA_AVAIN);
     if (!raw) {
       return {};
     }
@@ -178,30 +227,30 @@ function readPlanStepState(): Record<string, boolean> {
   }
 }
 
-function persistPlanStepState(state: Record<string, boolean>): void {
-  window.localStorage.setItem(PLAN_STEP_STATE_KEY, JSON.stringify(state));
+function tallennaAskelTila(state: Record<string, boolean>): void {
+  window.localStorage.setItem(SUUNNITELMA_ASKELTILA_AVAIN, JSON.stringify(state));
 }
 
-function normalizePlanStepState(steps: PlanStep[], state: Record<string, boolean>): Record<string, boolean> {
+function siistiAskelTila(steps: SuunnitelmaAskel[], state: Record<string, boolean>): Record<string, boolean> {
   const validIds = new Set(steps.map((step) => step.id));
   const normalized = Object.fromEntries(
     Object.entries(state).filter((entry): entry is [string, boolean] => validIds.has(entry[0]) && entry[1] === true)
   );
-  persistPlanStepState(normalized);
+  tallennaAskelTila(normalized);
   return normalized;
 }
 
-function buildMetrics(
-  items: SavedTutkintonimikeItem[],
-  notes: TutkintonimikeNoteItem[],
-  sessions: QuizSessionEntry[]
-): PlanMetric[] {
+function rakennaMittarit(
+  items: TallennettuTutkintonimikeTieto[],
+  notes: TutkintonimikeMuistiinpanoTieto[],
+  sessions: KyselyIstuntoTieto[]
+): SuunnitelmaMittari[] {
   const primaryCount = items.filter((item) => item.planPriority === "ensisijainen").length;
   const strongCount = items.filter((item) => item.planStatus === "vahva-vaihtoehto").length;
   const nextStepCount = items.filter((item) => (item.nextStep ?? "").trim().length > 0).length;
 
   return [
-    { label: "Tallennetut vaihtoehdot", value: String(items.length), accent: "strong" },
+    { label: "Tallennetut vaihtoehdot", value: String(items.length), korostus: "strong" },
     { label: "Ensisijaiset", value: String(primaryCount) },
     { label: "Vahvat vaihtoehdot", value: String(strongCount) },
     { label: "Määritellyt seuraavat askeleet", value: String(nextStepCount) },
@@ -210,13 +259,13 @@ function buildMetrics(
   ];
 }
 
-function buildPlanSteps(
-  items: SavedTutkintonimikeItem[],
-  notes: TutkintonimikeNoteItem[],
-  results: QuizResultEntry[],
-  sessions: QuizSessionEntry[]
-): PlanStep[] {
-  const steps: PlanStep[] = [];
+function rakennaSuunnitelmaAskeleet(
+  items: TallennettuTutkintonimikeTieto[],
+  notes: TutkintonimikeMuistiinpanoTieto[],
+  results: KyselyTulosTieto[],
+  sessions: KyselyIstuntoTieto[]
+): SuunnitelmaAskel[] {
+  const steps: SuunnitelmaAskel[] = [];
 
   if (items.length === 0) {
     steps.push({
@@ -242,7 +291,7 @@ function buildPlanSteps(
     const session = sessions[0];
     steps.push({
       id: `continue-${session.quizId}`,
-      title: `Jatka kysely loppuun: ${getQuizLabel(session.quizId)}`,
+      title: `Jatka kysely loppuun: ${haeKyselynNimi(session.quizId)}`,
       description: "Kesken jäänyt kysely kannattaa viimeistellä, jotta tulokset saa mukaan omaan suunnitelmaan.",
       href: QUIZ_PAGES[session.quizId] ?? "./saved-tutkintonimikkeet.html",
       linkLabel: "Jatka kyselyä"
@@ -312,21 +361,21 @@ function buildPlanSteps(
   return steps.slice(0, 4);
 }
 
-function getPlanPriorityLabel(value: string | null): string | null {
+function haePrioriteettiTeksti(value: string | null): string | null {
   if (!value) {
     return null;
   }
-  return PLAN_PRIORITY_LABELS[value] ?? value;
+  return SUUNNITELMA_PRIORITEETTI_TEKSTIT[value] ?? value;
 }
 
-function getPlanStatusLabel(value: string | null): string | null {
+function haeTilaTeksti(value: string | null): string | null {
   if (!value) {
     return null;
   }
-  return PLAN_STATUS_LABELS[value] ?? value;
+  return SUUNNITELMA_TILA_TEKSTIT[value] ?? value;
 }
 
-function getPlanSortWeight(item: SavedTutkintonimikeItem): number {
+function haeSuunnitelmaPaino(item: TallennettuTutkintonimikeTieto): number {
   const priorityWeight =
     item.planPriority === "ensisijainen"
       ? 40
@@ -347,41 +396,41 @@ function getPlanSortWeight(item: SavedTutkintonimikeItem): number {
   return priorityWeight + statusWeight + nextStepWeight;
 }
 
-function createMetricCard(metric: PlanMetric): HTMLElement {
+function luoMittarikortti(metric: SuunnitelmaMittari): HTMLElement {
   const card = document.createElement("article");
-  card.className = "my-plan-metric";
-  card.dataset.accent = metric.accent ?? "default";
+  card.className = "oma-suunnitelma-mittari";
+  card.dataset.korostus = metric.korostus ?? "default";
 
   const label = document.createElement("p");
-  label.className = "my-plan-metric-label";
+  label.className = "oma-suunnitelma-mittari-teksti";
   label.textContent = metric.label;
 
   const value = document.createElement("strong");
-  value.className = "my-plan-metric-value";
+  value.className = "oma-suunnitelma-mittari-arvo";
   value.textContent = metric.value;
 
   card.append(label, value);
   return card;
 }
 
-function createStepCard(
-  step: PlanStep,
+function luoAskelkortti(
+  step: SuunnitelmaAskel,
   state: Record<string, boolean>,
-  allSteps: PlanStep[]
+  allSteps: SuunnitelmaAskel[]
 ): HTMLElement {
   const row = document.createElement("article");
-  row.className = "my-plan-step";
-  row.dataset.completed = state[step.id] ? "true" : "false";
+  row.className = "oma-suunnitelma-askel";
+  row.dataset.valmis = state[step.id] ? "true" : "false";
 
   const toggle = document.createElement("label");
-  toggle.className = "my-plan-step-toggle";
+  toggle.className = "oma-suunnitelma-askel-valinta";
 
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.checked = Boolean(state[step.id]);
 
   const copy = document.createElement("span");
-  copy.className = "my-plan-step-copy";
+  copy.className = "oma-suunnitelma-askel-teksti";
 
   const title = document.createElement("strong");
   title.textContent = step.title;
@@ -407,53 +456,53 @@ function createStepCard(
     } else {
       delete state[step.id];
     }
-    persistPlanStepState(state);
-    row.dataset.completed = checkbox.checked ? "true" : "false";
-    updateStepCount(allSteps.filter((entry) => state[entry.id]).length, allSteps.length);
+    tallennaAskelTila(state);
+    row.dataset.valmis = checkbox.checked ? "true" : "false";
+    paivitaAskelLkm(allSteps.filter((entry) => state[entry.id]).length, allSteps.length);
   });
 
   return row;
 }
 
-function createSavedItemCard(item: SavedTutkintonimikeItem, noteText: string | null): HTMLElement {
+function luoVaihtoehtokortti(item: TallennettuTutkintonimikeTieto, noteText: string | null): HTMLElement {
   const card = document.createElement("article");
-  card.className = "my-plan-saved-card";
+  card.className = "oma-suunnitelma-vaihtoehto-kortti";
 
   const title = document.createElement("h4");
   title.textContent = item.nimi;
 
   const meta = document.createElement("p");
-  meta.className = "my-plan-card-meta";
-  meta.textContent = `${item.tutkinto_nimi} | Tallennettu ${formatTimestamp(item.savedAt)}`;
+  meta.className = "oma-suunnitelma-kortti-meta";
+  meta.textContent = `${item.tutkinto_nimi} | Tallennettu ${muotoileAikaleima(item.savedAt)}`;
 
   const tags = document.createElement("div");
-  tags.className = "my-plan-tags";
+  tags.className = "oma-suunnitelma-tunnisteet";
 
-  const priorityLabel = getPlanPriorityLabel(item.planPriority);
+  const priorityLabel = haePrioriteettiTeksti(item.planPriority);
   if (priorityLabel) {
     const tag = document.createElement("span");
-    tag.className = "my-plan-tag";
+    tag.className = "oma-suunnitelma-tunniste";
     tag.textContent = priorityLabel;
     tags.append(tag);
   }
 
-  const statusLabel = getPlanStatusLabel(item.planStatus);
+  const statusLabel = haeTilaTeksti(item.planStatus);
   if (statusLabel) {
     const tag = document.createElement("span");
-    tag.className = "my-plan-tag";
+    tag.className = "oma-suunnitelma-tunniste";
     tag.textContent = statusLabel;
     tags.append(tag);
   }
 
   const note = document.createElement("p");
-  note.className = "my-plan-card-note";
+  note.className = "oma-suunnitelma-kortti-muistio";
   note.textContent =
     noteText && noteText.trim().length > 0
       ? noteText
       : "Ei omaa muistiinpanoa vielä. Avaa tallennetut ja kirjaa ensivaikutelma.";
 
   const nextStep = document.createElement("p");
-  nextStep.className = "my-plan-card-next-step";
+  nextStep.className = "oma-suunnitelma-kortti-seuraava-askel";
   nextStep.textContent =
     (item.nextStep ?? "").trim().length > 0
       ? `Seuraava askel: ${item.nextStep}`
@@ -488,7 +537,7 @@ function createSavedItemCard(item: SavedTutkintonimikeItem, noteText: string | n
   return card;
 }
 
-function createSessionCard(item: QuizSessionEntry): HTMLElement {
+function luoJatkaKortti(item: KyselyIstuntoTieto): HTMLElement {
   const row = document.createElement("article");
   row.className = "quiz-saved-result";
 
@@ -496,10 +545,10 @@ function createSessionCard(item: QuizSessionEntry): HTMLElement {
   copy.className = "quiz-saved-result-copy";
 
   const title = document.createElement("strong");
-  title.textContent = getQuizLabel(item.quizId);
+  title.textContent = haeKyselynNimi(item.quizId);
 
   const meta = document.createElement("p");
-  meta.textContent = `Viimeksi päivitetty ${formatTimestamp(item.updatedAt)}.`;
+  meta.textContent = `Viimeksi päivitetty ${muotoileAikaleima(item.updatedAt)}.`;
 
   copy.append(title, meta);
 
@@ -512,7 +561,7 @@ function createSessionCard(item: QuizSessionEntry): HTMLElement {
   return row;
 }
 
-function createResultCard(item: QuizResultEntry): HTMLElement {
+function luoTuloskortti(item: KyselyTulosTieto): HTMLElement {
   const row = document.createElement("article");
   row.className = "quiz-saved-result";
 
@@ -520,10 +569,10 @@ function createResultCard(item: QuizResultEntry): HTMLElement {
   copy.className = "quiz-saved-result-copy";
 
   const title = document.createElement("strong");
-  title.textContent = getResultTitle(item);
+  title.textContent = haeTuloksenOtsikko(item);
 
   const meta = document.createElement("p");
-  meta.textContent = `${getQuizLabel(item.quizId)} | Tallennettu ${formatTimestamp(item.createdAt)}`;
+  meta.textContent = `${haeKyselynNimi(item.quizId)} | Tallennettu ${muotoileAikaleima(item.createdAt)}`;
 
   copy.append(title, meta);
 
@@ -536,7 +585,7 @@ function createResultCard(item: QuizResultEntry): HTMLElement {
   return row;
 }
 
-function createNoteCard(item: TutkintonimikeNoteItem): HTMLElement {
+function luoMuistiinpanoKortti(item: TutkintonimikeMuistiinpanoTieto): HTMLElement {
   const row = document.createElement("article");
   row.className = "quiz-saved-result";
 
@@ -547,7 +596,7 @@ function createNoteCard(item: TutkintonimikeNoteItem): HTMLElement {
   title.textContent = item.nimi;
 
   const meta = document.createElement("p");
-  meta.textContent = `${item.tutkinto_nimi} | Paivitetty ${formatTimestamp(item.updatedAt)}`;
+  meta.textContent = `${item.tutkinto_nimi} | Päivitetty ${muotoileAikaleima(item.updatedAt)}`;
 
   const note = document.createElement("p");
   note.className = "saved-note-preview";
@@ -564,39 +613,39 @@ function createNoteCard(item: TutkintonimikeNoteItem): HTMLElement {
   return row;
 }
 
-function updateStepCount(completedCount: number, totalCount: number): void {
-  if (stepsCountEl) {
-    stepsCountEl.textContent = `${completedCount}/${totalCount} valmiina`;
+function paivitaAskelLkm(completedCount: number, totalCount: number): void {
+  if (askeleetLkmEl) {
+    askeleetLkmEl.textContent = `${completedCount}/${totalCount} valmiina`;
   }
 }
 
-function initPlanNote(): void {
-  if (!planNoteEl || planNoteInitialized) {
+function alustaMuistio(): void {
+  if (!muistioEl || muistioAlustettu) {
     return;
   }
 
-  planNoteInitialized = true;
-  planNoteEl.value = window.localStorage.getItem(PLAN_NOTE_KEY) ?? "";
-  planNoteEl.addEventListener("input", () => {
-    window.localStorage.setItem(PLAN_NOTE_KEY, planNoteEl.value);
-    if (planNoteStatusEl) {
-      planNoteStatusEl.textContent = `Muistio tallennettu ${new Intl.DateTimeFormat("fi-FI", {
+  muistioAlustettu = true;
+  muistioEl.value = window.localStorage.getItem(SUUNNITELMA_MUISTIO_AVAIN) ?? "";
+  muistioEl.addEventListener("input", () => {
+    window.localStorage.setItem(SUUNNITELMA_MUISTIO_AVAIN, muistioEl.value);
+    if (muistioTilaEl) {
+      muistioTilaEl.textContent = `Muistio tallennettu ${new Intl.DateTimeFormat("fi-FI", {
         timeStyle: "short"
       }).format(new Date())}.`;
     }
   });
 }
 
-async function renderMyPlan(): Promise<void> {
-  const api = getApi();
+async function piirraOmaSuunnitelma(): Promise<void> {
+  const api = haeRajapinta();
   if (!api) {
-    setFeedback("Pywebview-rajapinta ei ole käytettävissä.");
-    renderEmpty(metricsEl, "Tilannekuvaa ei voitu ladata.");
-    renderEmpty(stepsEl, "Seuraavia askelia ei voitu muodostaa.");
-    renderEmpty(savedItemsEl, "Tallennettuja vaihtoehtoja ei voitu ladata.");
-    renderEmpty(sessionsEl, "Keskeneräisiä kyselyitä ei voitu ladata.");
-    renderEmpty(resultsEl, "Kyselytuloksia ei voitu ladata.");
-    renderEmpty(notesEl, "Muistiinpanoja ei voitu ladata.");
+    naytaPalaute("Pywebview-rajapinta ei ole käytettävissä.");
+    naytaTyhja(mittaritEl, "Tilannekuvaa ei voitu ladata.");
+    naytaTyhja(askeleetEl, "Seuraavia askelia ei voitu muodostaa.");
+    naytaTyhja(vaihtoehdotEl, "Tallennettuja vaihtoehtoja ei voitu ladata.");
+    naytaTyhja(jatkaEl, "Keskeneräisiä kyselyitä ei voitu ladata.");
+    naytaTyhja(tuloksetEl, "Kyselytuloksia ei voitu ladata.");
+    naytaTyhja(muistiinpanotEl, "Muistiinpanoja ei voitu ladata.");
     return;
   }
 
@@ -608,114 +657,117 @@ async function renderMyPlan(): Promise<void> {
     api.get_quiz_session("opintopolku")
   ]);
 
-  const sessions = [amisSession, opintopolkuSession].filter((item): item is QuizSessionEntry => item !== null);
+  const sessions = [amisSession, opintopolkuSession].filter((item): item is KyselyIstuntoTieto => item !== null);
   const noteMap = new Map(notes.map((note) => [note.id, note.noteText]));
-  const metrics = buildMetrics(items, notes, sessions);
-  const steps = buildPlanSteps(items, notes, results, sessions);
-  const stepState = normalizePlanStepState(steps, readPlanStepState());
+  const metrics = rakennaMittarit(items, notes, sessions);
+  const steps = rakennaSuunnitelmaAskeleet(items, notes, results, sessions);
+  const stepState = siistiAskelTila(steps, lueAskelTila());
   const completedCount = steps.filter((step) => stepState[step.id]).length;
 
-  if (metricsEl) {
-    metricsEl.replaceChildren(...metrics.map((metric) => createMetricCard(metric)));
+  if (mittaritEl) {
+    mittaritEl.replaceChildren(...metrics.map((metric) => luoMittarikortti(metric)));
   }
 
-  if (stepsEl) {
-    stepsEl.replaceChildren(...steps.map((step) => wrapListItem(createStepCard(step, stepState, steps))));
+  if (askeleetEl) {
+    askeleetEl.replaceChildren(...steps.map((step) => luoListarivi(luoAskelkortti(step, stepState, steps))));
   }
-  updateStepCount(completedCount, steps.length);
+  paivitaAskelLkm(completedCount, steps.length);
 
-  if (savedCountEl) {
-    savedCountEl.textContent = `${items.length} vaihtoehtoa`;
+  if (vaihtoehdotLkmEl) {
+    vaihtoehdotLkmEl.textContent = `${items.length} vaihtoehtoa`;
   }
   if (!items.length) {
-    renderEmpty(savedItemsEl, "Tallenna tutkintopankista kiinnostavia vaihtoehtoja, niin suunnitelma alkaa täyttyä.");
-  } else if (savedItemsEl) {
-    savedItemsEl.replaceChildren(
+    naytaTyhja(vaihtoehdotEl, "Tallenna tutkintopankista kiinnostavia vaihtoehtoja, niin suunnitelma alkaa täyttyä.");
+  } else if (vaihtoehdotEl) {
+    vaihtoehdotEl.replaceChildren(
       ...items
         .slice()
         .sort((left, right) => {
-          const weightDifference = getPlanSortWeight(right) - getPlanSortWeight(left);
+          const weightDifference = haeSuunnitelmaPaino(right) - haeSuunnitelmaPaino(left);
           const leftHasNote = noteMap.has(left.id) ? 1 : 0;
           const rightHasNote = noteMap.has(right.id) ? 1 : 0;
           return weightDifference || rightHasNote - leftHasNote || left.nimi.localeCompare(right.nimi, "fi");
         })
         .slice(0, 4)
-        .map((item) => wrapListItem(createSavedItemCard(item, noteMap.get(item.id) ?? null)))
+        .map((item) => luoListarivi(luoVaihtoehtokortti(item, noteMap.get(item.id) ?? null)))
     );
   }
 
-  if (sessionsCountEl) {
-    sessionsCountEl.textContent = `${sessions.length} kesken`;
+  if (jatkaLkmEl) {
+    jatkaLkmEl.textContent = `${sessions.length} kesken`;
   }
   if (!sessions.length) {
-    renderEmpty(sessionsEl, "Ei kesken jääneitä kyselyitä juuri nyt.");
-  } else if (sessionsEl) {
-    sessionsEl.replaceChildren(...sessions.map((item) => wrapListItem(createSessionCard(item))));
+    naytaTyhja(jatkaEl, "Ei kesken jääneitä kyselyitä juuri nyt.");
+  } else if (jatkaEl) {
+    jatkaEl.replaceChildren(...sessions.map((item) => luoListarivi(luoJatkaKortti(item))));
   }
 
-  if (resultsCountEl) {
-    resultsCountEl.textContent = `${results.length} tallennettua`;
+  if (tuloksetLkmEl) {
+    tuloksetLkmEl.textContent = `${results.length} tallennettua`;
   }
   if (!results.length) {
-    renderEmpty(resultsEl, "Kyselytulokset ilmestyvät tähän, kun tallennat niitä.");
-  } else if (resultsEl) {
-    resultsEl.replaceChildren(
+    naytaTyhja(tuloksetEl, "Kyselytulokset ilmestyvät tähän, kun tallennat niitä.");
+  } else if (tuloksetEl) {
+    tuloksetEl.replaceChildren(
       ...results
         .slice()
         .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime())
         .slice(0, 3)
-        .map((item) => wrapListItem(createResultCard(item)))
+        .map((item) => luoListarivi(luoTuloskortti(item)))
     );
   }
 
-  if (notesCountEl) {
-    notesCountEl.textContent = `${notes.length} muistiinpanoa`;
+  if (muistiinpanotLkmEl) {
+    muistiinpanotLkmEl.textContent = `${notes.length} muistiinpanoa`;
   }
   if (!notes.length) {
-    renderEmpty(notesEl, "Kun kirjoitat muistiinpanoja tallennetuille vaihtoehdoille, ne näkyvät myös täällä.");
-  } else if (notesEl) {
-    notesEl.replaceChildren(
+    naytaTyhja(muistiinpanotEl, "Kun kirjoitat muistiinpanoja tallennetuille vaihtoehdoille, ne näkyvät myös täällä.");
+  } else if (muistiinpanotEl) {
+    muistiinpanotEl.replaceChildren(
       ...notes
         .slice()
         .sort((left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime())
         .slice(0, 3)
-        .map((item) => wrapListItem(createNoteCard(item)))
+        .map((item) => luoListarivi(luoMuistiinpanoKortti(item)))
     );
   }
 }
 
 async function init(): Promise<InitAttemptResult> {
-  setFeedback("");
-  initPlanNote();
+  naytaPalaute("");
+  alustaYksinkertainenTila();
+  alustaMuistio();
 
-  const api = await waitForPywebviewApi<Api>();
+  const api = await waitForPywebviewApi<Rajapinta>();
   if (!api) {
-    setFeedback("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
-    renderEmpty(metricsEl, "Tilannekuvaa ei voitu ladata.");
-    renderEmpty(stepsEl, "Seuraavia askelia ei voitu muodostaa.");
-    renderEmpty(savedItemsEl, "Tallennettuja vaihtoehtoja ei voitu ladata.");
-    renderEmpty(sessionsEl, "Keskeneräisiä kyselyitä ei voitu ladata.");
-    renderEmpty(resultsEl, "Kyselytuloksia ei voitu ladata.");
-    renderEmpty(notesEl, "Muistiinpanoja ei voitu ladata.");
+    naytaPalaute("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
+    naytaTyhja(mittaritEl, "Tilannekuvaa ei voitu ladata.");
+    naytaTyhja(askeleetEl, "Seuraavia askelia ei voitu muodostaa.");
+    naytaTyhja(vaihtoehdotEl, "Tallennettuja vaihtoehtoja ei voitu ladata.");
+    naytaTyhja(jatkaEl, "Keskeneräisiä kyselyitä ei voitu ladata.");
+    naytaTyhja(tuloksetEl, "Kyselytuloksia ei voitu ladata.");
+    naytaTyhja(muistiinpanotEl, "Muistiinpanoja ei voitu ladata.");
     return { success: false, retryDelayMs: 500 };
   }
 
   try {
-    await renderMyPlan();
+    await piirraOmaSuunnitelma();
     return { success: true };
   } catch {
-    setFeedback("Oma suunnitelma -sivun lataus epäonnistui. Yritetään uudelleen...");
-    renderEmpty(metricsEl, "Tilannekuvaa ei voitu ladata.");
-    renderEmpty(stepsEl, "Seuraavia askelia ei voitu muodostaa.");
-    renderEmpty(savedItemsEl, "Tallennettuja vaihtoehtoja ei voitu ladata.");
-    renderEmpty(sessionsEl, "Keskeneräisiä kyselyitä ei voitu ladata.");
-    renderEmpty(resultsEl, "Kyselytuloksia ei voitu ladata.");
-    renderEmpty(notesEl, "Muistiinpanoja ei voitu ladata.");
+    naytaPalaute("Oma suunnitelma -sivun lataus epäonnistui. Yritetään uudelleen...");
+    naytaTyhja(mittaritEl, "Tilannekuvaa ei voitu ladata.");
+    naytaTyhja(askeleetEl, "Seuraavia askelia ei voitu muodostaa.");
+    naytaTyhja(vaihtoehdotEl, "Tallennettuja vaihtoehtoja ei voitu ladata.");
+    naytaTyhja(jatkaEl, "Keskeneräisiä kyselyitä ei voitu ladata.");
+    naytaTyhja(tuloksetEl, "Kyselytuloksia ei voitu ladata.");
+    naytaTyhja(muistiinpanotEl, "Muistiinpanoja ei voitu ladata.");
     return { success: false, retryDelayMs: 1000 };
   }
 }
 
 const initPage = createRetryingPageInit(init);
+
+alustaYksinkertainenTila();
 
 window.addEventListener("pywebviewready", () => {
   initPage();

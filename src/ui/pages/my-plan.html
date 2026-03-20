@@ -15,108 +15,119 @@
     <main class="app" id="main-content">
       <div id="app-header"></div>
 
-      <section class="panel my-plan-page" aria-labelledby="my-plan-title">
+      <section class="panel oma-suunnitelma-sivu" aria-labelledby="oma-suunnitelma-otsikko">
         <div class="saved-page-header">
           <div>
-            <h2 id="my-plan-title">Oma suunnitelma</h2>
+            <h2 id="oma-suunnitelma-otsikko">Oma suunnitelma</h2>
             <p class="saved-page-copy">
               Yksi näkymä omille vaihtoehdoille, seuraaville askelille ja omille huomioille. Sivu kokoaa nykyiset
               tallennukset yhteen ja auttaa hahmottamaan, mitä kannattaa tehdä seuraavaksi.
             </p>
           </div>
+          <div class="oma-suunnitelma-nakymakytkimet">
+            <label class="accessibility-toggle oma-suunnitelma-nakymatila" for="oma-suunnitelma-yksinkertainen-tila">
+              <input id="oma-suunnitelma-yksinkertainen-tila" type="checkbox" />
+              <span>Yksinkertainen tila</span>
+            </label>
+            <p id="oma-suunnitelma-yksinkertainen-tila-vihje" class="saved-page-copy">
+              Näytä sivu yhtenä pystysuuntaisena kokonaisuutena ilman vierekkäin asettuvia osioita.
+            </p>
+          </div>
         </div>
 
-        <p id="my-plan-feedback" class="saved-feedback" aria-live="polite"></p>
+        <p id="oma-suunnitelma-palaute" class="saved-feedback" aria-live="polite"></p>
 
-        <div class="my-plan-layout">
-          <div class="my-plan-primary">
-            <section class="my-plan-section" aria-labelledby="my-plan-overview-title">
+        <div class="oma-suunnitelma-prioriteetit">
+          <section class="oma-suunnitelma-osio oma-suunnitelma-osio--askeleet" aria-labelledby="oma-suunnitelma-askeleet-otsikko">
+            <div class="saved-section-header">
+              <div>
+                <h3 id="oma-suunnitelma-askeleet-otsikko">Seuraavat askeleet</h3>
+                <p class="saved-page-copy">
+                  Ehdotetut tehtävät muodostuvat tallennuksiesi, kyselyidesi ja muistiinpanojesi perusteella.
+                </p>
+              </div>
+              <div id="oma-suunnitelma-askeleet-lkm" class="count"></div>
+            </div>
+            <ul id="oma-suunnitelma-askeleet" class="oma-suunnitelma-askeleet"></ul>
+          </section>
+
+          <section class="oma-suunnitelma-osio oma-suunnitelma-osio--jatka" aria-labelledby="oma-suunnitelma-jatka-otsikko">
+            <div class="saved-section-header">
+              <div>
+                <h3 id="oma-suunnitelma-jatka-otsikko">Jatka tässä</h3>
+                <p class="saved-page-copy">Kesken jääneet kyselyt pysyvät helposti mukana suunnitelmassasi.</p>
+              </div>
+              <div id="oma-suunnitelma-jatka-lkm" class="count"></div>
+            </div>
+            <ul id="oma-suunnitelma-jatka" class="quiz-results-list"></ul>
+          </section>
+        </div>
+
+        <div class="oma-suunnitelma-asettelu">
+          <div class="oma-suunnitelma-paa">
+            <section class="oma-suunnitelma-osio oma-suunnitelma-osio--tilannekuva" aria-labelledby="oma-suunnitelma-tilannekuva-otsikko">
               <div class="saved-section-header">
                 <div>
-                  <h3 id="my-plan-overview-title">Tilannekuva</h3>
+                  <h3 id="oma-suunnitelma-tilannekuva-otsikko">Tilannekuva</h3>
                   <p class="saved-page-copy">Nopea yhteenveto siitä, kuinka paljon materiaalia sinulla on jo kasassa.</p>
                 </div>
               </div>
-              <div id="my-plan-metrics" class="my-plan-metrics"></div>
+              <div id="oma-suunnitelma-mittarit" class="oma-suunnitelma-mittarit"></div>
             </section>
 
-            <section class="my-plan-section" aria-labelledby="my-plan-steps-title">
+            <section class="oma-suunnitelma-osio oma-suunnitelma-osio--vaihtoehdot" aria-labelledby="oma-suunnitelma-vaihtoehdot-otsikko">
               <div class="saved-section-header">
                 <div>
-                  <h3 id="my-plan-steps-title">Seuraavat askeleet</h3>
-                  <p class="saved-page-copy">
-                    Ehdotetut tehtävät muodostuvat tallennuksiesi, kyselyidesi ja muistiinpanojesi perusteella.
-                  </p>
-                </div>
-                <div id="my-plan-steps-count" class="count"></div>
-              </div>
-              <ul id="my-plan-steps" class="my-plan-steps"></ul>
-            </section>
-
-            <section class="my-plan-section" aria-labelledby="my-plan-saved-title">
-              <div class="saved-section-header">
-                <div>
-                  <h3 id="my-plan-saved-title">Vahvimmat vaihtoehdot</h3>
+                  <h3 id="oma-suunnitelma-vaihtoehdot-otsikko">Vahvimmat vaihtoehdot</h3>
                   <p class="saved-page-copy">
                     Tallennetut tutkintonimikkeet toimivat suunnitelmasi runkona. Muistiinpanot nostetaan mukaan, jos
                     niitä löytyy.
                   </p>
                 </div>
-                <div id="my-plan-saved-count" class="count"></div>
+                <div id="oma-suunnitelma-vaihtoehdot-lkm" class="count"></div>
               </div>
-              <ul id="my-plan-saved-items" class="my-plan-card-grid"></ul>
+              <ul id="oma-suunnitelma-vaihtoehdot" class="oma-suunnitelma-korttiruudukko"></ul>
             </section>
           </div>
 
-          <aside class="my-plan-sidebar">
-            <section class="my-plan-section" aria-labelledby="my-plan-note-title">
+          <aside class="oma-suunnitelma-sivupalkki">
+            <section class="oma-suunnitelma-osio oma-suunnitelma-osio--muistio" aria-labelledby="oma-suunnitelma-muistio-otsikko">
               <div class="saved-section-header">
                 <div>
-                  <h3 id="my-plan-note-title">Oma suunnitelmamuistio</h3>
+                  <h3 id="oma-suunnitelma-muistio-otsikko">Oma suunnitelmamuistio</h3>
                   <p class="saved-page-copy">Kirjoita tähän oma tavoite, kysymys tai seuraava keskusteluaihe opolle.</p>
                 </div>
               </div>
-              <label class="my-plan-note-label" for="my-plan-note">Muistio</label>
+              <label class="oma-suunnitelma-muistio-label" for="oma-suunnitelma-muistio">Muistio</label>
               <textarea
-                id="my-plan-note"
-                class="my-plan-note-input"
+                id="oma-suunnitelma-muistio"
+                class="oma-suunnitelma-muistio-syote"
                 rows="8"
                 placeholder="Esim. Haluan vertailla kahta suosikkialaa ennen ensi viikkoa..."
               ></textarea>
-              <p id="my-plan-note-status" class="saved-page-copy">Muistio tallennetaan automaattisesti tälle laitteelle.</p>
+              <p id="oma-suunnitelma-muistio-tila" class="saved-page-copy">Muistio tallennetaan automaattisesti tälle laitteelle.</p>
             </section>
 
-            <section class="my-plan-section" aria-labelledby="my-plan-sessions-title">
+            <section class="oma-suunnitelma-osio oma-suunnitelma-osio--tulokset" aria-labelledby="oma-suunnitelma-tulokset-otsikko">
               <div class="saved-section-header">
                 <div>
-                  <h3 id="my-plan-sessions-title">Jatka tässä</h3>
-                  <p class="saved-page-copy">Kesken jääneet kyselyt pysyvät helposti mukana suunnitelmassasi.</p>
-                </div>
-                <div id="my-plan-sessions-count" class="count"></div>
-              </div>
-              <ul id="my-plan-sessions" class="quiz-results-list"></ul>
-            </section>
-
-            <section class="my-plan-section" aria-labelledby="my-plan-results-title">
-              <div class="saved-section-header">
-                <div>
-                  <h3 id="my-plan-results-title">Viimeisimmät kyselytulokset</h3>
+                  <h3 id="oma-suunnitelma-tulokset-otsikko">Viimeisimmät kyselytulokset</h3>
                   <p class="saved-page-copy">Tulokset auttavat muistamaan, mihin suuntaan vastauksesi ovat aiemmin kallistuneet.</p>
                 </div>
-                <div id="my-plan-results-count" class="count"></div>
+                <div id="oma-suunnitelma-tulokset-lkm" class="count"></div>
               </div>
-              <ul id="my-plan-results" class="quiz-results-list"></ul>
+              <ul id="oma-suunnitelma-tulokset" class="quiz-results-list"></ul>
             </section>
 
-            <section class="my-plan-section" aria-labelledby="my-plan-notes-title">
+            <section class="oma-suunnitelma-osio oma-suunnitelma-osio--muistiinpanot" aria-labelledby="oma-suunnitelma-muistiinpanot-otsikko">
               <div class="saved-section-header">
                 <div>
-                  <h3 id="my-plan-notes-title">Tuoreet muistiinpanot</h3>
+                  <h3 id="oma-suunnitelma-muistiinpanot-otsikko">Tuoreet muistiinpanot</h3>
                   <p class="saved-page-copy">Nopea lista viimeksi päivitetystä omasta pohdinnasta.</p>
                 </div>
-                <div id="my-plan-notes-count" class="count"></div>
+                <div id="oma-suunnitelma-muistiinpanot-lkm" class="count"></div>
               </div>
-              <ul id="my-plan-notes" class="quiz-results-list"></ul>
+              <ul id="oma-suunnitelma-muistiinpanot" class="quiz-results-list"></ul>
             </section>
           </aside>
         </div>
