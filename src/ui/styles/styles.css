@@ -1,0 +1,664 @@
+@import "./root/main.css";
+@import "./root/light-high-contrast.css";
+@import "./root/dark-main.css";
+@import "./root/dark-high-contrast.css";
+
+:root {
+  --layout-max-width: 82rem;
+  --layout-reading-width: 68rem;
+  --layout-padding-inline: clamp(var(--space-8), 4vw, var(--space-11));
+  --layout-padding-block: clamp(var(--space-8), 3vw, var(--space-11));
+  --layout-gap: clamp(var(--space-8), 3vw, var(--space-10));
+  --card-min-width: 16rem;
+  --compact-card-min-width: 12rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--font-family-base);
+  font-size: var(--text-base);
+  line-height: var(--line-height-copy);
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img {
+  display: block;
+  max-inline-size: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button,
+.header-link,
+.tutkintonimike-link-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  text-decoration: none;
+}
+
+button,
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea,
+.header-link,
+.tutkintonimike-link-action {
+  padding: var(--control-padding-y) var(--control-padding-x);
+  border: var(--border-width) solid currentColor;
+  background: transparent;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  inline-size: 100%;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  margin: 0;
+}
+
+textarea {
+  min-block-size: 8rem;
+  resize: vertical;
+}
+
+button[disabled],
+input[disabled],
+select[disabled],
+textarea[disabled] {
+  cursor: not-allowed;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+fieldset {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+}
+
+fieldset {
+  min-inline-size: 0;
+}
+
+details {
+  display: grid;
+  gap: var(--space-6);
+}
+
+summary {
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+h4,
+.header-link,
+.tutkintonimike-link,
+.tutkintonimike-link-action {
+  overflow-wrap: anywhere;
+}
+
+.skip-link {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: var(--layout-padding-inline);
+  padding: var(--space-4) var(--space-6);
+  border: var(--border-width) solid currentColor;
+  background: var(--color-background);
+  text-decoration: none;
+  transform: translateY(-150%);
+  z-index: 10;
+}
+
+.skip-link:focus {
+  transform: translateY(var(--space-4));
+}
+
+.app {
+  inline-size: min(100%, var(--layout-max-width));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: var(--layout-padding-block) var(--layout-padding-inline);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-content: start;
+  gap: var(--layout-gap);
+}
+
+.app > * {
+  min-inline-size: 0;
+}
+
+body[data-page="home"] .app > div:not(#app-header),
+body[data-page="tietosuoja"] .app > div:not(#app-header) {
+  display: grid;
+  gap: var(--layout-gap);
+}
+
+body[data-page="tietosuoja"] .app > div:not(#app-header) {
+  max-inline-size: var(--layout-reading-width);
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-8);
+  padding-block-end: var(--space-8);
+  border-block-end: var(--border-width) solid currentColor;
+}
+
+.site-header > div {
+  display: grid;
+  gap: var(--space-3);
+  max-inline-size: var(--layout-reading-width);
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.header-link.active,
+.list button.active,
+.quiz-option.is-selected {
+  font-weight: 700;
+}
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-6);
+  padding-block-start: var(--space-8);
+  border-block-start: var(--border-width) solid currentColor;
+}
+
+.site-footer-copy {
+  max-inline-size: 32rem;
+}
+
+.panel,
+.saved-section,
+.oma-suunnitelma-osio,
+.card,
+.opintopolku-card,
+.tutkintonimike-card,
+.accessibility-preview-card,
+.saved-stats-metric,
+.saved-stat-row,
+.quiz-result-card,
+.quiz-choice-shell,
+.quiz-saved-result,
+.asetukset-item,
+.oma-suunnitelma-mittari,
+.oma-suunnitelma-askel,
+.oma-suunnitelma-vaihtoehto-kortti {
+  padding: var(--space-8);
+  border: var(--border-width) solid currentColor;
+}
+
+.panel,
+.saved-section,
+.saved-page,
+.asetukset-page,
+.asetukset-section,
+.accessibility-page,
+.oma-suunnitelma-sivu,
+.oma-suunnitelma-osio,
+.search,
+.pankki-filters,
+.detail,
+.quiz-overview,
+.quiz-body,
+.quiz-form,
+.quiz-results,
+.quiz-ranking,
+.quiz-play,
+.quiz-play-header,
+.accessibility-form,
+.accessibility-preview,
+.accessibility-status-stack,
+.saved-note-editor,
+.saved-plan-editor,
+.asetukset-pane,
+.asetukset-list {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.saved-page-header,
+.saved-section-header,
+.asetukset-page-header,
+.asetukset-section-header,
+.accessibility-page-header,
+.accessibility-preview-header,
+.quiz-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-8);
+}
+
+.saved-page-copy,
+.quiz-lead,
+.quiz-help,
+.quiz-shortcuts,
+.accessibility-note,
+.tutkintonimike-meta,
+.saved-note-preview,
+.saved-plan-meta,
+.oma-suunnitelma-kortti-meta,
+.oma-suunnitelma-kortti-muistio,
+.oma-suunnitelma-kortti-seuraava-askel {
+  max-inline-size: 70ch;
+}
+
+.count,
+.saved-feedback {
+  min-block-size: 1.5em;
+}
+
+.empty {
+  padding-block: var(--space-6);
+}
+
+#card-select,
+#kyselyt-cards,
+.opintopolut-grid,
+.saved-grid,
+.tutkintonimike-grid,
+.oma-suunnitelma-korttiruudukko {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min-width)), 1fr));
+  gap: var(--space-8);
+}
+
+.saved-stats-summary,
+.saved-plan-grid,
+.oma-suunnitelma-mittarit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--compact-card-min-width)), 1fr));
+  gap: var(--space-6);
+}
+
+.quiz-results-list,
+.saved-stats-chart,
+.oma-suunnitelma-askeleet,
+.oma-suunnitelma-paa,
+.oma-suunnitelma-sivupalkki {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.quiz-results-list,
+.list,
+.oma-suunnitelma-askeleet,
+.oma-suunnitelma-korttiruudukko {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+body[data-page="home"] #kyselyt {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--layout-gap);
+}
+
+.list {
+  gap: var(--space-4);
+}
+
+.list button,
+.quiz-option {
+  inline-size: 100%;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.filter-toggle,
+.accessibility-choice,
+.accessibility-toggle,
+.oma-suunnitelma-askel-valinta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.card,
+.opintopolku-card {
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+  text-decoration: none;
+  min-block-size: 100%;
+}
+
+.card-image,
+.tutkintonimike-image,
+.tutkintonimike-image--placeholder {
+  inline-size: 100%;
+  object-fit: cover;
+}
+
+.card-image {
+  aspect-ratio: 16 / 9;
+}
+
+.tutkintonimike-image,
+.tutkintonimike-image--placeholder {
+  aspect-ratio: 1 / 1;
+}
+
+.card-image[aria-hidden="true"],
+.tutkintonimike-image--placeholder {
+  background: var(--color-surface-muted);
+}
+
+.opintopolku-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.tutkintonimike-card {
+  display: grid;
+  grid-template-columns: minmax(6rem, 8rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-6);
+}
+
+.tutkintonimike-card-body,
+.quiz-meta,
+.saved-stat-row-title-group,
+.quiz-summary,
+.asetukset-item-copy,
+.oma-suunnitelma-askel-teksti,
+.oma-suunnitelma-nakymakytkimet,
+.oma-suunnitelma-vaihtoehto-kortti,
+.saved-stats-metric,
+.oma-suunnitelma-mittari {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.tutkintonimike-card-actions,
+.quiz-choice-footer,
+.quiz-result-footer,
+.accessibility-actions,
+.accessibility-preview-actions,
+.oma-suunnitelma-tunnisteet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.oma-suunnitelma-tunniste {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid currentColor;
+}
+
+.saved-stats-chart {
+  gap: var(--space-6);
+}
+
+.saved-stat-row {
+  gap: var(--space-4);
+}
+
+.saved-stat-row-header,
+.quiz-saved-result {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-6);
+}
+
+.saved-stat-bar-track {
+  block-size: 0.75rem;
+  border: var(--border-width) solid currentColor;
+}
+
+.saved-stat-bar-fill {
+  block-size: 100%;
+  inline-size: calc(var(--saved-stat-ratio, 0) * 100%);
+  background: currentColor;
+}
+
+.saved-plan-next-step,
+.accessibility-control {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.quiz-meta {
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: var(--space-4) var(--space-6);
+}
+
+.quiz-options {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-4);
+}
+
+.panel-quiz {
+  inline-size: min(100%, var(--layout-reading-width));
+  justify-self: center;
+}
+
+.quiz-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--space-8);
+}
+
+.quiz-card-slot {
+  display: grid;
+  min-inline-size: 0;
+}
+
+.quiz-card-slot.is-disabled {
+  opacity: 0.7;
+}
+
+.quiz-choice-shell {
+  display: grid;
+  align-content: start;
+  gap: var(--space-6);
+  block-size: 100%;
+}
+
+.quiz-choice-button {
+  display: block;
+  inline-size: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.quiz-choice-button .tutkintonimike-card {
+  padding: 0;
+  border: 0;
+}
+
+.quiz-ranking-list {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.quiz-ranking-list li {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.quiz-score {
+  display: inline-flex;
+  align-self: start;
+}
+
+.asetukset-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--layout-gap);
+}
+
+.asetukset-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-6);
+}
+
+.accessibility-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--layout-gap);
+}
+
+.accessibility-fieldset {
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  border: var(--border-width) solid currentColor;
+}
+
+.oma-suunnitelma-prioriteetit {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--layout-gap);
+}
+
+.oma-suunnitelma-asettelu {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 1fr);
+  align-items: start;
+  gap: var(--layout-gap);
+}
+
+.oma-suunnitelma-listarivi {
+  list-style: none;
+}
+
+.oma-suunnitelma-muistio-label {
+  display: block;
+}
+
+.oma-suunnitelma-muistio-syote {
+  min-block-size: 12rem;
+}
+
+.oma-suunnitelma-sivu[data-yksinkertainen-tila="true"] .oma-suunnitelma-prioriteetit,
+.oma-suunnitelma-sivu[data-yksinkertainen-tila="true"] .oma-suunnitelma-asettelu {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 60rem) {
+  .workspace,
+  .asetukset-columns,
+  .accessibility-layout,
+  .oma-suunnitelma-prioriteetit,
+  .oma-suunnitelma-asettelu,
+  .quiz-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 45rem) {
+  .site-header,
+  .site-footer,
+  .saved-page-header,
+  .saved-section-header,
+  .asetukset-page-header,
+  .asetukset-section-header,
+  .accessibility-page-header,
+  .accessibility-preview-header,
+  .quiz-header,
+  .saved-stat-row-header,
+  .quiz-saved-result {
+    flex-direction: column;
+  }
+
+  .tutkintonimike-card {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-meta {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+  }
+}
