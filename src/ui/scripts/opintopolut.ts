@@ -49,9 +49,6 @@ function renderItems(items: OpiskeluSuunta[]): void {
       const card = document.createElement("article");
       card.className = "opintopolku-card";
 
-      const title = document.createElement("h3");
-      title.textContent = item.nimi;
-
       const image = document.createElement("img");
       image.className = "card-image";
       image.src = item.img;
@@ -59,6 +56,12 @@ function renderItems(items: OpiskeluSuunta[]): void {
       image.addEventListener("error", () => {
         image.style.display = "none";
       });
+
+      const body = document.createElement("div");
+      body.className = "opintopolku-card-body";
+
+      const title = document.createElement("h3");
+      title.textContent = item.nimi;
 
       const desc = document.createElement("p");
       desc.textContent = item.desc;
@@ -77,7 +80,8 @@ function renderItems(items: OpiskeluSuunta[]): void {
         })
       );
 
-      card.append(title, image, desc, subheading, list);
+      body.append(title, desc, subheading, list);
+      card.append(image, body);
       return card;
     })
   );

@@ -204,6 +204,8 @@ async function initPage(): Promise<InitAttemptResult> {
   persistAccessibilitySettings(initialSettings);
 
   formEl.addEventListener("input", previewCurrentSettings);
+  // Select controls in the embedded webview reliably emit change even when input is inconsistent.
+  formEl.addEventListener("change", previewCurrentSettings);
   saveButtonEl.addEventListener("click", () => {
     void saveSettings();
   });

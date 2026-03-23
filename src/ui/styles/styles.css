@@ -37,9 +37,10 @@ body,
 button,
 input,
 select,
-textarea {
+textarea,
+option {
   font: inherit;
-  color: inherit;
+  color: var(--color-text);
 }
 
 img {
@@ -49,6 +50,23 @@ img {
 
 a {
   color: inherit;
+}
+
+:root[data-contrast="light-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link),
+:root[data-contrast="dark-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link) {
+  color: var(--color-link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.14em;
+}
+
+:root[data-contrast="light-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):visited,
+:root[data-contrast="dark-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):visited {
+  color: var(--color-link-visited);
+}
+
+:root[data-contrast="light-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):hover,
+:root[data-contrast="dark-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):hover {
+  color: var(--color-link-hover);
 }
 
 button {
@@ -145,6 +163,21 @@ h4,
 .tutkintonimike-link,
 .tutkintonimike-link-action {
   overflow-wrap: anywhere;
+}
+
+.header-link,
+.tutkintonimike-link-action,
+.skip-link {
+  color: var(--color-text);
+}
+
+.header-link:hover,
+.header-link:visited,
+.tutkintonimike-link-action:hover,
+.tutkintonimike-link-action:visited,
+.skip-link:hover,
+.skip-link:visited {
+  color: var(--color-text);
 }
 
 .skip-link {
@@ -358,6 +391,32 @@ body[data-page="home"] #kyselyt {
   gap: var(--space-6);
 }
 
+body[data-page="opintopolut"] .panel {
+  inline-size: 100%;
+  max-inline-size: 76rem;
+  justify-self: center;
+}
+
+body[data-page="opintopolut"] .opintopolut-detail {
+  gap: var(--space-10);
+}
+
+body[data-page="opintopolut"] .opintopolut-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-10);
+  justify-items: stretch;
+}
+
+body[data-page="opintopolut"] .opintopolku-card {
+  inline-size: 100%;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+}
+
+body[data-page="opintopolut"] .opintopolku-card .card-image {
+  aspect-ratio: 4 / 3;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
@@ -419,6 +478,17 @@ body[data-page="home"] #kyselyt {
 .opintopolku-list {
   display: grid;
   gap: var(--space-3);
+}
+
+.opintopolku-card-body {
+  display: grid;
+  align-content: start;
+  gap: var(--space-5);
+  min-inline-size: 0;
+}
+
+.opintopolku-card-body p {
+  max-inline-size: 68ch;
 }
 
 .tutkintonimike-card {
@@ -628,6 +698,14 @@ body[data-page="home"] #kyselyt {
 }
 
 @media (max-width: 60rem) {
+  body[data-page="opintopolut"] .opintopolut-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body[data-page="opintopolut"] .opintopolku-card {
+    inline-size: 100%;
+  }
+
   .workspace,
   .asetukset-columns,
   .accessibility-layout,

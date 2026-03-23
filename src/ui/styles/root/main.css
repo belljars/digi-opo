@@ -27,6 +27,7 @@
 }
 
 :root {
+  color-scheme: light;
   --font-scale: 1;
   --font-family-base: system-ui, sans-serif;
   --font-family-system: system-ui, sans-serif;
