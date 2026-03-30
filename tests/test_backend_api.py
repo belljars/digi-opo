@@ -1,16 +1,23 @@
-from __future__ import annotations
+"""Backendin keskeisiä käyttäjäpolkuja suojaavat integraatiotestit.
 
-import importlib.util
-import json
-import sys
-import tempfile
-import types
-import unittest
-from pathlib import Path
-from unittest import mock
+Testit rakentavat tilapäisen projektirakenteen, lataavat oikean API:n ja
+varmistavat, että data, asetukset ja tallennukset toimivat yhdessä.
+"""
+
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi.
+
+import importlib.util  # Lataa sovelluksen moduulin tiedostopolusta ilman normaalia import-ketjua.
+import json  # Rakentaa testidataa JSON-tiedostoiksi ja lukee tallennuksia takaisin.
+import sys  # Lisää vale-webview-moduulin Pythonin moduulirekisteriin testejä varten.
+import tempfile  # Luo eristetyn väliaikaisen projektihakemiston jokaiselle testille.
+import types  # Rakentaa kevyen vale-olion webview-riippuvuuden korvaamiseen.
+import unittest  # Tarjoaa testikehyksen ja testien ajotavan.
+from pathlib import Path  # Käsittelee testien väliaikaisia tiedosto- ja kansiopolkuja.
+from unittest import mock  # Korvaa sovelluksen projektijuuren testin omalla hakemistolla.
 
 
 def load_app_module():
+    """Lataa `app.py`:n testikäyttöön ilman oikean käyttöliittymäikkunan avaamista."""
     project_root = Path(__file__).resolve().parents[1]
     app_path = project_root / "src" / "app" / "app.py"
     spec = importlib.util.spec_from_file_location("digi_opo_app", app_path)
@@ -21,7 +28,8 @@ def load_app_module():
         create_window=lambda *args, **kwargs: None,
         start=lambda *args, **kwargs: None,
     )
-    sys.modules.setdefault("webview", fake_webview) # Mockataan webview, jotta app.py ei yritä luoda oikeaa ikkunaa testatessa
+    # Mockataan webview, jotta testit eivät avaa oikeaa työpöytäikkunaa.
+    sys.modules.setdefault("webview", fake_webview)
 
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -29,7 +37,10 @@ def load_app_module():
 
 
 class BackendApiTests(unittest.TestCase):
+    # Varmistaa backendin tietokanta-, sisältö- ja asetustoimintojen toimivuuden
+
     def setUp(self) -> None:
+        # Rakentaa eristetyn testiprojektin datatiedostoineen jokaista testiä varten
         self.app = load_app_module()
         self._apis = []
         self.tmpdir = tempfile.TemporaryDirectory()
@@ -109,17 +120,20 @@ class BackendApiTests(unittest.TestCase):
         )
 
     def tearDown(self) -> None:
+        """Sulkee testin aikana luodut API-instanssit ja siivoaa väliaikaiset tiedostot."""
         for api in self._apis:
             api.close()
         self.tmpdir.cleanup()
 
     def create_api(self):
+        """Luo API-instanssin käyttämään testin väliaikaista projektijuurta."""
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
             api = self.app.Api()
         self._apis.append(api)
         return api
 
     def test_api_imports_data_and_search_works(self) -> None:
+        """Lähdedata tuodaan tietokantaan ja haku palauttaa oikeat tutkintorivit."""
         api = self.create_api()
         tutkinnot = api.list_tutkinnot()
         self.assertEqual(len(tutkinnot), 2)
@@ -145,18 +159,21 @@ class BackendApiTests(unittest.TestCase):
         )
 
     def test_opiskelu_suunnat_image_is_normalized_for_http(self) -> None:
+        # Opiskelusuuntien kuvat muunnetaan käyttöliittymälle sopiviksi HTTP-poluiksi
         api = self.create_api()
         items = api.list_opiskelu_suunnat()
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["img"], "/src/ui/assets/opiskeluSuunnat/lukio.jpg")
 
     def test_opintopolku_quiz_payload_is_available(self) -> None:
+        # Opintopolkuvisan koko JSON-rakenne on saatavilla backendin kautta
         api = self.create_api()
         quiz = api.get_opintopolku_quiz()
         self.assertIn("questions", quiz)
         self.assertGreater(len(quiz["questions"]), 0)
 
     def test_saved_tutkintonimikkeet_are_persisted_in_sqlite(self) -> None:
+        # Suosikkeihin tallennettu tutkintonimike säilyy myös SQLite-tietokannassa
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
         saved = api.save_tutkintonimike(all_items[0]["id"])
@@ -182,6 +199,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(row[0], all_items[0]["id"])
 
     def test_saved_tutkintonimike_can_be_removed(self) -> None:
+        # Tallennettu suosikki voidaan poistaa siististi käyttäjän listalta
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
         api.save_tutkintonimike(all_items[0]["id"])
@@ -191,6 +209,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
 
     def test_hidden_tutkinto_is_excluded_until_unhidden(self) -> None:
+        # Piilotettu tutkinto katoaa näkyvistä, kunnes piilotus puretaan
         api = self.create_api()
         tutkinnot = api.list_tutkinnot()
         sahkoala = next(item for item in tutkinnot if item["nimi"] == "Sahkoala")
@@ -212,6 +231,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertIsNotNone(api.get_tutkinto(sahkoala["id"]))
 
     def test_hidden_tutkintonimike_is_excluded_from_lists_saved_and_notes_until_unhidden(self) -> None:
+        # Piilotettu nimike poistuu myös suosikeista ja muistiinpanoista näkyvistä
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
         sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
@@ -254,6 +274,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(kokki["nimi"], "Kokki")
 
     def test_tutkintonimike_note_can_be_saved_listed_and_removed(self) -> None:
+        # Muistiinpano voidaan tallentaa, listata ja lopuksi poistaa
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
 
@@ -271,6 +292,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(api.list_tutkintonimike_notes(), [])
 
     def test_tutkintonimike_plan_can_be_saved_listed_and_cleared(self) -> None:
+        # Suunnitelmatiedot tallentuvat suosikille ja voidaan myöhemmin tyhjentää
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
         sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
@@ -307,6 +329,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertIsNone(saved_items[0]["nextStep"])
 
     def test_accessibility_settings_can_be_saved_and_loaded(self) -> None:
+        # Esteettömyysasetukset päivittyvät oletuksista käyttäjän tallentamiin arvoihin
         api = self.create_api()
 
         self.assertEqual(
@@ -350,6 +373,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(api.get_accessibility_settings(), saved)
 
     def test_quiz_results_are_persisted_in_user_directory(self) -> None:
+        # Visatulokset kirjoitetaan käyttäjän omaan tallennustiedostoon
         api = self.create_api()
         first = api.save_quiz_result(
             "opintopolku",
@@ -374,6 +398,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(len(payload["items"]), 2)
 
     def test_quiz_result_can_be_removed(self) -> None:
+        # Yksittäinen visatulos voidaan poistaa tunnisteensa perusteella
         api = self.create_api()
         result = api.save_quiz_result(
             "amis-quiz",
@@ -386,6 +411,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(api.list_quiz_results(), [])
 
     def test_quiz_session_can_be_saved_loaded_and_cleared(self) -> None:
+        # Keskeneräinen visaistunto voidaan tallentaa, lukea ja tyhjentää
         api = self.create_api()
         saved = api.save_quiz_session(
             "opintopolku",
@@ -407,6 +433,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertTrue(sessions_path.exists())
 
     def test_static_server_allows_only_ui_paths(self) -> None:
+        # Staattinen palvelin sallii vain käyttöliittymän tiedostopolut
         self.assertTrue(self.app.is_allowed_static_path("/src/ui/pages/home.html"))
         self.assertTrue(self.app.is_allowed_static_path("/src/ui/assets/ammatit/sahkoasentaja.png"))
         self.assertFalse(self.app.is_allowed_static_path("/src/data/ammatit.json"))

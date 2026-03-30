@@ -1,22 +1,37 @@
-from __future__ import annotations
+# Backendin perusrakenne ja yhteiset tallennusapumetodit
 
-import sqlite3
-import threading
+# Perusluokka avaa tietokantayhteyden, varmistaa lähdedatan saatavuuden ja tarjoaa yhteiset metodit visatietojen tallentamiseen tiedostoihin
 
-from backend_apu import kirjoita_json_objekti, lue_json_objekti, utc_now_iso
-from projekti_paths import ProjectPaths
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 
-from .tietokanta import connect_db, ensure_data, migrate_saved_tutkintonimikkeet_from_json
+import sqlite3  # Työskentelee sovelluksen SQLite-tietokannan kanssa
+
+import threading  # Suojaa backendin yhteisiä resursseja rinnakkaiselta käytöltä
+
+from backend_apu import (  # Tuo tiedosto- ja aikaleima-apurit backendin yhteisiin tallennuksiin
+    kirjoita_json_objekti,  # Kirjoittaa JSON-tiedoston turvallisesti levylle
+    lue_json_objekti,  # Lukee JSON-objektin tiedostosta oletusarvon kanssa
+    utc_now_iso,  # Luo tallennuksille yhtenäisen UTC-aikaleiman
+)
+from projekti_paths import ProjectPaths  # Tarjoaa backendille kaikki tarvittavat projektin tiedostopolut
+
+from .tietokanta import (  # Tuo tietokannan avauksen, datan varmistuksen ja vanhan datan migraation
+    connect_db,  # Avaa SQLite-yhteyden sovelluksen tietokantaan
+    ensure_data,  # Varmistaa, että skeema ja lähdedata ovat ajan tasalla
+    migrate_saved_tutkintonimikkeet_from_json,  # Siirtää vanhat JSON-suosikit SQLiteen
+)
 
 
 class BackendBase:
+    # Backendin kantaluokka, jonka päälle muut mixinit rakentuvat
+
     _paths: ProjectPaths
     _conn: sqlite3.Connection
     _lock: threading.Lock
     _closed: bool
 
     def __init__(self, paths: ProjectPaths) -> None:
-        # Luo backend-API:n, tietokantayhteyden ja varmistaa datan
+        # Avaa tietokannan ja varmistaa, että sovelluksen data on käyttövalmista
         self._paths = paths
         self._conn = connect_db(paths)
         self._lock = threading.Lock()
@@ -33,26 +48,26 @@ class BackendBase:
             self._closed = True
 
     def _load_quiz_results(self) -> list[dict]:
-        # Lukee tallennetut quiz-tulokset kayttajan JSON-tiedostosta
+        # Lukee tallennetut visatulokset käyttäjän JSON-tiedostosta
         data = lue_json_objekti(self._paths.quiz_vastaus_polku(), {"items": []})
         items = data.get("items", [])
         return items if isinstance(items, list) else []
 
     def _write_quiz_results(self, items: list[dict]) -> None:
-        # Kirjoittaa quiz-tulokset levylle
+        # Kirjoittaa visatulokset levylle aikaleiman kanssa
         kirjoita_json_objekti(
             self._paths.quiz_vastaus_polku(),
             {"items": items, "updatedAt": utc_now_iso()},
         )
 
     def _load_quiz_sessions(self) -> list[dict]:
-        # Lukee keskeneraiset quiz-istunnot kayttajan JSON-tiedostosta
+        # Lukee keskeneräiset visaistunnot käyttäjän JSON-tiedostosta
         data = lue_json_objekti(self._paths.quiz_tila_polku(), {"items": []})
         items = data.get("items", [])
         return items if isinstance(items, list) else []
 
     def _write_quiz_sessions(self, items: list[dict]) -> None:
-        # Kirjoittaa quiz-istunnot levylle
+        # Kirjoittaa keskeneräiset visaistunnot levylle aikaleiman kanssa
         kirjoita_json_objekti(
             self._paths.quiz_tila_polku(),
             {"items": items, "updatedAt": utc_now_iso()},
