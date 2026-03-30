@@ -20,6 +20,7 @@ Sovelluksessa on tällä hetkellä seuraavat näkymät:
 - `Etusivu` (`src/ui/pages/home.html`)
 - `Tutkintopankki` (`src/ui/pages/pankki.html`)
 - `Tallennetut tutkintonimikkeet` (`src/ui/pages/saved-tutkintonimikkeet.html`)
+- `Oma suunnitelma` (`src/ui/pages/my-plan.html`)
 - `Opintopolut` (`src/ui/pages/opintopolut.html`)
 - `Opintopolku-kysely` (`src/ui/pages/quiz.html`)
 - `Amis-korttivertailu` (`src/ui/pages/amis-quiz.html`)
@@ -206,7 +207,7 @@ python -m unittest tests.test_ui_smoke
 
 ```text
 digi-opo/
-├── doc/                  # Projektin dokumentaatio suomeksi
+├── docs/                 # Projektin dokumentaatio suomeksi
 ├── data/                 # SQLite-tietokannat
 ├── src/
 │   ├── app/              # pywebview-sovellus ja Python API
@@ -227,12 +228,14 @@ digi-opo/
 
 ## Dokumentaatio
 
-Lisädokumentaatio löytyy `doc/`-kansiosta:
+Lisädokumentaatio löytyy `docs/`-kansiosta:
 
-- `doc/README.md`
-- `doc/kaynnistys.md`
-- `doc/arkkitehtuuri.md`
-- `doc/asetukset-ja-piilotus.md`
+- `docs/README.md`
+- `docs/arkkitehtuuri.md`
+- `docs/backend.md`
+- `docs/frontend.md`
+- `docs/kayttovirrat.md`
+- `docs/kehitys-ja-testaus.md`
 
 ## Lisenssi
 
