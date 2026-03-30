@@ -1,13 +1,20 @@
-from __future__ import annotations
+# Visojen tuloksiin ja istuntoihin liittyvä backend-rajapinta
 
-import json
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 
-from backend_apu import laske_sha256, utc_now_iso
+import json  # Muodostaa visatuloksesta vakaan merkkijonoesityksen tunnisteen laskentaan
+
+from backend_apu import (  # Tuo tunnisteen laskennan ja aikaleima-apurin visojen tallennukseen
+    laske_sha256,  # Laskee visatulokselle yksilöllisen tunnisteen
+    utc_now_iso,  # Luo tallennuksille yhtenäisen UTC-aikaleiman
+)
 
 
 class QuizitApiMixin:
+    # Mixin, joka lisää backendiin visatulosten ja -istuntojen hallinnan
+
     def list_quiz_results(self, quiz_id: str | None = None) -> list[dict]:
-        # Lukee quiz-tulokset ja suodattaa ne tarvittaessa quizin tunnisteella
+        # Palauttaa tallennetut visatulokset, haluttaessa yhden visan perusteella suodatettuna
         normalized_quiz_id = str(quiz_id or "").strip()
         with self._lock:
             items = self._load_quiz_results()
@@ -17,7 +24,7 @@ class QuizitApiMixin:
         return sorted(items, key=lambda item: str(item.get("createdAt", "")), reverse=True)
 
     def save_quiz_result(self, quiz_id: str, result: dict) -> dict:
-        # Tallentaa yhden quiz-tuloksen kayttajan tiedostoihin
+        # Tallentaa yhden visatuloksen käyttäjän omaan tiedostoon
         normalized_quiz_id = str(quiz_id or "").strip()
         if not normalized_quiz_id:
             raise ValueError("quiz_id is required")
@@ -45,7 +52,7 @@ class QuizitApiMixin:
         return entry
 
     def remove_quiz_result(self, result_id: str) -> bool:
-        # Poistaa yhden quiz-tuloksen tunnisteen perusteella
+        # Poistaa yksittäisen visatuloksen sen tunnisteen perusteella
         normalized_result_id = str(result_id or "").strip()
         if not normalized_result_id:
             raise ValueError("result_id is required")
@@ -61,7 +68,7 @@ class QuizitApiMixin:
         return True
 
     def get_quiz_session(self, quiz_id: str) -> dict | None:
-        # Palauttaa quizin keskeneraisen istunnon, jos sellainen on olemassa
+        # Palauttaa visan keskeneräisen istunnon, jos sellainen on tallennettu
         normalized_quiz_id = str(quiz_id or "").strip()
         if not normalized_quiz_id:
             raise ValueError("quiz_id is required")
@@ -75,7 +82,7 @@ class QuizitApiMixin:
         return None
 
     def save_quiz_session(self, quiz_id: str, session: dict) -> dict:
-        # Tallentaa quizin keskeneraisen istunnon jatkamista varten
+        # Tallentaa keskeneräisen visaistunnon, jotta sitä voi jatkaa myöhemmin
         normalized_quiz_id = str(quiz_id or "").strip()
         if not normalized_quiz_id:
             raise ValueError("quiz_id is required")
@@ -95,7 +102,7 @@ class QuizitApiMixin:
         return entry
 
     def clear_quiz_session(self, quiz_id: str) -> bool:
-        # Poistaa quizin keskeneraisen istunnon
+        # Poistaa tallennetun keskeneräisen visaistunnon
         normalized_quiz_id = str(quiz_id or "").strip()
         if not normalized_quiz_id:
             raise ValueError("quiz_id is required")

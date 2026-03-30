@@ -1,65 +1,75 @@
-from __future__ import annotations
+# Projektin polkujen ja staattisten resurssien hallinta
 
-from dataclasses import dataclass
-from functools import partial
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
-import threading
-from urllib.parse import urlparse
+# Tämä moduuli kokoaa yhteen tiedostopolut, joita backend ja käyttöliittymä tarvitsevat, sekä käynnistää kevyen paikallisen palvelimen UI-resursseille
+
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
+
+from dataclasses import dataclass  # Luo kevyen luokan, joka säilyttää projektin polut selkeästi
+
+from functools import partial  # Esitäyttää HTTP-käsittelijälle projektijuuren palvelinhakemistoksi
+
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer  # Tarjoaa kevyen paikallisen HTTP-palvelimen UI-tiedostoille
+
+from pathlib import Path  # Käsittelee projektin tiedostopolkuja käyttöjärjestelmäriippumattomasti
+
+import threading  # Käynnistää staattisen palvelimen taustasäikeessä
+
+from urllib.parse import urlparse  # Purkaa URL-polusta varsinaisen reitin turvallisuustarkistusta varten
 
 
 def is_allowed_static_path(request_path: str) -> bool:
-    # Sallii HTTP-palvelimelta vain kayttoliittyman tiedostopolut
+    # Tarkistaa, että HTTP-palvelin tarjoilee vain käyttöliittymän tiedostoja
     return urlparse(request_path).path.startswith("/src/ui/")
 
 
 @dataclass(frozen=True)
 class ProjectPaths:
-    # Kokoaa projektin polut yhteen paikkaan
+    # Kokoaa sovelluksen tarvitsemat tiedostopolut yhden olion alle
+
     project_root: Path
 
     def ui_index_path(self) -> str:
-        # Palauttaa sovelluksen ensimmaisen HTML-sivun
+        # Palauttaa käyttöliittymän aloitussivun HTTP-polun
         return "/src/ui/pages/home.html"
 
     def tietokanta_path(self) -> Path:
-        # Varmistaa data-kansion ja palauttaa SQLite-polun
+        # Varmistaa datakansion ja palauttaa SQLite-tietokannan polun
         data_dir = self.project_root / "data"
         data_dir.mkdir(exist_ok=True)
         return data_dir / "tutkinnot.db"
 
     def kayttaja_data_dir(self) -> Path:
-        # Varmistaa kayttajakohtaisen tallennuskansion
+        # Palauttaa käyttäjäkohtaisen tallennuskansion ja luo sen tarvittaessa
         user_dir = self.project_root / "user"
         user_dir.mkdir(exist_ok=True)
         return user_dir
 
     def lahde_json_path(self) -> Path:
-        # Palauttaa tutkintojen lahde-JSONin polun
+        # Palauttaa tutkintodatan päälähteen polun
         return self.project_root / "src" / "data" / "ammatit.json"
 
     def opiskelu_suunnat_json_path(self) -> Path:
-        # Palauttaa opintopolkujen datatiedoston polun
+        # Palauttaa opiskelu- ja opintopolkujen esittelydatan polun
         return self.project_root / "src" / "data" / "opiskeluSuunnat.json"
 
     def opintopolku_quiz_json_path(self) -> Path:
-        # Palauttaa opintopolku-kyselyn datatiedoston polun
+        # Palauttaa opintopolkuvisan datatiedoston polun
         return self.project_root / "src" / "data" / "opintopolkuQuiz.json"
 
     def saved_tutkintonimikkeet_path(self) -> Path:
-        # Palauttaa vanhan suosikkien JSON-tallennuksen polun
+        # Palauttaa vanhan suosikkien JSON-tallennuksen polun migraatiota varten
         return self.kayttaja_data_dir() / "saved_tutkintonimikkeet.json"
 
     def quiz_vastaus_polku(self) -> Path:
-        # Palauttaa quiz-tulosten tallennuspolun
+        # Palauttaa visatulosten tallennuspolun
         return self.kayttaja_data_dir() / "quiz_results.json"
 
     def quiz_tila_polku(self) -> Path:
-        # Palauttaa quiz-istunnon tallennuspolun
+        # Palauttaa keskeneräisten visojen tallennuspolun
         return self.kayttaja_data_dir() / "quiz_sessions.json"
 
     def resolve_local_ui_path(self, raw_path: str) -> Path | None:
-        # Ratkoo UI:n paikallisen resurssipolun turvallisesti projektin sisalta
+        # Ratkoo käyttöliittymäresurssin paikallisen polun turvallisesti projektin sisältä
         candidate_text = str(raw_path or "").strip()
         if not candidate_text:
             return None
@@ -67,6 +77,7 @@ class ProjectPaths:
         if urlparse(candidate_text).scheme:
             return None
 
+        # Siistitään polku selaimesta tai JSONista tulevasta muodosta yhtenäiseksi
         normalized = candidate_text.replace("\\", "/")
         while normalized.startswith("./"):
             normalized = normalized[2:]
@@ -77,6 +88,7 @@ class ProjectPaths:
         if not normalized:
             return None
 
+        # Kokeillaan useita järkeviä suhteellisia vaihtoehtoja, jotta data voi viitata tiedostoihin eri tavoilla ilman, että UI-koodi rikkoutuu
         rel_candidates = [Path(normalized)]
         if normalized.startswith("src/ui/"):
             rel_candidates.append(Path(normalized.removeprefix("src/ui/")))
@@ -97,7 +109,7 @@ class ProjectPaths:
         return None
 
     def normalize_ui_asset_ref(self, raw_path: str) -> str:
-        # Muuntaa loydetyn resurssin HTTP-yhteensopivaksi poluksi
+        # Muuntaa paikallisen resurssiviittauksen HTTP-poluksi käyttöliittymää varten
         resolved = self.resolve_local_ui_path(raw_path)
         if not resolved:
             return raw_path
@@ -110,9 +122,11 @@ class ProjectPaths:
 
 
 def start_static_server(paths: ProjectPaths) -> tuple[ThreadingHTTPServer, int]:
-    # Kaynnistaa kevyen paikallisen tiedostopalvelimen pywebviewta varten
+    # Käynnistää kevyen paikallisen HTTP-palvelimen pywebview-käyttöä varten
 
     class UiOnlyRequestHandler(SimpleHTTPRequestHandler):
+        #P alvelin, joka sallii vain käyttöliittymän tiedostot
+
         def send_head(self):
             if not is_allowed_static_path(self.path):
                 self.send_error(404, "File not found")

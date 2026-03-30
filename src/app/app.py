@@ -1,39 +1,51 @@
-from __future__ import annotations
+# Työpöytäsovelluksen käynnistysmoduuli.
 
-import os
-from pathlib import Path
-import sys
+# Tämä tiedosto valmistelee ajonaikaisen ympäristön, kokoaa backend-rajapinnan ja avaa käyttöliittymän pywebview-ikkunaan.
+
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
+
+import os  # Lukee ja asettaa ympäristömuuttujia alustakohtaista käynnistystä varten
+from pathlib import Path  # Käsittelee tiedostopolkuja käyttöjärjestelmäriippumattomasti
+import sys  # Tarkistaa alustan ja täydentää Pythonin import-hakupolkua
 
 CURRENT_DIR = Path(__file__).resolve().parent
+# Lisätään moduulikansio import-polkuun, jotta paikalliset importit toimivat
+# myös silloin, kun tiedosto ajetaan suoraan komentoriviltä
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_DIR))
 
+# Linuxilla pywebview käyttää Qt-taustaa, joten asetetaan oletus-API valmiiksi
 if sys.platform.startswith("linux"):
     os.environ.setdefault("QT_API", "pyqt6")
 
+# Wayland-ympäristössä pakotetaan xcb-tausta, koska Qt toimii sillä vakaammin
 if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
-from backend_rajapinta import Api as BackendApi
-from projekti_paths import ProjectPaths, is_allowed_static_path, start_static_server
-import webview
+from backend_rajapinta import Api as BackendApi  # Tuo backendin julkisen API-luokan käyttöliittymän käyttöön
+from projekti_paths import (  # Tuo polku- ja palvelinapurit käyttöliittymän käynnistystä varten
+    ProjectPaths,  # Kokoaa projektin tärkeät tiedostopolut yhteen olioon
+    is_allowed_static_path,  # Tarkistaa, mitä UI-polkuja staattinen palvelin saa tarjoilla
+    start_static_server,  # Käynnistää paikallisen HTTP-palvelimen pywebview-ikkunaa varten
+)
+import webview  # Avaa HTML-käyttöliittymän työpöytäsovelluksen ikkunaan.
 
 
 def _project_root() -> Path:
-    # Palauttaa projektin juurikansion, jonka pohjalta muut polut lasketaan
-
+    # Palauttaa projektin juuren, josta muut sovelluksen polut johdetaan
     return Path(__file__).resolve().parents[2]
 
 
 class Api(BackendApi):
-    def __init__(self) -> None:
-        # Luo yhteensopivan API-fasadin nykyiselle kaytolle ja testeille
+    # Ohut sovelluskohtainen julkisivu käyttöliittymän JS-rajapinnalle
 
+    def __init__(self) -> None:
+        # Alustaa backendin projektin juuren pohjalta
         super().__init__(ProjectPaths(_project_root()))
 
 
 def main() -> None:
-    # Kaynnistaa paikallisen palvelimen ja avaa pywebview-ikkunan
+    # Käynnistää paikallisen tiedostopalvelimen ja avaa käyttöliittymäikkunan
     paths = ProjectPaths(_project_root())
     api = Api()
     server, port = start_static_server(paths)

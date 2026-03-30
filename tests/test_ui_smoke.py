@@ -1,26 +1,39 @@
-from __future__ import annotations # Tämä ei oikeastaan tee mitään tässä tiedostossa, mutta se on hyvä käytäntö, jos haluamme käyttää tyyppiviitteissä ominaisuuksia, jotka vaativat tämän importin (kuten forward references tai jotkin typing-moduulin ominaisuudet) :)
+"""Kevyet savutestit käyttöliittymän HTML-sivuille.
 
-import re
-import unittest
-from pathlib import Path
+Tämän tiedoston testit tarkistavat, että jokainen tärkeä sivu viittaa olemassa
+oleviin tyylitiedostoihin ja skripteihin ennen varsinaisia selainajotestejä.
+"""
+
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi.
+
+import re  # Etsii HTML:stä CSS- ja skriptiviittaukset säännöllisillä lausekkeilla.
+import unittest  # Tarjoaa savutestien testikehyksen.
+from pathlib import Path  # Ratkoo UI-sivujen ja resurssien tiedostopolut.
 
 
+# Regexit poimivat HTML:stä sivun viittaamat CSS- ja JS-resurssit.
 LINK_RE = re.compile(r'<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"', re.IGNORECASE)
 SCRIPT_RE = re.compile(r'<script[^>]+src="([^"]+)"', re.IGNORECASE)
 
 
 class UiSmokeTests(unittest.TestCase):
+    """Varmistaa, että käyttöliittymän sivut osoittavat olemassa oleviin resursseihin."""
+
     def setUp(self) -> None:
+        """Tallentaa projektijuuren ja sivukansion seuraavia testiapureita varten."""
         self.project_root = Path(__file__).resolve().parents[1]
         self.pages_dir = self.project_root / "src" / "ui" / "pages"
 
     def _load_html(self, page_name: str) -> str:
+        """Lukee yhden HTML-sivun testin tarkasteltavaksi."""
         return (self.pages_dir / page_name).read_text(encoding="utf-8")
 
     def _resolve_page_asset(self, page_name: str, rel_path: str) -> Path:
+        """Ratkaisee sivulla käytetyn suhteellisen resurssipolun levyltä löytyväksi poluksi."""
         return (self.pages_dir / page_name).parent.joinpath(rel_path).resolve()
 
     def _script_exists_with_ts_fallback(self, page_name: str, script_src: str) -> bool:
+        """Hyväksyy skriptin joko JS-tiedostona tai lähteenä olevana TS-tiedostona."""
         script_path = self._resolve_page_asset(page_name, script_src)
         if script_path.exists():
             return True
@@ -30,6 +43,7 @@ class UiSmokeTests(unittest.TestCase):
         return ts_path.exists()
 
     def test_pages_reference_existing_css_and_scripts(self) -> None:
+        """Jokainen keskeinen HTML-sivu viittaa olemassa oleviin tyyleihin ja skripteihin."""
         pages = [
             "home.html",
             "pankki.html",

@@ -1,9 +1,16 @@
-from __future__ import annotations
+# Asetuksiin liittyvä backend-rajapinta.
 
-import json
+# Tässä moduulissa hallitaan erityisesti esteettömyysasetuksia sekä käyttäjän piilottamia tutkintoja ja tutkintonimikkeitä.
 
-from backend_apu import utc_now_iso
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 
+import json  # Muuntaa asetukset tietokannassa säilytettäväksi JSON-merkkijonoksi
+
+from backend_apu import utc_now_iso  # Luo UTC-aikaleiman asetusten ja piilotusten päivityksille
+
+
+# Nämä ovat käyttöliittymän oletusarvot tilanteisiin, joissa käyttäjä ei ole
+# vielä tallentanut omia esteettömyysasetuksiaan
 
 DEFAULT_ACCESSIBILITY_SETTINGS = {
     "contrast": "default",
@@ -17,6 +24,7 @@ DEFAULT_ACCESSIBILITY_SETTINGS = {
 
 
 def _normalize_accessibility_settings(raw: object) -> dict[str, str | bool]:
+    # Suodattaa asetuksista vain sallitut arvot ja täydentää puuttuvat oletuksilla
     allowed_contrast = {"default", "light-high", "dark-high"}
     allowed_font_family = {"system", "sans", "serif", "dyslexia"}
     allowed_font_size = {"100", "112", "125", "150"}
@@ -51,7 +59,10 @@ def _normalize_accessibility_settings(raw: object) -> dict[str, str | bool]:
 
 
 class AsetuksetApiMixin:
+    # Mixin, joka lisää backendiin asetuksiin liittyvät metodit
+
     def get_accessibility_settings(self) -> dict[str, str | bool]:
+        # Palauttaa tällä hetkellä tallennetut esteettömyysasetukset
         with self._lock:
             row = self._conn.execute(
                 """
@@ -72,6 +83,7 @@ class AsetuksetApiMixin:
         return _normalize_accessibility_settings(payload)
 
     def save_accessibility_settings(self, settings: object) -> dict[str, str | bool]:
+        # Tallentaa esteettömyysasetukset normalisoidussa muodossa
         normalized = _normalize_accessibility_settings(settings)
 
         with self._lock:
@@ -90,7 +102,7 @@ class AsetuksetApiMixin:
         return normalized
 
     def list_hidden_tutkinnot(self) -> list[dict[str, str | int]]:
-        # Palauttaa asetuksissa piilotetut tutkinnot
+        # Listaa tutkinnot, jotka käyttäjä on piilottanut näkyvistä
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -113,7 +125,7 @@ class AsetuksetApiMixin:
         ]
 
     def list_hidden_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
-        # Palauttaa asetuksissa piilotetut tutkintonimikkeet
+        # Listaa yksittäiset tutkintonimikkeet, jotka on piilotettu näkyvistä
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -140,7 +152,7 @@ class AsetuksetApiMixin:
         ]
 
     def hide_tutkinto(self, tutkinto_id: int) -> bool:
-        # Piilottaa tutkinnon koko sovelluksesta
+        # Merkitsee tutkinnon piilotetuksi koko sovelluksessa
         try:
             normalized_id = int(tutkinto_id)
         except (TypeError, ValueError) as exc:
@@ -165,7 +177,7 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_tutkinto(self, tutkinto_id: int) -> bool:
-        # Palauttaa aiemmin piilotetun tutkinnon takaisin nakyviin
+        # Poistaa tutkinnon piilotuksen ja palauttaa sen jälleen näkyviin
         try:
             normalized_id = int(tutkinto_id)
         except (TypeError, ValueError) as exc:
@@ -183,7 +195,7 @@ class AsetuksetApiMixin:
         return cursor.rowcount > 0
 
     def hide_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        # Piilottaa yksittaisen tutkintonimikkeen koko sovelluksesta
+        # Merkitsee yksittäisen tutkintonimikkeen piilotetuksi
         try:
             normalized_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -214,7 +226,7 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        # Palauttaa aiemmin piilotetun tutkintonimikkeen takaisin nakyviin
+        # Poistaa tutkintonimikkeen piilotuksen
         try:
             normalized_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
