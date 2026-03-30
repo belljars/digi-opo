@@ -1,3 +1,5 @@
+// Yhteinen korttirakenne tutkintonimikkeiden lista- ja detaljinäkymille
+
 export type TutkintonimikeCardItem = {
   nimi: string;
   linkki: string | null;
@@ -23,6 +25,7 @@ export type TutkintonimikeCardElements = {
   linkAction: HTMLAnchorElement | null;
 };
 
+// Luo kuvan tai turvallisen paikkamerkin silloin, kun varsinaista kuvaa ei ole
 function createImageElement(item: TutkintonimikeCardItem): HTMLElement {
   if (!item.img) {
     const placeholder = document.createElement("div");
@@ -44,6 +47,7 @@ function createImageElement(item: TutkintonimikeCardItem): HTMLElement {
   return image;
 }
 
+// Luo kortin erillisen toimintolinkin ulkoiseen tutkintonimikekuvaukseen
 export function createTutkintonimikeLinkAction(linkki: string | null): HTMLAnchorElement | null {
   if (!linkki) {
     return null;
@@ -58,6 +62,7 @@ export function createTutkintonimikeLinkAction(linkki: string | null): HTMLAncho
   return linkAction;
 }
 
+// Kokoaa tutkintonimikkeen peruskortin ja palauttaa sen tärkeimmät alielementit jatkokäyttöön
 export function createTutkintonimikeCard(
   item: TutkintonimikeCardItem,
   options: CreateTutkintonimikeCardOptions = {}

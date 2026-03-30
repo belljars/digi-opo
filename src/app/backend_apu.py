@@ -1,4 +1,4 @@
-# Yhteisiä apufunktioita backendin tiedostojen käsittelyyn.
+# Yhteisiä apufunktioita backendin tiedostojen käsittelyyn
 
 # Moduuli tarjoaa pieniä, uudelleenkäytettäviä utiliteetteja esimerkiksi JSON-datan lukemiseen, tiedostokirjoituksiin ja aikaleimoihin
 

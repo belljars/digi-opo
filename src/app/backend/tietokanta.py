@@ -21,7 +21,8 @@ AMMATIT_IMPORT_VERSION = "4"
 
 def connect_db(paths: ProjectPaths) -> sqlite3.Connection:
     # Avaa yhteyden sovelluksen SQLite-tietokantaan ja säätää perusasetukset
-    conn = sqlite3.connect(paths.tietokanta_path(), check_same_thread=False)  # Sallii yhteyden käytön myös muista säikeistä, kun käyttö on lukittu.
+    # Sallii yhteyden käytön myös muista säikeistä, kun käyttö on lukittu
+    conn = sqlite3.connect(paths.tietokanta_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
@@ -135,8 +136,9 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
 
 
 def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: list) -> None:
-    """Tuo tutkintodatan JSON-lähteestä SQLite-tietokannan riveiksi."""
-    for tutkinto in tutkinnot:  # Käydään jokainen lähde-JSONin tutkinto läpi ja tuodaan se tietokantaan.
+    # Tuo tutkintodatan JSON-lähteestä SQLite-tietokannan riveiksi
+    # Käydään jokainen lähde-JSONin tutkinto läpi ja tuodaan se tietokantaan
+    for tutkinto in tutkinnot:
         nimi = str(tutkinto.get("nimi", "")).strip()
         desc = str(tutkinto.get("desc", "")).strip()
         if not nimi:
@@ -146,12 +148,14 @@ def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: l
             (nimi, desc),
         )
 
-        tutkinto_id = cursor.lastrowid  # Talteen otetaan juuri lisätyn tutkinnon id, jotta nimikkeet voidaan liittää siihen.
+        # Talteen otetaan juuri lisätyn tutkinnon id, jotta nimikkeet voidaan liittää siihen
+        tutkinto_id = cursor.lastrowid
         nimikkeet = tutkinto.get("tutkintonimikkeet", []) or []
         if not isinstance(nimikkeet, list):
             nimikkeet = []
 
-        for nimike in nimikkeet:  # Käydään tutkinnon kaikki nimikkeet läpi ja lisätään ne omiksi riveikseen.
+        # Käydään tutkinnon kaikki nimikkeet läpi ja lisätään ne omiksi riveikseen
+        for nimike in nimikkeet:
             nimike_nimi = str(nimike.get("nimi", "")).strip()
             linkki = str(nimike.get("linkki", "")).strip() or None
             img = paths.normalize_ui_asset_ref(str(nimike.get("img", "")).strip()) or None
@@ -219,8 +223,10 @@ def migrate_saved_tutkintonimikkeet_from_json(
     if not legacy_path.exists():
         return
 
-    data = lue_json_objekti(legacy_path, {"items": []})  # Lukee vanhan suosikkitiedoston sisällön turvallisesti oletusrakenteella.
-    items = data.get("items", [])  # Poimii migroitavat suosikkirivit, jos tiedosto sisältää niitä.
+    # Lukee vanhan suosikkitiedoston sisällön turvallisesti oletusrakenteella
+    data = lue_json_objekti(legacy_path, {"items": []})
+    # Poimii migroitavat suosikkirivit, jos tiedosto sisältää niitä
+    items = data.get("items", [])
     if not isinstance(items, list) or not items:
         return
 

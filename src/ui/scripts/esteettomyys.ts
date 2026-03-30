@@ -1,5 +1,7 @@
 export {};
 
+// Esteettömyyssivun esikatselu, tallennus ja selaimen varatallennus
+
 import {
   applyAccessibilitySettings,
   defaultAccessibilitySettings,
@@ -29,10 +31,14 @@ const resetButtonEl = document.querySelector(
 ) as HTMLButtonElement | null;
 const draftBadgeEl = document.querySelector(".accessibility-draft-badge") as HTMLElement | null;
 
+// activeApi kertoo, tallennetaanko muutokset backendiin vai pelkästään selaimeen
 let activeApi: SettingsApi | null = null;
+// savedSettings kuvaa viimeksi pysyvästi tallennettua tilaa
 let savedSettings: AccessibilitySettings = { ...defaultAccessibilitySettings };
+// currentSettings seuraa lomakkeen tämänhetkistä esikatselutilaa
 let currentSettings: AccessibilitySettings = { ...defaultAccessibilitySettings };
 
+// Päivittää sivun tilaviestit yhdestä keskitetystä kohdasta
 function setStatus(message: string): void {
   if (statusEl) {
     statusEl.textContent = message;
@@ -51,6 +57,8 @@ function setActionsDisabled(disabled: boolean): void {
   }
 }
 
+// Käytetään verkko-operaatioiden aikana, jotta käyttäjä ei laukaise päällekkäisiä tallennuksia
+// Synkronoi toimintopainikkeet sen mukaan, onko lomakkeessa tallentamattomia muutoksia
 function updateActionState(): void {
   const hasUnsavedChanges = !areAccessibilitySettingsEqual(currentSettings, savedSettings);
   const isDefaultPreview = areAccessibilitySettingsEqual(currentSettings, defaultAccessibilitySettings);
@@ -69,6 +77,7 @@ function updateActionState(): void {
   }
 }
 
+// Lukee lomakkeen kentät ja normalisoi ne yhtenäiseksi asetusrakenteeksi
 function readFormSettings(): AccessibilitySettings {
   if (!formEl) {
     return { ...defaultAccessibilitySettings };
@@ -86,6 +95,7 @@ function readFormSettings(): AccessibilitySettings {
   });
 }
 
+// Kirjoittaa annetut asetukset takaisin lomakkeen kenttiin ja valintoihin
 function writeFormSettings(settings: AccessibilitySettings): void {
   if (!formEl) {
     return;
@@ -125,6 +135,7 @@ function writeFormSettings(settings: AccessibilitySettings): void {
   }
 }
 
+// Päivittää esikatselun heti lomakkeen muutosten perusteella ilman pysyvää tallennusta
 function previewCurrentSettings(): void {
   currentSettings = readFormSettings();
   applyAccessibilitySettings(currentSettings);
@@ -136,6 +147,7 @@ function previewCurrentSettings(): void {
   );
 }
 
+// Tallentaa nykyiset asetukset backendiin tai selaimeen sen mukaan, kumpi on käytettävissä
 async function saveSettings(): Promise<void> {
   currentSettings = readFormSettings();
 
@@ -162,10 +174,12 @@ async function saveSettings(): Promise<void> {
   } catch {
     setStatus("Esteettömyysasetusten tallennus epäonnistui.");
   } finally {
+    // Painikkeet palautetaan aina tilaan, joka vastaa viimeisintä tunnettua esikatselua
     updateActionState();
   }
 }
 
+// Palauttaa lomakkeelle sovelluksen oletusasetukset esikatselua varten
 function resetSettings(): void {
   currentSettings = { ...defaultAccessibilitySettings };
   writeFormSettings(currentSettings);
@@ -178,6 +192,7 @@ function resetSettings(): void {
   );
 }
 
+// Palauttaa lomakkeelle viimeksi tallennetut asetukset ilman uutta backend-kutsua
 function restoreSavedSettings(): void {
   currentSettings = { ...savedSettings };
   writeFormSettings(currentSettings);
@@ -186,13 +201,16 @@ function restoreSavedSettings(): void {
   setStatus("Tallennetut asetukset palautettu esikatseluun.");
 }
 
+// Alustaa esteettömyyssivun, sitoo tapahtumat ja lataa ensimmäiset asetukset
 async function initPage(): Promise<InitAttemptResult> {
+  // Jos lomake puuttuu, sivulla ei ole mitään alustettavaa mutta ajon voi silti päättää onnistuneena
   if (!formEl || !saveButtonEl || !restoreButtonEl || !resetButtonEl) {
     return { success: true };
   }
 
   activeApi = await waitForPywebviewApi<SettingsApi>();
 
+  // Backendin puuttuessa käytetään selaimeen jääneitä asetuksia saumattomana varatilana
   const initialSettings = activeApi
     ? normalizeAccessibilitySettings(await activeApi.get_accessibility_settings())
     : loadStoredAccessibilitySettings();
@@ -204,13 +222,14 @@ async function initPage(): Promise<InitAttemptResult> {
   persistAccessibilitySettings(initialSettings);
 
   formEl.addEventListener("input", previewCurrentSettings);
-  // Select controls in the embedded webview reliably emit change even when input is inconsistent.
+  // Select-elementit tarvitsevat lisäksi change-kuuntelun, jotta esikatselu päivittyy varmasti
   formEl.addEventListener("change", previewCurrentSettings);
   saveButtonEl.addEventListener("click", () => {
     void saveSettings();
   });
   restoreButtonEl.addEventListener("click", restoreSavedSettings);
   formEl.addEventListener("reset", () => {
+    // reset-tapahtuma laukeaa ennen kuin selain on palauttanut kenttien arvot
     window.setTimeout(resetSettings, 0);
   });
 
@@ -226,6 +245,7 @@ async function initPage(): Promise<InitAttemptResult> {
 
 const startPage = createRetryingPageInit(initPage);
 
+// Käynnistetään sivu heti kun DOM on valmis ja myös erikseen pywebviewn valmistuessa
 if (document.readyState === "loading") {
   window.addEventListener("DOMContentLoaded", startPage, { once: true });
 } else {

@@ -125,7 +125,7 @@ def start_static_server(paths: ProjectPaths) -> tuple[ThreadingHTTPServer, int]:
     # Käynnistää kevyen paikallisen HTTP-palvelimen pywebview-käyttöä varten
 
     class UiOnlyRequestHandler(SimpleHTTPRequestHandler):
-        #P alvelin, joka sallii vain käyttöliittymän tiedostot
+        # Palvelin sallii vain käyttöliittymän tiedostot
 
         def send_head(self):
             if not is_allowed_static_path(self.path):

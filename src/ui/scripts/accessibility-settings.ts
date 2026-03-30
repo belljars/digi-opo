@@ -1,3 +1,5 @@
+// Yhteiset esteettömyysasetusten tyypit, oletukset ja selaintallennus
+
 export type ContrastMode = "default" | "light-high" | "dark-high";
 export type FontFamilyMode = "system" | "sans" | "serif" | "dyslexia";
 export type FontSizeMode = "100" | "112" | "125" | "150";
@@ -15,8 +17,10 @@ export type AccessibilitySettings = {
 
 type UnknownRecord = Record<string, unknown>;
 
+// Selainmuistin avain pidetään keskitetysti yhdessä paikassa
 export const ACCESSIBILITY_STORAGE_KEY = "digi-opo.accessibility";
 
+// Nämä asetukset vastaavat sovelluksen oletusulkoasua ennen käyttäjän omia valintoja
 export const defaultAccessibilitySettings: AccessibilitySettings = {
   contrast: "default",
   fontFamily: "system",
@@ -36,6 +40,7 @@ function isRecord(value: unknown): value is UnknownRecord {
   return typeof value === "object" && value !== null;
 }
 
+// Siivoaa tuntemattoman syötteen aina käyttöliittymän hyväksymään asetusrakenteeseen
 export function normalizeAccessibilitySettings(value: unknown): AccessibilitySettings {
   const settings: AccessibilitySettings = { ...defaultAccessibilitySettings };
   if (!isRecord(value)) {
@@ -67,6 +72,7 @@ export function normalizeAccessibilitySettings(value: unknown): AccessibilitySet
   return settings;
 }
 
+// Peilaa aktiiviset esteettömyysasetukset dokumentin data-attribuutteihin ja CSS-muuttujiin
 export function applyAccessibilitySettings(settings: AccessibilitySettings): void {
   const root = document.documentElement;
   const fontScale = Number(settings.fontSize) / 100;
@@ -80,10 +86,12 @@ export function applyAccessibilitySettings(settings: AccessibilitySettings): voi
   root.style.setProperty("--font-scale", String(fontScale));
 }
 
+// Tallentaa viimeisimmät asetukset selaimen paikalliseen muistiin
 export function persistAccessibilitySettings(settings: AccessibilitySettings): void {
   window.localStorage.setItem(ACCESSIBILITY_STORAGE_KEY, JSON.stringify(settings));
 }
 
+// Lukee selaimeen tallennetut asetukset tai palauttaa turvalliset oletusarvot
 export function loadStoredAccessibilitySettings(): AccessibilitySettings {
   try {
     const raw = window.localStorage.getItem(ACCESSIBILITY_STORAGE_KEY);

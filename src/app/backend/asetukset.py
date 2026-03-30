@@ -1,6 +1,6 @@
-# Asetuksiin liittyvä backend-rajapinta.
+# Asetuksiin liittyvä backend-rajapinta
 
-# Tässä moduulissa hallitaan erityisesti esteettömyysasetuksia sekä käyttäjän piilottamia tutkintoja ja tutkintonimikkeitä.
+# Tässä moduulissa hallitaan erityisesti esteettömyysasetuksia sekä käyttäjän piilottamia tutkintoja ja tutkintonimikkeitä
 
 from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 

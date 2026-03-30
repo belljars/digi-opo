@@ -1,23 +1,22 @@
-"""Backendin keskeisiä käyttäjäpolkuja suojaavat integraatiotestit.
+# Backendin keskeisiä käyttäjäpolkuja suojaavat integraatiotestit
+#
+# Testit rakentavat tilapäisen projektirakenteen, lataavat oikean API:n ja
+# varmistavat, että data, asetukset ja tallennukset toimivat yhdessä
 
-Testit rakentavat tilapäisen projektirakenteen, lataavat oikean API:n ja
-varmistavat, että data, asetukset ja tallennukset toimivat yhdessä.
-"""
+from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi.
-
-import importlib.util  # Lataa sovelluksen moduulin tiedostopolusta ilman normaalia import-ketjua.
-import json  # Rakentaa testidataa JSON-tiedostoiksi ja lukee tallennuksia takaisin.
-import sys  # Lisää vale-webview-moduulin Pythonin moduulirekisteriin testejä varten.
-import tempfile  # Luo eristetyn väliaikaisen projektihakemiston jokaiselle testille.
-import types  # Rakentaa kevyen vale-olion webview-riippuvuuden korvaamiseen.
-import unittest  # Tarjoaa testikehyksen ja testien ajotavan.
-from pathlib import Path  # Käsittelee testien väliaikaisia tiedosto- ja kansiopolkuja.
-from unittest import mock  # Korvaa sovelluksen projektijuuren testin omalla hakemistolla.
+import importlib.util  # Lataa sovelluksen moduulin tiedostopolusta ilman normaalia import-ketjua
+import json  # Rakentaa testidataa JSON-tiedostoiksi ja lukee tallennuksia takaisin
+import sys  # Lisää vale-webview-moduulin Pythonin moduulirekisteriin testejä varten
+import tempfile  # Luo eristetyn väliaikaisen projektihakemiston jokaiselle testille
+import types  # Rakentaa kevyen vale-olion webview-riippuvuuden korvaamiseen
+import unittest  # Tarjoaa testikehyksen ja testien ajotavan
+from pathlib import Path  # Käsittelee testien väliaikaisia tiedosto- ja kansiopolkuja
+from unittest import mock  # Korvaa sovelluksen projektijuuren testin omalla hakemistolla
 
 
+# Lataa sovelluksen käynnistysmoduulin testikäyttöön ilman oikean käyttöliittymäikkunan avaamista
 def load_app_module():
-    """Lataa `app.py`:n testikäyttöön ilman oikean käyttöliittymäikkunan avaamista."""
     project_root = Path(__file__).resolve().parents[1]
     app_path = project_root / "src" / "app" / "app.py"
     spec = importlib.util.spec_from_file_location("digi_opo_app", app_path)
@@ -28,7 +27,7 @@ def load_app_module():
         create_window=lambda *args, **kwargs: None,
         start=lambda *args, **kwargs: None,
     )
-    # Mockataan webview, jotta testit eivät avaa oikeaa työpöytäikkunaa.
+    # Mockataan webview, jotta testit eivät avaa oikeaa työpöytäikkunaa
     sys.modules.setdefault("webview", fake_webview)
 
     module = importlib.util.module_from_spec(spec)
@@ -119,21 +118,21 @@ class BackendApiTests(unittest.TestCase):
             json.dumps(quiz_payload), encoding="utf-8"
         )
 
+    # Sulkee testin aikana luodut API-instanssit ja siivoaa väliaikaiset tiedostot
     def tearDown(self) -> None:
-        """Sulkee testin aikana luodut API-instanssit ja siivoaa väliaikaiset tiedostot."""
         for api in self._apis:
             api.close()
         self.tmpdir.cleanup()
 
+    # Luo API-instanssin käyttämään testin väliaikaista projektijuurta
     def create_api(self):
-        """Luo API-instanssin käyttämään testin väliaikaista projektijuurta."""
         with mock.patch.object(self.app, "_project_root", return_value=self.root):
             api = self.app.Api()
         self._apis.append(api)
         return api
 
+    # Lähdedata tuodaan tietokantaan ja haku palauttaa oikeat tutkintorivit
     def test_api_imports_data_and_search_works(self) -> None:
-        """Lähdedata tuodaan tietokantaan ja haku palauttaa oikeat tutkintorivit."""
         api = self.create_api()
         tutkinnot = api.list_tutkinnot()
         self.assertEqual(len(tutkinnot), 2)

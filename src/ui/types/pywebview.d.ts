@@ -1,5 +1,7 @@
 export {};
 
+// Jaetut tyyppimäärittelyt selainpuolen window.pywebview API:lle
+
 type TutkintoListItem = {
   id: number;
   nimi: string;
@@ -83,6 +85,7 @@ type PywebviewApi = {
   clear_quiz_session: (quizId: string) => Promise<boolean>;
 };
 
+// Laajentaa selainikkunan tyypin vastaamaan pywebviewn injektoimaa API:a
 declare global {
   interface Window {
     pywebview?: {

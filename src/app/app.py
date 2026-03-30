@@ -1,6 +1,6 @@
-# Työpöytäsovelluksen käynnistysmoduuli.
+# Työpöytäsovelluksen käynnistysmoduuli
 
-# Tämä tiedosto valmistelee ajonaikaisen ympäristön, kokoaa backend-rajapinnan ja avaa käyttöliittymän pywebview-ikkunaan.
+# Tämä tiedosto valmistelee ajonaikaisen ympäristön, kokoaa backend-rajapinnan ja avaa käyttöliittymän pywebview-ikkunaan
 
 from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 
@@ -28,7 +28,7 @@ from projekti_paths import (  # Tuo polku- ja palvelinapurit käyttöliittymän 
     is_allowed_static_path,  # Tarkistaa, mitä UI-polkuja staattinen palvelin saa tarjoilla
     start_static_server,  # Käynnistää paikallisen HTTP-palvelimen pywebview-ikkunaa varten
 )
-import webview  # Avaa HTML-käyttöliittymän työpöytäsovelluksen ikkunaan.
+import webview  # Avaa HTML-käyttöliittymän työpöytäsovelluksen ikkunaan
 
 
 def _project_root() -> Path:

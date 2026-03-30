@@ -1,4 +1,6 @@
-# Tässä moduulissa yhdistetään eri vastuualueet omista mixin-luokistaan yhdeksi API-luokaksi, jonka käyttöliittymä näkee yhtenä kokonaisuutena
+# Backend-API:n kokoaminen mixin-luokista
+
+# Tämä moduuli yhdistää eri vastuualueet omista mixin-luokistaan yhdeksi API-luokaksi, jonka käyttöliittymä näkee yhtenä kokonaisuutena
 
 from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 

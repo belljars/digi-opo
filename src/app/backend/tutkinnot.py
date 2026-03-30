@@ -1,6 +1,6 @@
 # Tutkintoihin, suosikkeihin ja käyttäjän omiin muistiinpanoihin liittyvä API
 
-# Tämä moduuli tarjoaa käyttöliittymälle näkymät varsinaiseen tutkintodataan ja käyttäjän tekemiin omiin valintoihin, kuten suosikkeihin ja suunnitelmiin.
+# Tämä moduuli tarjoaa käyttöliittymälle näkymät varsinaiseen tutkintodataan ja käyttäjän tekemiin omiin valintoihin, kuten suosikkeihin ja suunnitelmiin
 
 from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 
@@ -75,7 +75,7 @@ class TutkinnotApiMixin:
             return None
 
         with self._lock:
-            # Nimikkeet haetaan erikseen vasta sen jälkeen, kun tutkinto on todettu näkyväksi.
+            # Nimikkeet haetaan erikseen vasta sen jälkeen, kun tutkinto on todettu näkyväksi
             nimikkeet = self._conn.execute(
                 """
                 SELECT n.id, n.nimi, n.linkki, n.img
@@ -346,18 +346,29 @@ class TutkinnotApiMixin:
         except (TypeError, ValueError) as exc:
             raise ValueError("Invalid tutkintonimike id") from exc
 
-        normalized_priority = str(priority or "").strip()  # Muuttaa prioriteetin turvallisesti siistityksi merkkijonoksi.
-        normalized_status = str(status or "").strip()  # Muuttaa tilan turvallisesti siistityksi merkkijonoksi.
-        normalized_next_step = str(next_step or "").strip()  # Siistii käyttäjän seuraavan askeleen tekstin tallennusta varten.
+        # Muuttaa prioriteetin turvallisesti siistityksi merkkijonoksi
+        normalized_priority = str(priority or "").strip()
+        # Muuttaa tilan turvallisesti siistityksi merkkijonoksi
+        normalized_status = str(status or "").strip()
+        # Siistii käyttäjän seuraavan askeleen tekstin tallennusta varten
+        normalized_next_step = str(next_step or "").strip()
 
-        if normalized_priority not in self._ALLOWED_PLAN_PRIORITIES:  # Hyväksytään vain ennalta määritellyt prioriteettiarvot.
+        # Hyväksytään vain ennalta määritellyt prioriteettiarvot
+        if normalized_priority not in self._ALLOWED_PLAN_PRIORITIES:
             raise ValueError("Invalid plan priority")
-        if normalized_status not in self._ALLOWED_PLAN_STATUSES:  # Hyväksytään vain ennalta määritellyt tilaarvot.
+        # Hyväksytään vain ennalta määritellyt tilaarvot
+        if normalized_status not in self._ALLOWED_PLAN_STATUSES:
             raise ValueError("Invalid plan status")
 
-        plan_updated_at = utc_now_iso() if (normalized_priority or normalized_status or normalized_next_step) else None  # Aikaleima asetetaan vain, jos suunnitelmassa on sisältöä.
+        # Aikaleima asetetaan vain, jos suunnitelmassa on sisältöä
+        plan_updated_at = (
+            utc_now_iso()
+            if (normalized_priority or normalized_status or normalized_next_step)
+            else None
+        )
 
-        with self._lock:  # Lukitsee tietokantavaiheen, jotta tarkistus ja tallennus pysyvät yhtenäisenä.
+        # Lukitsee tietokantavaiheen, jotta tarkistus ja tallennus pysyvät yhtenäisenä
+        with self._lock:
             row = self._get_visible_tutkintonimike_row(nimike_id)
             if row is None:
                 raise ValueError(f"Unknown tutkintonimike id: {nimike_id}")

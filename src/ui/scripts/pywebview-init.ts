@@ -1,3 +1,5 @@
+// Apurit pywebviewn API:n odottamiseen ja sivukohtaisen alustusyrityksen uusintaan
+
 export type InitControllerOptions = {
   retryDelayMs?: number;
   retryOnFailureDelayMs?: number;
@@ -10,10 +12,12 @@ export type InitAttemptResult = {
 
 type InitRunner = () => Promise<InitAttemptResult>;
 
+// Palauttaa pywebviewn API-olion heti, jos se on jo saatavilla ikkunassa
 export function getPywebviewApi<T>(): T | null {
   return (window.pywebview?.api as T | undefined) ?? null;
 }
 
+// Odottaa pywebviewn API:a annetun aikakatkaisun ajan ennen kuin luovuttaa
 export async function waitForPywebviewApi<T>(timeoutMs = 4000): Promise<T | null> {
   const start = Date.now();
   return new Promise((resolve) => {
@@ -33,6 +37,7 @@ export async function waitForPywebviewApi<T>(timeoutMs = 4000): Promise<T | null
   });
 }
 
+// Luo sivulle käynnistysfunktion, joka yrittää alustuksen uudelleen kunnes se onnistuu
 export function createRetryingPageInit(
   runner: InitRunner,
   options: InitControllerOptions = {}

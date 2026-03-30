@@ -1,5 +1,7 @@
 export {};
 
+// Sivupohjan yhteinen header, footer ja esteettömyysasetusten alkuperäinen lataus
+
 import {
   applyAccessibilitySettings,
   loadStoredAccessibilitySettings,
@@ -29,10 +31,13 @@ type SettingsApi = {
   get_accessibility_settings: () => Promise<AccessibilitySettings>;
 };
 
+// Käyttää ensin selaimen paikallisia asetuksia ja korvaa ne backendin arvoilla, jos ne saadaan
 async function initAccessibilitySettings(): Promise<void> {
+  // Paikalliset asetukset otetaan käyttöön heti, jotta sivu ei välähdä oletustilassa
   const stored = loadStoredAccessibilitySettings();
   applyAccessibilitySettings(stored);
 
+  // Backendin asetuksia odotetaan vain hetki, jotta hidas käynnistys ei blokkaa sivua
   const api = await waitForPywebviewApi<SettingsApi>(1500);
   if (!api) {
     return;
@@ -43,10 +48,11 @@ async function initAccessibilitySettings(): Promise<void> {
     applyAccessibilitySettings(remote);
     persistAccessibilitySettings(remote);
   } catch {
-    // Jatketaan paikallisilla asetuksilla, jos backend ei ole saatavilla.
+    // Jatketaan paikallisilla asetuksilla, jos backend ei ole saatavilla
   }
 }
 
+// Rakentaa sivun yläreunan navigaation keskitetystä linkkilistasta
 function renderHeader(): void {
   const headerHost = document.getElementById("app-header");
   if (!headerHost) {
@@ -56,6 +62,7 @@ function renderHeader(): void {
   const currentPage = document.body.dataset.page ?? "";
   const subtitle = document.body.dataset.subtitle ?? "Digitaalinen opintoapu";
 
+  // Aktiivinen sivu merkitään sekä tyyliluokalla että aria-attribuutilla
   const links = navItems
     .map((item) => {
       const isActive = item.id === currentPage;
@@ -78,6 +85,7 @@ function renderHeader(): void {
   `;
 }
 
+// Lisää sivulle yhteisen alatunnisteen ja pysyvät linkit
 function renderFooter(): void {
   const footerHost = document.getElementById("app-footer");
   if (!footerHost) {
@@ -92,6 +100,7 @@ function renderFooter(): void {
   `;
 }
 
+// Alustaa jokaiselle sivulle yhteiset rakenneosat heti dokumentin valmistuttua
 function initLayout(): void {
   renderHeader();
   renderFooter();
@@ -99,6 +108,7 @@ function initLayout(): void {
 }
 
 if (document.readyState === "loading") {
+  // Yhteinen layout alustetaan vasta kun sivun paikkasäilöt ovat varmasti olemassa
   window.addEventListener("DOMContentLoaded", initLayout, { once: true });
 } else {
   initLayout();

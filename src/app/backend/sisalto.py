@@ -18,12 +18,15 @@ class SisaltoApiMixin:
         data = parse_json_payload(raw_text, "opiskeluSuunnat.json")
 
         opiskelu_suunnat = data.get("opiskeluSuunnat", [])
-        if not isinstance(opiskelu_suunnat, list):  # Varmistaa, että lähdedatan pääavain sisältää listan käsiteltäviä kohteita.
+        # Varmistaa, että lähdedatan pääavain sisältää listan käsiteltäviä kohteita
+        if not isinstance(opiskelu_suunnat, list):
             raise ValueError("opiskeluSuunnat.json missing 'opiskeluSuunnat' list")
 
-        items: list[dict[str, str | int]] = []  # Kerää lopulliset, käyttöliittymälle siivotut opiskelusuuntaoliot tähän listaan.
+        # Kerää lopulliset, käyttöliittymälle siivotut opiskelusuuntaoliot tähän listaan
+        items: list[dict[str, str | int]] = []
         for item in opiskelu_suunnat:
-            if not isinstance(item, dict):  # Ohitetaan rikkinäiset rivit, jos listassa on jotain muuta kuin sanakirjoja.
+            # Ohitetaan rikkinäiset rivit, jos listassa on jotain muuta kuin sanakirjoja
+            if not isinstance(item, dict):
                 continue
             nimi = str(item.get("nimi", "")).strip()
             if not nimi:
