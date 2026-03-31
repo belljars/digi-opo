@@ -50,7 +50,6 @@ class UiSmokeTests(unittest.TestCase):
             "opintopolut.html",
             "quiz.html",
             "amis-quiz.html",
-            "esteettomyys.html",
         ]
         for page in pages:
             with self.subTest(page=page):

@@ -126,6 +126,7 @@ function getApi(): Api | null {
 function setFeedback(message = ""): void {
   if (feedbackEl) {
     feedbackEl.textContent = message;
+    feedbackEl.toggleAttribute("hidden", message.length === 0);
   }
 }
 
@@ -311,6 +312,7 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
     img: item.img,
     tutkinto_nimi: item.tutkinto_nimi
   });
+  root.classList.add("saved-item-card");
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";
@@ -374,7 +376,7 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
   planGrid.className = "saved-plan-grid";
 
   const priorityWrap = document.createElement("div");
-  priorityWrap.className = "accessibility-control";
+  priorityWrap.className = "form-control";
 
   const priorityLabel = document.createElement("label");
   priorityLabel.htmlFor = `saved-plan-priority-${item.id}`;
@@ -393,7 +395,7 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
   priorityWrap.append(priorityLabel, prioritySelect);
 
   const statusWrap = document.createElement("div");
-  statusWrap.className = "accessibility-control";
+  statusWrap.className = "form-control";
 
   const statusLabel = document.createElement("label");
   statusLabel.htmlFor = `saved-plan-status-${item.id}`;

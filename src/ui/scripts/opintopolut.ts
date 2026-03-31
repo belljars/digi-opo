@@ -27,6 +27,7 @@ const listEl = document.getElementById("opintopolut-list");
 function setStatus(message: string): void {
   if (statusEl) {
     statusEl.textContent = message;
+    statusEl.toggleAttribute("hidden", message.length === 0);
   }
 }
 
@@ -92,9 +93,7 @@ function renderItems(items: OpiskeluSuunta[]): void {
     })
   );
 
-  if (statusEl) {
-    statusEl.textContent = "";
-  }
+  setStatus("");
 }
 
 // Hakee opintopolut backendistä ja pyytää uutta yritystä, jos pywebview ei ole vielä valmis

@@ -15,10 +15,20 @@
     <main class="app" id="main-content">
       <div id="app-header"></div>
 
-      <section class="panel">
+      <section class="panel opintopolut-page">
+        <header class="page-hero">
+          <div class="page-hero-copy">
+            <h2>Opintopolut</h2>
+            <p class="saved-page-copy">Tutustu erilaisiin reitteihin ammatillisiin opintoihin ja jatkosuuntiin yhden näkymän kautta.</p>
+          </div>
+          <div class="page-hero-note">
+            <p class="page-hero-label">Sisältö</p>
+            <p class="page-hero-meta">Tältä sivulta näet valmiita polkuja, joita voit käyttää oman suunnitelmasi pohjana.</p>
+          </div>
+        </header>
+
         <div class="detail opintopolut-detail">
-          <h2>Erilaiset opintopolut</h2>
-          <p id="opintopolut-status" class="empty">Ladataan...</p>
+          <p id="opintopolut-status" class="empty" hidden>Ladataan...</p>
           <div id="opintopolut-list" class="opintopolut-grid"></div>
         </div>
       </section>

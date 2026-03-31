@@ -123,7 +123,6 @@ Niissä tarkistetaan muun muassa:
 - piilotuslogiikka
 - muistiinpanot
 - suunnitelmakentät
-- esteettömyysasetukset
 - quiz-tulokset ja sessiot
 - staattisen palvelimen polkurajaus
 
@@ -137,8 +136,6 @@ Nämä testit tarkistavat:
 
 - että `waitForPywebviewApi()` toimii viiveellisessä tilanteessa
 - että alustus yrittää uudelleen onnistuneesti
-- että esteettömyysasetusten vertailu toimii
-- että asetusten CSS/dataset-peilaus toimii
 
 ## 3. HTML-sivujen savutestit
 
@@ -218,7 +215,6 @@ muutokset näkyvät suoraan backendin JSON-luvuissa ilman SQLite-importtia.
 Projektissa toistuvaa logiikkaa on jo keskitetty hyvin. Uutta yhteistä logiikkaa kannattaa lisätä mieluummin:
 
 - `pywebview-init.ts`
-- `accessibility-settings.ts`
 - `tutkintonimike-card.ts`
 
 kuin kopioida useaan sivuun.

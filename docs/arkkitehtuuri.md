@@ -116,7 +116,6 @@ SQLiteen tuodaan tutkintodata `ammatit.json`:stä käynnistyksen yhteydessä. Ti
 - muistiinpanot
 - piilotetut tutkinnot
 - piilotetut tutkintonimikkeet
-- esteettömyysasetukset
 
 ### 3. Käyttäjäkohtaiset JSON-tiedostot
 
@@ -165,8 +164,6 @@ Frontend jakautuu kolmeen tasoon:
 
 - `layout.ts`
 - `pywebview-init.ts`
-- `accessibility-settings.ts`
-- `accessibility-page-state.ts`
 - `tutkintonimike-card.ts`
 
 ### Sivukohtaiset skriptit
@@ -180,7 +177,6 @@ Jokaisella näkymällä on oma `.ts`-tiedosto, joka:
 
 ### Tyylikerros
 
-- `src/ui/styles/root/*.css` määrittää teema- ja esteettömyysmuuttujia
 - `src/ui/styles/styles.css` sisältää sovelluksen yhteiset ja sivukohtaiset tyylit
 
 ## Yhteiset suunnitteluperiaatteet koodissa
@@ -203,7 +199,6 @@ Esimerkiksi:
 
 Esimerkiksi:
 
-- esteettömyysasetuksissa hyväksytään vain tunnetut arvot
 - suunnitelmakentissä hyväksytään vain sallitut tilakoodit
 - tunnisteet muunnetaan turvallisesti kokonaisluvuiksi
 

@@ -16,15 +16,19 @@
       <div id="app-header"></div>
 
       <section class="panel asetukset-page">
-        <div class="asetukset-page-header">
-          <div>
+        <header class="page-hero asetukset-page-header">
+          <div class="page-hero-copy">
             <h2>Asetukset</h2>
             <p class="saved-page-copy">
               Piilotetut tutkinnot ja tutkintonimikkeet poistuvat koko sovelluksesta, mukaan lukien kyselyt.
             </p>
           </div>
-          <div id="asetukset-feedback" class="saved-feedback" aria-live="polite"></div>
-        </div>
+          <div class="page-hero-note">
+            <p class="page-hero-label">Vaikutus</p>
+            <p class="page-hero-meta">Tee tästä näkymästä omasi hallitsemalla, mitä tutkintoja ja tutkintonimikkeitä sovellus näyttää.</p>
+          </div>
+        </header>
+        <div id="asetukset-feedback" class="saved-feedback saved-page-feedback" aria-live="polite" hidden></div>
 
         <section class="asetukset-section" aria-labelledby="asetukset-tutkinnot-title">
           <div class="asetukset-section-header">
@@ -36,25 +40,30 @@
 
           <div class="asetukset-columns">
             <div class="asetukset-pane">
-              <div class="search">
-                <label for="asetukset-tutkinto-search">Näkyvät tutkinnot</label>
-                <input
-                  id="asetukset-tutkinto-search"
-                  type="search"
-                  placeholder="Hae tutkintoa nimellä"
-                  autocomplete="off"
-                />
-              </div>
-              <div id="asetukset-visible-tutkinnot-count" class="count"></div>
-              <div id="asetukset-visible-tutkinnot" class="asetukset-list"></div>
+              <details class="asetukset-dropdown">
+                <summary class="asetukset-dropdown-summary">
+                  <span class="asetukset-dropdown-title">Näkyvät tutkinnot</span>
+                  <span id="asetukset-visible-tutkinnot-count" class="count"></span>
+                </summary>
+                <div class="asetukset-dropdown-body">
+                  <div class="search">
+                    <label for="asetukset-tutkinto-search">Hae näkyvää tutkintoa</label>
+                    <input
+                      id="asetukset-tutkinto-search"
+                      type="search"
+                      placeholder="Hae tutkintoa nimellä"
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div id="asetukset-visible-tutkinnot" class="asetukset-list"></div>
+                </div>
+              </details>
             </div>
 
-            <div class="asetukset-pane">
-              <details>
-                <summary>Piilotetut tutkinnot</summary>
-                <div id="asetukset-hidden-tutkinnot-count" class="count"></div>
-                <div id="asetukset-hidden-tutkinnot" class="asetukset-list"></div>
-              </details>
+            <div class="asetukset-pane asetukset-pane--hidden">
+              <p class="asetukset-pane-label">Piilotetut tutkinnot</p>
+              <div id="asetukset-hidden-tutkinnot-count" class="count"></div>
+              <div id="asetukset-hidden-tutkinnot" class="asetukset-list"></div>
             </div>
           </div>
         </section>
@@ -71,25 +80,30 @@
 
           <div class="asetukset-columns">
             <div class="asetukset-pane">
-              <div class="search">
-                <label for="asetukset-tutkintonimike-search">Näkyvät tutkintonimikkeet</label>
-                <input
-                  id="asetukset-tutkintonimike-search"
-                  type="search"
-                  placeholder="Hae tutkintonimikettä nimellä"
-                  autocomplete="off"
-                />
-              </div>
-              <div id="asetukset-visible-tutkintonimikkeet-count" class="count"></div>
-              <div id="asetukset-visible-tutkintonimikkeet" class="saved-grid"></div>
+              <details class="asetukset-dropdown">
+                <summary class="asetukset-dropdown-summary">
+                  <span class="asetukset-dropdown-title">Näkyvät tutkintonimikkeet</span>
+                  <span id="asetukset-visible-tutkintonimikkeet-count" class="count"></span>
+                </summary>
+                <div class="asetukset-dropdown-body">
+                  <div class="search">
+                    <label for="asetukset-tutkintonimike-search">Hae näkyvää tutkintonimikettä</label>
+                    <input
+                      id="asetukset-tutkintonimike-search"
+                      type="search"
+                      placeholder="Hae tutkintonimikettä nimellä"
+                      autocomplete="off"
+                    />
+                  </div>
+                  <div id="asetukset-visible-tutkintonimikkeet" class="saved-grid"></div>
+                </div>
+              </details>
             </div>
 
-            <div class="asetukset-pane">
-              <details>
-                <summary>Piilotetut tutkintonimikkeet</summary>
-                <div id="asetukset-hidden-tutkintonimikkeet-count" class="count"></div>
-                <div id="asetukset-hidden-tutkintonimikkeet" class="saved-grid"></div>
-              </details>
+            <div class="asetukset-pane asetukset-pane--hidden">
+              <p class="asetukset-pane-label">Piilotetut tutkintonimikkeet</p>
+              <div id="asetukset-hidden-tutkintonimikkeet-count" class="count"></div>
+              <div id="asetukset-hidden-tutkintonimikkeet" class="saved-grid"></div>
             </div>
           </div>
         </section>

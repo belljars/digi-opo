@@ -89,6 +89,18 @@ function normalizeValue(value: string): string {
   return value.trim().toLocaleLowerCase("fi");
 }
 
+function getTutkintoDisplayName(name: string): string {
+  if (name === "Tutkintokoulutukseen valmentava koulutus (TUVA)") {
+    return "TUVA";
+  }
+
+  if (name === "Työhön ja itsenäiseen elämään valmentava koulutus (TELMA)") {
+    return "TELMA";
+  }
+
+  return name;
+}
+
 function populateTutkintoFilter(items: TutkintoListItem[]): void {
   if (!tutkintoFilterEl) {
     return;
@@ -105,7 +117,7 @@ function populateTutkintoFilter(items: TutkintoListItem[]): void {
   items.forEach((item) => {
     const option = document.createElement("option");
     option.value = String(item.id);
-    option.textContent = item.nimi;
+    option.textContent = getTutkintoDisplayName(item.nimi);
     tutkintoFilterEl.append(option);
   });
 
@@ -120,7 +132,7 @@ function renderList(items: TutkintoListItem[]): void {
   listEl.replaceChildren(
     ...items.map((item) => {
       const button = document.createElement("button");
-      button.textContent = item.nimi;
+      button.textContent = getTutkintoDisplayName(item.nimi);
       button.dataset.id = String(item.id);
       if (item.id === activeId) {
         button.classList.add("active");

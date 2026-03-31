@@ -15,37 +15,64 @@
     <main class="app" id="main-content">
       <div id="app-header"></div>
 
-      <div>
-        <h2>Aloita tutustuminen</h2>
-        <div id="card-select">
-          <a href="./pankki.html" class="card">
-            <div class="card-image" aria-hidden="true"></div>
-            <h2>Amis Tutkintopankki</h2>
-            <p>Selaa tutkintopankin tietokantaa ja löydä sinua kiinnostavia tutkintoja.</p>
-          </a>
-          <a href="./opintopolut.html" class="card">
-            <div class="card-image" aria-hidden="true"></div>
-            <h2>Erilaiset opintopolut</h2>
-            <p>Katso erilaisia opintopolkuja ja suunnittele oma reittisi kohti unelmiesi uraa.</p>
-          </a>
-        </div>
-        <div id="kyselyt">
-          <h1>Kyselyt</h1>
-          <p>Löydä sinulle sopivat tutkintokyselyt.</p>
+      <section class="home-page">
+        <header class="page-hero">
+          <div class="page-hero-copy">
+            <h2>Etusivu</h2>
+            <p class="saved-page-copy">
+              Yksi näkymä tutkintojen selaamiseen, erilaisten reittien tutkimiseen ja omien kyselyiden aloittamiseen.
+            </p>
+          </div>
+          <div class="page-hero-note">
+            <p class="page-hero-label">Aloita tästä</p>
+            <p class="page-hero-meta">
+              Valitse ensin selaatko tutkintoja, katsotko valmiita opintopolkuja vai etsitkö suuntaa kyselyiden avulla.
+            </p>
+          </div>
+        </header>
+
+        <section class="home-section" aria-labelledby="home-browse-title">
+          <div class="home-section-header">
+            <div>
+              <h3 id="home-browse-title">Aloita tutustuminen</h3>
+              <p class="saved-page-copy">Selaa pankkia tai katso valmiita opintopolkuja ennen kuin alat vertailla vaihtoehtoja tarkemmin.</p>
+            </div>
+          </div>
+          <div id="card-select">
+            <a href="./pankki.html" class="card">
+              <img class="card-image" src="../assets/home/tutkintopankki.png" alt="Amis tutkintopankki" />
+              <h2>Amis Tutkintopankki</h2>
+              <p>Selaa tutkintopankin tietokantaa ja löydä sinua kiinnostavia tutkintoja.</p>
+            </a>
+            <a href="./opintopolut.html" class="card">
+              <img class="card-image" src="../assets/home/opintopolu.png" alt="Erilaiset opintopolut" />
+              <h2>Erilaiset opintopolut</h2>
+              <p>Katso erilaisia opintopolkuja ja suunnittele oma reittisi kohti unelmiesi uraa.</p>
+            </a>
+          </div>
+        </section>
+
+        <section class="home-section" id="kyselyt" aria-labelledby="home-quiz-title">
+          <div class="home-section-header">
+            <div>
+              <h3 id="home-quiz-title">Kyselyt</h3>
+              <p class="saved-page-copy">Löydä sinulle sopivia tutkintoja vastaamalla kysymyksiin tai vertailemalla vaihtoehtoja yksi pari kerrallaan.</p>
+            </div>
+          </div>
           <div id="kyselyt-cards">
             <a href="./quiz.html" class="card">
-              <div class="card-image" aria-hidden="true"></div>
+              <img class="card-image" src="../assets/home/quiz.png" alt="Opintopolku-kysely" />
               <h2>Opintopolku-kysely</h2>
               <p>Vastaa kysymyksiin ja löydä sinulle sopivin opintopolku.</p>
             </a>
             <a href="./amis-quiz.html" class="card">
-              <div class="card-image" aria-hidden="true"></div>
+              <img class="card-image" src="../assets/home/vertailu.png" alt="Amis-korttivertailu" />
               <h2>Amis-korttivertailu</h2>
               <p>Vertaile kahta tutkintonimikettä kerrallaan ja tee valintoja.</p>
             </a>
           </div>
-        </div>
-      </div>
+        </section>
+      </section>
 
       <footer id="app-footer" class="site-footer"></footer>
     </main>
