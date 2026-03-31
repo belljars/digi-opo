@@ -1,15 +1,6 @@
 export {};
 
-// Sivupohjan yhteinen header, footer ja esteettömyysasetusten alkuperäinen lataus
-
-import {
-  applyAccessibilitySettings,
-  loadStoredAccessibilitySettings,
-  normalizeAccessibilitySettings,
-  persistAccessibilitySettings,
-  type AccessibilitySettings
-} from "./accessibility-settings.js";
-import { waitForPywebviewApi } from "./pywebview-init.js";
+// Sivupohjan yhteinen header ja footer
 
 type NavItem = {
   id: string;
@@ -23,34 +14,8 @@ const navItems: NavItem[] = [
   { id: "saved", href: "./saved-tutkintonimikkeet.html", label: "Tallennetut" },
   { id: "my-plan", href: "./my-plan.html", label: "Oma suunnitelma" },
   { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" },
-  { id: "asetukset", href: "./asetukset.html", label: "Asetukset" },
-  { id: "esteettomyys", href: "./esteettomyys.html", label: "Esteettömyys" }
+  { id: "asetukset", href: "./asetukset.html", label: "Asetukset" }
 ];
-
-type SettingsApi = {
-  get_accessibility_settings: () => Promise<AccessibilitySettings>;
-};
-
-// Käyttää ensin selaimen paikallisia asetuksia ja korvaa ne backendin arvoilla, jos ne saadaan
-async function initAccessibilitySettings(): Promise<void> {
-  // Paikalliset asetukset otetaan käyttöön heti, jotta sivu ei välähdä oletustilassa
-  const stored = loadStoredAccessibilitySettings();
-  applyAccessibilitySettings(stored);
-
-  // Backendin asetuksia odotetaan vain hetki, jotta hidas käynnistys ei blokkaa sivua
-  const api = await waitForPywebviewApi<SettingsApi>(1500);
-  if (!api) {
-    return;
-  }
-
-  try {
-    const remote = normalizeAccessibilitySettings(await api.get_accessibility_settings());
-    applyAccessibilitySettings(remote);
-    persistAccessibilitySettings(remote);
-  } catch {
-    // Jatketaan paikallisilla asetuksilla, jos backend ei ole saatavilla
-  }
-}
 
 // Rakentaa sivun yläreunan navigaation keskitetystä linkkilistasta
 function renderHeader(): void {
@@ -104,7 +69,6 @@ function renderFooter(): void {
 function initLayout(): void {
   renderHeader();
   renderFooter();
-  void initAccessibilitySettings();
 }
 
 if (document.readyState === "loading") {

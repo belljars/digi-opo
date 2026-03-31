@@ -1,742 +1,1429 @@
-@import "./root/main.css";
-@import "./root/light-high-contrast.css";
-@import "./root/dark-main.css";
-@import "./root/dark-high-contrast.css";
+/* ============================================================
+   digi-opo – layout
+   ============================================================ */
 
+/* ------------------------------------------------------------
+   1. Muuttujat
+   ------------------------------------------------------------ */
 :root {
-  --layout-max-width: 82rem;
-  --layout-reading-width: 68rem;
-  --layout-padding-inline: clamp(var(--space-8), 4vw, var(--space-11));
-  --layout-padding-block: clamp(var(--space-8), 3vw, var(--space-11));
-  --layout-gap: clamp(var(--space-8), 3vw, var(--space-10));
-  --card-min-width: 16rem;
-  --compact-card-min-width: 12rem;
+  --font-scale: 1;
+  --line-height: 1.5;
+  --surface-radius: 4px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --max-width: 1280px;
+  --panel-min: 280px;
 }
 
-*,
-*::before,
-*::after {
+/* ------------------------------------------------------------
+   2. Perusnollaus
+   ------------------------------------------------------------ */
+*, *::before, *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-html {
-  font-size: 100%;
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+ul, ol {
+  list-style: none;
 }
 
 body {
-  min-height: 100vh;
-  margin: 0;
-  font-family: var(--font-family-base);
-  font-size: var(--text-base);
-  line-height: var(--line-height-copy);
-  color: var(--color-text);
-  background: var(--color-background);
+  line-height: var(--line-height);
+  color: #171717;
 }
 
-body,
-button,
-input,
-select,
-textarea,
-option {
-  font: inherit;
-  color: var(--color-text);
-}
-
-img {
-  display: block;
-  max-inline-size: 100%;
-}
-
-a {
+a,
+a:visited {
   color: inherit;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
 }
 
-:root[data-contrast="light-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link),
-:root[data-contrast="dark-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link) {
-  color: var(--color-link);
-  text-decoration-thickness: 0.08em;
-  text-underline-offset: 0.14em;
+a:focus-visible,
+button:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
 }
 
-:root[data-contrast="light-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):visited,
-:root[data-contrast="dark-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):visited {
-  color: var(--color-link-visited);
+/* ------------------------------------------------------------
+   3. Yhteiset rajaukset
+   ------------------------------------------------------------ */
+:is(
+  .panel,
+  .card,
+  .tutkintonimike-card,
+  .quiz-overview,
+  .quiz-play,
+  .quiz-result-card,
+  .quiz-ranking,
+  .saved-section,
+  .oma-suunnitelma-osio,
+  .opintopolku-card
+) {
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
 }
 
-:root[data-contrast="light-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):hover,
-:root[data-contrast="dark-high"] a:not(.header-link):not(.tutkintonimike-link-action):not(.skip-link):hover {
-  color: var(--color-link-hover);
-}
-
-button {
-  cursor: pointer;
-}
-
-button,
-.header-link,
-.tutkintonimike-link-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  text-decoration: none;
-}
-
-button,
-input:not([type="checkbox"]):not([type="radio"]),
-select,
-textarea,
-.header-link,
-.tutkintonimike-link-action {
-  padding: var(--control-padding-y) var(--control-padding-x);
-  border: var(--border-width) solid currentColor;
-  background: transparent;
-}
-
-input:not([type="checkbox"]):not([type="radio"]),
-select,
-textarea {
-  inline-size: 100%;
-}
-
-input[type="checkbox"],
-input[type="radio"] {
-  margin: 0;
-}
-
-textarea {
-  min-block-size: 8rem;
-  resize: vertical;
-}
-
-button[disabled],
-input[disabled],
-select[disabled],
-textarea[disabled] {
-  cursor: not-allowed;
+:is(.card, .tutkintonimike-card) {
+  overflow: hidden;
 }
 
 [hidden] {
   display: none !important;
 }
 
-:focus-visible {
-  outline: var(--focus-ring-width) solid currentColor;
-  outline-offset: var(--focus-ring-offset);
-}
-
-h1,
-h2,
-h3,
-h4,
-p,
-ul,
-ol,
-fieldset {
-  margin: 0;
-}
-
-ul,
-ol {
-  padding-left: 1.25rem;
-}
-
-fieldset {
-  min-inline-size: 0;
-}
-
-details {
-  display: grid;
-  gap: var(--space-6);
-}
-
-summary {
-  cursor: pointer;
-}
-
-h1,
-h2,
-h3,
-h4,
-.header-link,
-.tutkintonimike-link,
-.tutkintonimike-link-action {
-  overflow-wrap: anywhere;
-}
-
-.header-link,
-.tutkintonimike-link-action,
-.skip-link {
-  color: var(--color-text);
-}
-
-.header-link:hover,
-.header-link:visited,
-.tutkintonimike-link-action:hover,
-.tutkintonimike-link-action:visited,
-.skip-link:hover,
-.skip-link:visited {
-  color: var(--color-text);
-}
-
+/* ------------------------------------------------------------
+   4. Ohituslinkki
+   ------------------------------------------------------------ */
 .skip-link {
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: var(--layout-padding-inline);
-  padding: var(--space-4) var(--space-6);
-  border: var(--border-width) solid currentColor;
-  background: var(--color-background);
-  text-decoration: none;
-  transform: translateY(-150%);
-  z-index: 10;
+  top: -9999px;
+  left: var(--space-4);
+  z-index: 9999;
+  padding: var(--space-2) var(--space-4);
 }
 
 .skip-link:focus {
-  transform: translateY(var(--space-4));
+  top: var(--space-4);
+}
+
+/* ------------------------------------------------------------
+   5. Sovelluksen pääasettelu – viewport-lukitus
+   ------------------------------------------------------------ */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
 .app {
-  inline-size: min(100%, var(--layout-max-width));
-  min-height: 100vh;
-  margin: 0 auto;
-  padding: var(--layout-padding-block) var(--layout-padding-inline);
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  align-content: start;
-  gap: var(--layout-gap);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+  overflow: hidden;
 }
 
-.app > * {
-  min-inline-size: 0;
+/* Header ja footer pysyvät paikallaan */
+#app-header {
+  flex-shrink: 0;
 }
 
-body[data-page="home"] .app > div:not(#app-header),
-body[data-page="tietosuoja"] .app > div:not(#app-header) {
-  display: grid;
-  gap: var(--layout-gap);
+#app-footer {
+  flex-shrink: 0;
 }
 
-body[data-page="tietosuoja"] .app > div:not(#app-header) {
-  max-inline-size: var(--layout-reading-width);
+/* Sisältöalue vieritetään headerin ja footerin välissä */
+.app > *:not(#app-header):not(#app-footer) {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-block: var(--space-6);
 }
 
+/* ------------------------------------------------------------
+   6. Ylätunniste ja navigaatio
+   ------------------------------------------------------------ */
 .site-header {
   display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding-block: var(--space-4);
   flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-8);
-  padding-block-end: var(--space-8);
-  border-block-end: var(--border-width) solid currentColor;
-}
-
-.site-header > div {
-  display: grid;
-  gap: var(--space-3);
-  max-inline-size: var(--layout-reading-width);
 }
 
 .site-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: var(--space-1);
+  margin-left: auto;
 }
 
-.header-link.active,
-.list button.active,
-.quiz-option.is-selected {
-  font-weight: 700;
+.header-link {
+  padding: var(--space-2) var(--space-3);
 }
 
+/* ------------------------------------------------------------
+   7. Alatunniste
+   ------------------------------------------------------------ */
 .site-footer {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-6);
-  padding-block-start: var(--space-8);
-  border-block-start: var(--border-width) solid currentColor;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block: var(--space-4);
 }
 
-.site-footer-copy {
-  max-inline-size: 32rem;
+/* ------------------------------------------------------------
+   8. Paneeli
+   ------------------------------------------------------------ */
+.panel {
+  padding: var(--space-6);
 }
 
-.panel,
-.saved-section,
-.oma-suunnitelma-osio,
-.card,
-.opintopolku-card,
-.tutkintonimike-card,
-.accessibility-preview-card,
-.saved-stats-metric,
-.saved-stat-row,
-.quiz-result-card,
-.quiz-choice-shell,
-.quiz-saved-result,
-.asetukset-item,
-.oma-suunnitelma-mittari,
-.oma-suunnitelma-askel,
-.oma-suunnitelma-vaihtoehto-kortti {
-  padding: var(--space-8);
-  border: var(--border-width) solid currentColor;
-}
-
-.panel,
-.saved-section,
-.saved-page,
-.asetukset-page,
-.asetukset-section,
-.accessibility-page,
-.oma-suunnitelma-sivu,
-.oma-suunnitelma-osio,
-.search,
-.pankki-filters,
-.detail,
-.quiz-overview,
-.quiz-body,
-.quiz-form,
-.quiz-results,
-.quiz-ranking,
-.quiz-play,
-.quiz-play-header,
-.accessibility-form,
-.accessibility-preview,
-.accessibility-status-stack,
-.saved-note-editor,
-.saved-plan-editor,
-.asetukset-pane,
-.asetukset-list {
-  display: grid;
-  gap: var(--space-8);
-}
-
-.saved-page-header,
-.saved-section-header,
-.asetukset-page-header,
-.asetukset-section-header,
-.accessibility-page-header,
-.accessibility-preview-header,
-.quiz-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-8);
-}
-
-.saved-page-copy,
-.quiz-lead,
-.quiz-help,
-.quiz-shortcuts,
-.accessibility-note,
-.tutkintonimike-meta,
-.saved-note-preview,
-.saved-plan-meta,
-.oma-suunnitelma-kortti-meta,
-.oma-suunnitelma-kortti-muistio,
-.oma-suunnitelma-kortti-seuraava-askel {
-  max-inline-size: 70ch;
-}
-
-.count,
-.saved-feedback {
-  min-block-size: 1.5em;
-}
-
-.empty {
-  padding-block: var(--space-6);
-}
-
-#card-select,
-#kyselyt-cards,
-.opintopolut-grid,
-.saved-grid,
-.tutkintonimike-grid,
-.oma-suunnitelma-korttiruudukko {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min-width)), 1fr));
-  gap: var(--space-8);
-}
-
-.saved-stats-summary,
-.saved-plan-grid,
-.oma-suunnitelma-mittarit {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--compact-card-min-width)), 1fr));
-  gap: var(--space-6);
-}
-
-.quiz-results-list,
-.saved-stats-chart,
-.oma-suunnitelma-askeleet,
-.oma-suunnitelma-paa,
-.oma-suunnitelma-sivupalkki {
-  display: grid;
-  gap: var(--space-6);
-}
-
-.quiz-results-list,
-.list,
-.oma-suunnitelma-askeleet,
-.oma-suunnitelma-korttiruudukko {
-  margin: 0;
+.app > .panel {
   padding: 0;
-  list-style: none;
+  border: none;
+  border-radius: 0;
 }
 
-body[data-page="home"] #kyselyt {
-  display: grid;
-  gap: var(--space-6);
+.page-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-5);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: rgba(0, 0, 0, 0.03);
 }
 
-body[data-page="opintopolut"] .panel {
-  inline-size: 100%;
-  max-inline-size: 76rem;
-  justify-self: center;
+.page-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-body[data-page="opintopolut"] .opintopolut-detail {
-  gap: var(--space-10);
+.page-hero-copy h2 {
+  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+  line-height: 0.95;
 }
 
-body[data-page="opintopolut"] .opintopolut-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-10);
-  justify-items: stretch;
+.page-hero-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 21rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: rgba(255, 255, 255, 0.6);
 }
 
-body[data-page="opintopolut"] .opintopolku-card {
-  inline-size: 100%;
-  grid-template-columns: 1fr;
-  gap: var(--space-8);
+.page-hero-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.72;
 }
 
-body[data-page="opintopolut"] .opintopolku-card .card-image {
-  aspect-ratio: 4 / 3;
+.page-hero-meta {
+  line-height: 1.6;
+}
+
+/* ------------------------------------------------------------
+   9. Työtila – kaksipalstainen (pankki)
+   ------------------------------------------------------------ */
+.app > .workspace {
+  overflow-y: hidden;
+  padding-block: 0;
 }
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
-  align-items: start;
-  gap: var(--layout-gap);
-}
-
-.list {
+  grid-template-columns: minmax(var(--panel-min), 500px) 1fr;
   gap: var(--space-4);
+  height: 100%;
+  overflow: hidden;
 }
 
-.list button,
-.quiz-option {
-  inline-size: 100%;
-  justify-content: flex-start;
+.panel-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  height: 100%;
+  overflow-y: auto;
+}
+
+.panel-detail {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* ------------------------------------------------------------
+   10. Pankin suodattimet
+   ------------------------------------------------------------ */
+.pankki-filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  align-items: stretch;
+}
+
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.search input,
+.search select {
+  width: 100%;
   text-align: left;
 }
 
-.filter-toggle,
-.accessibility-choice,
-.accessibility-toggle,
-.oma-suunnitelma-askel-valinta {
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------
+   11. Listanäkymä
+   ------------------------------------------------------------ */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.list li button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------
+   12. Etusivun kortit
+   ------------------------------------------------------------ */
+#card-select,
+#kyselyt-cards {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--space-4);
 }
 
-.card,
-.opintopolku-card {
-  display: grid;
-  align-content: start;
+.home-page {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-6);
-  text-decoration: none;
-  min-block-size: 100%;
 }
 
-.card-image,
-.tutkintonimike-image,
-.tutkintonimike-image--placeholder {
-  inline-size: 100%;
-  object-fit: cover;
+.home-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.home-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.home-page .card-image {
+  aspect-ratio: 3 / 1;
+  min-height: 5.5rem;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  text-decoration: none;
 }
 
 .card-image {
+  width: 100%;
   aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 
-.tutkintonimike-image,
-.tutkintonimike-image--placeholder {
-  aspect-ratio: 1 / 1;
-}
-
-.card-image[aria-hidden="true"],
-.tutkintonimike-image--placeholder {
-  background: var(--color-surface-muted);
-}
-
-.opintopolku-list {
+/* ------------------------------------------------------------
+   13. Tutkintonimike-kortti
+   ------------------------------------------------------------ */
+.tutkintonimike-grid {
   display: grid;
-  gap: var(--space-3);
-}
-
-.opintopolku-card-body {
-  display: grid;
-  align-content: start;
-  gap: var(--space-5);
-  min-inline-size: 0;
-}
-
-.opintopolku-card-body p {
-  max-inline-size: 68ch;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
 }
 
 .tutkintonimike-card {
-  display: grid;
-  grid-template-columns: minmax(6rem, 8rem) minmax(0, 1fr);
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  overflow: hidden;
+}
+
+.tutkintonimike-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.tutkintonimike-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.tutkintonimike-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+/* ------------------------------------------------------------
+   14. Kysely – yhteiset
+   ------------------------------------------------------------ */
+.panel-quiz {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-6);
 }
 
-.tutkintonimike-card-body,
-.quiz-meta,
-.saved-stat-row-title-group,
-.quiz-summary,
-.asetukset-item-copy,
-.oma-suunnitelma-askel-teksti,
-.oma-suunnitelma-nakymakytkimet,
-.oma-suunnitelma-vaihtoehto-kortti,
-.saved-stats-metric,
-.oma-suunnitelma-mittari {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.tutkintonimike-card-actions,
-.quiz-choice-footer,
-.quiz-result-footer,
-.accessibility-actions,
-.accessibility-preview-actions,
-.oma-suunnitelma-tunnisteet {
+.quiz-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-}
-
-.oma-suunnitelma-tunniste {
-  display: inline-flex;
-  align-items: center;
-  padding: var(--space-2) var(--space-4);
-  border: var(--border-width) solid currentColor;
-}
-
-.saved-stats-chart {
-  gap: var(--space-6);
-}
-
-.saved-stat-row {
-  gap: var(--space-4);
-}
-
-.saved-stat-row-header,
-.quiz-saved-result {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
   align-items: flex-start;
-  gap: var(--space-6);
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
 }
 
-.saved-stat-bar-track {
-  block-size: 0.75rem;
-  border: var(--border-width) solid currentColor;
-}
-
-.saved-stat-bar-fill {
-  block-size: 100%;
-  inline-size: calc(var(--saved-stat-ratio, 0) * 100%);
-  background: currentColor;
-}
-
-.saved-plan-next-step,
-.accessibility-control {
-  display: grid;
-  gap: var(--space-3);
+.quiz-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .quiz-meta {
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
-  gap: var(--space-4) var(--space-6);
+  display: flex;
+  gap: var(--space-4);
+}
+
+.quiz-body {
+  flex: 1;
+}
+
+.quiz-loading {
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.quiz-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
 .quiz-options {
-  display: grid;
-  gap: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.quiz-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+}
+
+.quiz-option input[type="radio"] {
+  margin-top: 2px;
 }
 
 .quiz-actions {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.quiz-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.quiz-result-card {
+  padding: var(--space-5);
+}
+
+/* ------------------------------------------------------------
+   15. Amis-korttivertailu
+   ------------------------------------------------------------ */
+.quiz-play {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
 }
 
-.panel-quiz {
-  inline-size: min(100%, var(--layout-reading-width));
-  justify-self: center;
+.quiz-play-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .quiz-cards {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  gap: var(--space-8);
-}
-
-.quiz-card-slot {
-  display: grid;
-  min-inline-size: 0;
-}
-
-.quiz-card-slot.is-disabled {
-  opacity: 0.7;
-}
-
-.quiz-choice-shell {
-  display: grid;
-  align-content: start;
-  gap: var(--space-6);
-  block-size: 100%;
-}
-
-.quiz-choice-button {
-  display: block;
-  inline-size: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  text-align: left;
-}
-
-.quiz-choice-button .tutkintonimike-card {
-  padding: 0;
-  border: 0;
-}
-
-.quiz-ranking-list {
-  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
 }
 
-.quiz-ranking-list li {
-  display: grid;
+.quiz-card-slot {
+  display: flex;
+  flex-direction: column;
+}
+
+.quiz-ranking {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-3);
 }
 
-.quiz-score {
+.quiz-ranking-list {
+  list-style: decimal;
+  padding-left: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ------------------------------------------------------------
+   16. Tallennetut
+   ------------------------------------------------------------ */
+.saved-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.saved-hero {
+  padding: var(--space-5);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.saved-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.saved-hero-copy h2 {
+  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+  line-height: 0.95;
+}
+
+.saved-hero-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 21rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.saved-hero-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.saved-hero-summary-text {
+  line-height: 1.6;
+}
+
+.saved-page-feedback {
+  padding-inline: var(--space-1);
+}
+
+.saved-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.saved-feedback {
+  min-height: 1.5em;
+  font-size: 0.95rem;
+}
+
+.saved-page-copy {
+  margin-top: var(--space-1);
+  font-size: 0.9em;
+  opacity: 0.8;
+  max-width: 66ch;
+}
+
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.saved-grid--stack {
+  grid-template-columns: 1fr;
+}
+
+.saved-page-header,
+.saved-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.saved-section-header > div:first-child {
+  min-width: 0;
+}
+
+.quiz-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.quiz-saved-result {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+}
+
+.quiz-saved-result-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.saved-note-preview {
+  margin-top: var(--space-2);
+  line-height: 1.6;
+}
+
+.empty {
+  padding: var(--space-4);
+  border: 1px dashed currentColor;
+  border-radius: var(--surface-radius);
+  opacity: 0.8;
+  line-height: 1.6;
+}
+
+.tutkintonimike-link-action {
   display: inline-flex;
-  align-self: start;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.quiz-result-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.saved-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.saved-main,
+.saved-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.saved-sidebar {
+  position: sticky;
+  top: var(--space-2);
+}
+
+.saved-section .count {
+  min-height: 1.8rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.saved-dropdown {
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  overflow: hidden;
+}
+
+.saved-dropdown-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
+}
+
+.saved-dropdown-summary::-webkit-details-marker {
+  display: none;
+}
+
+.saved-dropdown-summary::after {
+  content: "+";
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.saved-dropdown[open] .saved-dropdown-summary::after {
+  content: "-";
+}
+
+.saved-dropdown-title {
+  font-weight: 600;
+}
+
+.saved-dropdown .count {
+  margin-left: auto;
+}
+
+.saved-dropdown-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: 1px solid currentColor;
+}
+
+.saved-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+
+.saved-stats-metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 7rem;
+  padding: var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+}
+
+.saved-stats-metric[data-accent="strong"] {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.saved-stats-metric-label {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+.saved-stats-metric-value {
+  font-size: clamp(1.4rem, 2.2vw, 2rem);
+  line-height: 1.2;
+}
+
+.saved-stats-chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.saved-stat-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+}
+
+.saved-stat-row-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.saved-stat-row-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.saved-stat-row-meta,
+.saved-stat-row-items,
+.saved-plan-meta {
+  line-height: 1.6;
+  opacity: 0.82;
+}
+
+.saved-stat-row-value {
+  font-weight: 700;
+}
+
+.saved-stat-bar-track {
+  height: 0.55rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.saved-stat-bar-fill {
+  width: calc(var(--saved-stat-ratio, 0) * 100%);
+  height: 100%;
+  background: currentColor;
+}
+
+.saved-item-card {
+  display: grid;
+  grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.saved-item-card .tutkintonimike-image,
+.saved-item-card .tutkintonimike-image--placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  aspect-ratio: auto;
+  object-fit: cover;
+}
+
+.saved-item-card .tutkintonimike-card-body {
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.saved-note-editor,
+.saved-plan-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed currentColor;
+}
+
+.saved-note-label {
+  font-weight: 600;
+}
+
+.saved-note-input,
+.saved-plan-input {
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+}
+
+.saved-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.saved-plan-next-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.saved-plan-meta {
+  font-size: 0.95rem;
+}
+
+.saved-grid--stack > .empty,
+.quiz-results-list > .empty,
+.saved-stats-chart > .empty {
+  width: 100%;
+}
+
+.saved-sidebar .quiz-saved-result {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.saved-sidebar .tutkintonimike-link-action,
+.saved-sidebar .quiz-result-footer {
+  align-self: flex-start;
+}
+
+/* ------------------------------------------------------------
+   17. Asetukset-sivu
+   ------------------------------------------------------------ */
+.asetukset-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.asetukset-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.asetukset-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.asetukset-section + .asetukset-section {
+  padding-top: var(--space-6);
+  border-top: 1px solid currentColor;
+}
+
+.asetukset-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
 }
 
 .asetukset-columns {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--layout-gap);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.asetukset-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.asetukset-dropdown {
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.asetukset-dropdown-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
+}
+
+.asetukset-dropdown-summary::-webkit-details-marker {
+  display: none;
+}
+
+.asetukset-dropdown-summary::after {
+  content: "+";
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.asetukset-dropdown[open] .asetukset-dropdown-summary::after {
+  content: "-";
+}
+
+.asetukset-dropdown-title {
+  font-weight: 600;
+}
+
+.asetukset-dropdown .count {
+  margin-left: auto;
+  padding-block: 0;
+  padding-right: var(--space-2);
+}
+
+.asetukset-dropdown-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: 1px solid currentColor;
+}
+
+.asetukset-pane--hidden {
+  padding: var(--space-4);
+  border: 1px dashed;
+  border-radius: 4px;
+}
+
+.asetukset-pane-label {
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.asetukset-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .asetukset-item {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-6);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 4px;
+  border: 1px solid transparent;
 }
 
-.accessibility-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  align-items: start;
-  gap: var(--layout-gap);
+.asetukset-item:hover {
+  border-color: currentColor;
 }
 
-.accessibility-fieldset {
-  display: grid;
-  gap: var(--space-6);
-  padding: var(--space-8);
-  border: var(--border-width) solid currentColor;
+.asetukset-item-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
 }
 
-.oma-suunnitelma-prioriteetit {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--layout-gap);
+.asetukset-item-copy h4 {
+  font-size: 1em;
+  font-weight: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tutkintonimike-action {
+  padding: 0;
+  flex-shrink: 0;
+  font-size: inherit;
+}
+
+/* ------------------------------------------------------------
+   18. Oma suunnitelma -sivu
+   ------------------------------------------------------------ */
+.oma-suunnitelma-sivu {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.oma-suunnitelma-hero {
+  padding: var(--space-5);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.oma-suunnitelma-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.oma-suunnitelma-hero-copy h2 {
+  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+  line-height: 0.95;
+}
+
+.oma-suunnitelma-hero-controls {
+  max-width: 20rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.oma-suunnitelma-palaute {
+  padding-inline: var(--space-1);
+}
+
+.oma-suunnitelma-osio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
 }
 
 .oma-suunnitelma-asettelu {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 1fr);
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: var(--space-4);
   align-items: start;
-  gap: var(--layout-gap);
+}
+
+.oma-suunnitelma-paa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.oma-suunnitelma-sivupalkki {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: sticky;
+  top: var(--space-2);
 }
 
 .oma-suunnitelma-listarivi {
   list-style: none;
 }
 
+.oma-suunnitelma-osio .count {
+  min-height: 1.8rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.oma-suunnitelma-vaihtoehto-kortti {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-4);
+}
+
+.oma-suunnitelma-kortti-meta {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  opacity: 0.72;
+}
+
+.oma-suunnitelma-tunnisteet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.oma-suunnitelma-tunniste {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.oma-suunnitelma-kortti-muistio,
+.oma-suunnitelma-kortti-seuraava-askel,
+.oma-suunnitelma-kortti-yhteenveto {
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.oma-suunnitelma-kortti-seuraava-askel {
+  padding-top: var(--space-2);
+  border-top: 1px dashed currentColor;
+}
+
+.oma-suunnitelma-kortti-yhteenveto {
+  opacity: 0.78;
+}
+
 .oma-suunnitelma-muistio-label {
-  display: block;
+  font-weight: 600;
 }
 
 .oma-suunnitelma-muistio-syote {
-  min-block-size: 12rem;
+  min-height: 10rem;
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
 }
 
-.oma-suunnitelma-sivu[data-yksinkertainen-tila="true"] .oma-suunnitelma-prioriteetit,
-.oma-suunnitelma-sivu[data-yksinkertainen-tila="true"] .oma-suunnitelma-asettelu {
+.oma-suunnitelma-korttiruudukko {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.oma-suunnitelma-korttiruudukko > .empty {
+  grid-column: 1 / -1;
+  max-width: 34rem;
+}
+
+.quiz-results-list > .empty {
+  width: 100%;
+}
+
+.oma-suunnitelma-sivupalkki .quiz-saved-result {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.oma-suunnitelma-sivupalkki .tutkintonimike-link-action {
+  align-self: flex-start;
+}
+
+[data-yksinkertainen-tila="true"] .oma-suunnitelma-asettelu {
   grid-template-columns: 1fr;
 }
 
-@media (max-width: 60rem) {
-  body[data-page="opintopolut"] .opintopolut-grid {
+/* ------------------------------------------------------------
+   19. Opintopolut-sivu
+   ------------------------------------------------------------ */
+.opintopolut-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+.opintopolut-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.opintopolut-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.opintopolku-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-md, 8px);
+  background: var(--color-surface, #fff);
+}
+
+.opintopolku-card img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.opintopolku-card-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.opintopolku-list {
+  padding-left: var(--space-4);
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* ------------------------------------------------------------
+   20. Lomake-elementit
+   ------------------------------------------------------------ */
+input[type="text"],
+input[type="search"],
+select,
+textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  font-family: inherit;
+  line-height: var(--line-height);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.form-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.form-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* ------------------------------------------------------------
+   21. Painikkeet
+   ------------------------------------------------------------ */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-2);
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  text-decoration-line: underline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------
+   22. Reagoiva asettelu – kapeat näytöt
+   ------------------------------------------------------------ */
+@media (max-width: 860px) {
+  .app > .workspace {
+    overflow-y: auto;
+    height: auto;
+    padding-block: var(--space-6);
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  .panel-list,
+  .panel-detail {
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .asetukset-columns {
     grid-template-columns: 1fr;
   }
 
-  body[data-page="opintopolut"] .opintopolku-card {
-    inline-size: 100%;
+  .saved-layout,
+  .oma-suunnitelma-asettelu {
+    grid-template-columns: 1fr;
   }
 
-  .workspace,
-  .asetukset-columns,
-  .accessibility-layout,
-  .oma-suunnitelma-prioriteetit,
-  .oma-suunnitelma-asettelu,
+  .saved-item-card,
+  .quiz-saved-result {
+    flex-direction: column;
+  }
+
+  .saved-item-card {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-sidebar,
+  .oma-suunnitelma-sivupalkki {
+    position: static;
+  }
+
   .quiz-cards {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 45rem) {
-  .site-header,
-  .site-footer,
-  .saved-page-header,
-  .saved-section-header,
-  .asetukset-page-header,
-  .asetukset-section-header,
-  .accessibility-page-header,
-  .accessibility-preview-header,
-  .quiz-header,
-  .saved-stat-row-header,
-  .quiz-saved-result {
+@media (max-width: 600px) {
+  .app {
+    padding-inline: var(--space-3);
+  }
+
+  .site-header {
     flex-direction: column;
+    align-items: flex-start;
   }
 
-  .tutkintonimike-card {
-    grid-template-columns: 1fr;
+  .site-nav {
+    margin-left: 0;
   }
 
-  .quiz-meta {
-    grid-auto-flow: row;
-    grid-auto-columns: auto;
+  .page-hero {
+    padding: var(--space-4);
   }
+
+  .page-hero-copy h2 {
+    font-size: 1.9rem;
+  }
+
+  .saved-hero {
+    padding: var(--space-4);
+  }
+
+  .saved-hero-copy h2 {
+    font-size: 1.9rem;
+  }
+
+  .oma-suunnitelma-hero {
+    padding: var(--space-4);
+  }
+
+  .oma-suunnitelma-hero-copy h2 {
+    font-size: 1.9rem;
+  }
+
 }

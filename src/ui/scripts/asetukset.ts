@@ -68,6 +68,7 @@ let hiddenTutkintonimikkeet: HiddenTutkintonimikeItem[] = [];
 function setFeedback(message = ""): void {
   if (feedbackEl) {
     feedbackEl.textContent = message;
+    feedbackEl.toggleAttribute("hidden", message.length === 0);
   }
 }
 

@@ -16,16 +16,16 @@
       <div id="app-header"></div>
 
       <section class="panel oma-suunnitelma-sivu" aria-labelledby="oma-suunnitelma-otsikko">
-        <div class="saved-page-header">
-          <div>
+        <header class="saved-page-header oma-suunnitelma-hero">
+          <div class="oma-suunnitelma-hero-copy">
             <h2 id="oma-suunnitelma-otsikko">Oma suunnitelma</h2>
             <p class="saved-page-copy">
               Yksi näkymä omille vaihtoehdoille, seuraaville askelille ja omille huomioille. Sivu kokoaa nykyiset
               tallennukset yhteen ja auttaa hahmottamaan, mitä kannattaa tehdä seuraavaksi.
             </p>
           </div>
-          <div class="oma-suunnitelma-nakymakytkimet">
-            <label class="accessibility-toggle oma-suunnitelma-nakymatila" for="oma-suunnitelma-yksinkertainen-tila">
+          <div class="oma-suunnitelma-nakymakytkimet oma-suunnitelma-hero-controls">
+            <label class="form-toggle oma-suunnitelma-nakymatila" for="oma-suunnitelma-yksinkertainen-tila">
               <input id="oma-suunnitelma-yksinkertainen-tila" type="checkbox" />
               <span>Yksinkertainen tila</span>
             </label>
@@ -33,46 +33,21 @@
               Näytä sivu yhtenä pystysuuntaisena kokonaisuutena ilman vierekkäin asettuvia osioita.
             </p>
           </div>
-        </div>
+        </header>
 
-        <p id="oma-suunnitelma-palaute" class="saved-feedback" aria-live="polite"></p>
-
-        <div class="oma-suunnitelma-prioriteetit">
-          <section class="oma-suunnitelma-osio oma-suunnitelma-osio--askeleet" aria-labelledby="oma-suunnitelma-askeleet-otsikko">
-            <div class="saved-section-header">
-              <div>
-                <h3 id="oma-suunnitelma-askeleet-otsikko">Seuraavat askeleet</h3>
-                <p class="saved-page-copy">
-                  Ehdotetut tehtävät muodostuvat tallennuksiesi, kyselyidesi ja muistiinpanojesi perusteella.
-                </p>
-              </div>
-              <div id="oma-suunnitelma-askeleet-lkm" class="count"></div>
-            </div>
-            <ul id="oma-suunnitelma-askeleet" class="oma-suunnitelma-askeleet"></ul>
-          </section>
-
-          <section class="oma-suunnitelma-osio oma-suunnitelma-osio--jatka" aria-labelledby="oma-suunnitelma-jatka-otsikko">
-            <div class="saved-section-header">
-              <div>
-                <h3 id="oma-suunnitelma-jatka-otsikko">Jatka tässä</h3>
-                <p class="saved-page-copy">Kesken jääneet kyselyt pysyvät helposti mukana suunnitelmassasi.</p>
-              </div>
-              <div id="oma-suunnitelma-jatka-lkm" class="count"></div>
-            </div>
-            <ul id="oma-suunnitelma-jatka" class="quiz-results-list"></ul>
-          </section>
-        </div>
+        <p id="oma-suunnitelma-palaute" class="saved-feedback oma-suunnitelma-palaute" aria-live="polite"></p>
 
         <div class="oma-suunnitelma-asettelu">
           <div class="oma-suunnitelma-paa">
-            <section class="oma-suunnitelma-osio oma-suunnitelma-osio--tilannekuva" aria-labelledby="oma-suunnitelma-tilannekuva-otsikko">
+            <section class="oma-suunnitelma-osio oma-suunnitelma-osio--jatka" aria-labelledby="oma-suunnitelma-jatka-otsikko">
               <div class="saved-section-header">
                 <div>
-                  <h3 id="oma-suunnitelma-tilannekuva-otsikko">Tilannekuva</h3>
-                  <p class="saved-page-copy">Nopea yhteenveto siitä, kuinka paljon materiaalia sinulla on jo kasassa.</p>
+                  <h3 id="oma-suunnitelma-jatka-otsikko">Jatka tässä</h3>
+                  <p class="saved-page-copy">Kesken jääneet kyselyt pysyvät helposti mukana suunnitelmassasi.</p>
                 </div>
+                <div id="oma-suunnitelma-jatka-lkm" class="count"></div>
               </div>
-              <div id="oma-suunnitelma-mittarit" class="oma-suunnitelma-mittarit"></div>
+              <ul id="oma-suunnitelma-jatka" class="quiz-results-list"></ul>
             </section>
 
             <section class="oma-suunnitelma-osio oma-suunnitelma-osio--vaihtoehdot" aria-labelledby="oma-suunnitelma-vaihtoehdot-otsikko">

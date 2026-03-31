@@ -34,15 +34,6 @@ Vastuut:
 - renderöi headerin keskitetystä navigaatiolistasta
 - renderöi footerin
 - merkitsee aktiivisen sivun `data-page`-attribuutin perusteella
-- alustaa esteettömyysasetukset
-
-Tärkeä yksityiskohta:
-
-- layout ottaa ensin käyttöön selaimen `localStorage`-asetukset
-- yrittää sen jälkeen hakea backendin tallennetut asetukset
-- jos backend palauttaa asetuksia, ne korvaavat paikallisen väliaikaisen tilan
-
-Näin vältetään ulkoasun välähtäminen oletusasetuksilla.
 
 ## `src/ui/scripts/pywebview-init.ts`
 
@@ -55,33 +46,6 @@ Tarjoaa:
 - `createRetryingPageInit()`
 
 Tämä on koko frontendin kannalta kriittinen tiedosto, koska `pywebview` ei aina ole valmis heti DOM:n valmistuessa.
-
-## `src/ui/scripts/accessibility-settings.ts`
-
-Esteettömyysasetusten yhteinen malli.
-
-Vastuut:
-
-- tyyppimäärittelyt
-- oletusasetukset
-- validointi ja normalisointi
-- asetusten käyttö CSS-dataset-attribuutteina
-- tallennus selaimen `localStorage`:en
-
-Se kirjoittaa esimerkiksi nämä attribuutit dokumentin juureen:
-
-- `data-contrast`
-- `data-font-family`
-- `data-line-height`
-- `data-reduced-motion`
-- `data-strong-focus`
-- `data-larger-targets`
-
-Lisäksi se päivittää CSS-muuttujan `--font-scale`.
-
-## `src/ui/scripts/accessibility-page-state.ts`
-
-Sisältää yhden kenttäkohtaisen vertailuapurin, jolla tunnistetaan onko esteettömyyslomakkeessa tallentamattomia muutoksia.
 
 ## `src/ui/scripts/tutkintonimike-card.ts`
 
@@ -334,52 +298,11 @@ Sivu ei itse päätä, mikä on piilotettu. Se vain näyttää backendin nykyise
 
 Tämä tekee sivun logiikasta yksinkertaisen ja vähentää tilavirheiden riskiä.
 
-## `esteettomyys.ts`
-
-Esteettömyyssivu yhdistää kolme tasoa:
-
-- lomakkeen
-- live-esikatselun
-- pysyvän tallennuksen
-
-### Käyttäytyminen
-
-- jokainen muutos päivittyy heti esikatseluun
-- tallennus menee backendiin, jos API on käytettävissä
-- muuten tallennus menee selaimen `localStorage`:en varatilana
-- “Tallentamattomia muutoksia” -badge perustuu kenttäkohtaiseen vertailuun tallennettuun tilaan
-
 ## `tietosuoja.html`
 
 Staattinen sisältösivu, joka käyttää vain yhteistä layoutia.
 
 ## CSS-rakenne
-
-## `src/ui/styles/root/main.css`
-
-Määrittää:
-
-- fontit
-- värit
-- spacing-tokenit
-- tekstikoot
-- line-heightit
-- fokusrenkaan parametrit
-- esteettömyysasetuksista johdetut muuttujat
-
-Mukana on myös `OpenDyslexic`-fontin `@font-face`-määritykset.
-
-## `src/ui/styles/root/light-high-contrast.css`
-
-Määrittää vaalean korkean kontrastin teeman.
-
-## `src/ui/styles/root/dark-high-contrast.css`
-
-Määrittää tumman korkean kontrastin teeman.
-
-## `src/ui/styles/root/dark-main.css`
-
-Tiedosto on tällä hetkellä tyhjä. Se näyttää olevan varattu mahdollista tulevaa tummaa perusteemaa varten.
 
 ## `src/ui/styles/styles.css`
 
@@ -387,7 +310,6 @@ Sovelluksen päätyylitiedosto.
 
 Se:
 
-- importoi juuriteemat
 - määrittää peruslayoutin
 - tyylittelee komponentit ja sivut
 - hyödyntää juuritason CSS-muuttujia
@@ -398,4 +320,3 @@ Se:
 2. Jokaisella sivulla on oma paikallinen tila.
 3. Yhteinen koodi on erotettu pieniin apumoduuleihin.
 4. Backendin valmistumattomuus on huomioitu kaikissa merkittävissä sivuissa.
-5. Esteettömyysasetukset ovat poikkeus, jossa käytetään sekä backend-tallennusta että paikallista selaintallennusta.

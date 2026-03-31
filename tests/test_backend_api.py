@@ -327,50 +327,6 @@ class BackendApiTests(unittest.TestCase):
         self.assertIsNone(saved_items[0]["planStatus"])
         self.assertIsNone(saved_items[0]["nextStep"])
 
-    def test_accessibility_settings_can_be_saved_and_loaded(self) -> None:
-        # Esteettömyysasetukset päivittyvät oletuksista käyttäjän tallentamiin arvoihin
-        api = self.create_api()
-
-        self.assertEqual(
-            api.get_accessibility_settings(),
-            {
-                "contrast": "default",
-                "fontFamily": "system",
-                "fontSize": "100",
-                "lineHeight": "normal",
-                "reducedMotion": False,
-                "strongFocus": False,
-                "largerTargets": False,
-            },
-        )
-
-        saved = api.save_accessibility_settings(
-            {
-                "contrast": "dark-high",
-                "fontFamily": "serif",
-                "fontSize": "125",
-                "lineHeight": "comfortable",
-                "reducedMotion": True,
-                "strongFocus": True,
-                "largerTargets": True,
-                "unknown": "ignored",
-            }
-        )
-
-        self.assertEqual(
-            saved,
-            {
-                "contrast": "dark-high",
-                "fontFamily": "serif",
-                "fontSize": "125",
-                "lineHeight": "comfortable",
-                "reducedMotion": True,
-                "strongFocus": True,
-                "largerTargets": True,
-            },
-        )
-        self.assertEqual(api.get_accessibility_settings(), saved)
-
     def test_quiz_results_are_persisted_in_user_directory(self) -> None:
         # Visatulokset kirjoitetaan käyttäjän omaan tallennustiedostoon
         api = self.create_api()

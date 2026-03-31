@@ -25,7 +25,6 @@ Sovelluksessa on tällä hetkellä seuraavat näkymät:
 - `Opintopolku-kysely` (`src/ui/pages/quiz.html`)
 - `Amis-korttivertailu` (`src/ui/pages/amis-quiz.html`)
 - `Asetukset` (`src/ui/pages/asetukset.html`)
-- `Esteettömyys` (`src/ui/pages/esteettomyys.html`)
 - `Tietosuojakäytäntö` (`src/ui/pages/tietosuoja.html`)
 
 Sovellus mahdollistaa esimerkiksi:

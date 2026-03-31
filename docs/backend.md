@@ -126,7 +126,7 @@ Käyttäjän omat muistiinpanot nimikkeille:
 
 #### `app_settings`
 
-Sovellusasetukset, tällä hetkellä erityisesti esteettömyysasetukset:
+Varattu yleisille sovellusasetuksille:
 
 - `key`
 - `value`
@@ -223,20 +223,7 @@ Tyhjä suunnitelma tyhjentää kentät ja asettaa `planUpdatedAt`-arvon takaisin
 
 ## `src/app/backend/asetukset.py`
 
-Sisältää esteettömyysasetukset sekä piilotuslogiikan.
-
-### Esteettömyysasetukset
-
-Metodit:
-
-- `get_accessibility_settings()`
-- `save_accessibility_settings(settings)`
-
-Asetukset tallennetaan `app_settings`-tauluun JSON-merkkijonona. Tallennuksessa käytetään aina normalisointia:
-
-- tuntemattomat kentät ohitetaan
-- sallitut kentät rajataan tunnettuun joukkoon
-- puuttuvat arvot täydennetään oletuksilla
+Sisältää piilotuslogiikan.
 
 ### Piilotetut tutkinnot ja nimikkeet
 

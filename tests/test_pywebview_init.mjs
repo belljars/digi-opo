@@ -1,20 +1,6 @@
 import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
 
-const styleProperties = new Map();
-const rootDataset = {};
-
-globalThis.document = {
-  documentElement: {
-    dataset: rootDataset,
-    style: {
-      setProperty(name, value) {
-        styleProperties.set(name, value);
-      },
-    },
-  },
-};
-
 const windowStub = {
   pywebview: undefined,
   requestAnimationFrame(callback) {
@@ -27,8 +13,6 @@ const windowStub = {
 globalThis.window = windowStub;
 
 const { createRetryingPageInit, waitForPywebviewApi } = await import("../src/ui/scripts/pywebview-init.js");
-const { areAccessibilitySettingsEqual } = await import("../src/ui/scripts/accessibility-page-state.js");
-const { applyAccessibilitySettings } = await import("../src/ui/scripts/accessibility-settings.js");
 
 async function testDelayedApiReadiness() {
   let attempts = 0;
@@ -52,50 +36,5 @@ async function testDelayedApiReadiness() {
   assert.equal(attempts, 2, "init should retry once and then succeed after API becomes available");
 }
 
-function testAccessibilitySettingsEquality() {
-  const base = {
-    contrast: "default",
-    fontFamily: "system",
-    fontSize: "100",
-    lineHeight: "normal",
-    reducedMotion: false,
-    strongFocus: false,
-    largerTargets: false,
-  };
-
-  assert.equal(
-    areAccessibilitySettingsEqual(base, { ...base }),
-    true,
-    "equal settings should be recognized as equal"
-  );
-  assert.equal(
-    areAccessibilitySettingsEqual(base, { ...base, fontSize: "125" }),
-    false,
-    "a single changed field should make settings unequal"
-  );
-}
-
-function testApplyAccessibilitySettings() {
-  applyAccessibilitySettings({
-    contrast: "dark-high",
-    fontFamily: "serif",
-    fontSize: "125",
-    lineHeight: "loose",
-    reducedMotion: true,
-    strongFocus: true,
-    largerTargets: true,
-  });
-
-  assert.equal(rootDataset.contrast, "dark-high");
-  assert.equal(rootDataset.fontFamily, "serif");
-  assert.equal(rootDataset.lineHeight, "loose");
-  assert.equal(rootDataset.reducedMotion, "true");
-  assert.equal(rootDataset.strongFocus, "true");
-  assert.equal(rootDataset.largerTargets, "true");
-  assert.equal(styleProperties.get("--font-scale"), "1.25");
-}
-
 await testDelayedApiReadiness();
-testAccessibilitySettingsEquality();
-testApplyAccessibilitySettings();
 console.log("test_pywebview_init.mjs passed");

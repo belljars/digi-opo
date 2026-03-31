@@ -238,26 +238,6 @@ Selainmuistiin jäävät:
 
 Nämä eivät mene backendille, vaan ovat selvästi käyttöliittymäkohtaisia mukavuusominaisuuksia.
 
-## 8. Esteettömyysasetusten virta
-
-### Ensilataus
-
-1. `layout.ts` lukee selaimen tallennetut asetukset.
-2. Ne otetaan heti käyttöön, jotta sivu ei vaihda ulkoasua myöhemmin silminnähtävästi.
-3. Sen jälkeen layout yrittää hakea backendin asetukset.
-4. Jos backend vastaa, sen asetukset yliajavat paikalliset arvot ja tallentuvat myös selaimeen.
-
-### Esteettömyyssivulla
-
-1. `esteettomyys.ts` lataa tallennetun tilan.
-2. Käyttäjän muutokset näkyvät heti esikatselussa.
-3. `Tallenna` kirjoittaa asetukset:
-   - backendiin, jos API on käytettävissä
-   - muuten selaimen `localStorage`:en
-
-### Käytännön hyöty
-
-Tämä kaksitasoinen ratkaisu tekee käyttöliittymästä resilientin:
 
 - sovellus näyttää oikealta heti
 - asetukset säilyvät myös tilanteissa, joissa backend ei vielä ole valmis
