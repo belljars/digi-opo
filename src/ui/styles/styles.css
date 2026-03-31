@@ -20,6 +20,24 @@
 
   --max-width: 1280px;
   --panel-min: 280px;
+
+  --color-bg: #fffdf8;
+  --color-text: #171717;
+  --color-surface-soft: rgba(0, 0, 0, 0.03);
+  --color-surface-strong: rgba(255, 255, 255, 0.6);
+  --color-surface-muted: rgba(0, 0, 0, 0.04);
+  --color-card-bg: #fffdf8;
+  --color-shadow: rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #111315;
+  --color-text: #f3efe7;
+  --color-surface-soft: rgba(255, 255, 255, 0.05);
+  --color-surface-strong: rgba(255, 255, 255, 0.04);
+  --color-surface-muted: rgba(255, 255, 255, 0.08);
+  --color-card-bg: #171a1d;
+  --color-shadow: rgba(0, 0, 0, 0.32);
 }
 
 /* ------------------------------------------------------------
@@ -42,7 +60,8 @@ ul, ol {
 
 body {
   line-height: var(--line-height);
-  color: #171717;
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
 a,
@@ -153,10 +172,68 @@ body {
   flex-wrap: wrap;
   gap: var(--space-1);
   margin-left: auto;
+  align-items: center;
 }
 
 .header-link {
   padding: var(--space-2) var(--space-3);
+}
+
+.header-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.35rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  list-style: none;
+  cursor: pointer;
+}
+
+.header-theme-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.header-theme-toggle::after {
+  content: "+";
+  font-weight: 700;
+}
+
+.header-theme-menu[open] .header-theme-toggle::after {
+  content: "-";
+}
+
+.header-theme-menu {
+  position: relative;
+}
+
+.header-theme-menu-body {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 20;
+  min-width: 10.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: var(--color-card-bg);
+}
+
+.header-theme-option {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  justify-content: flex-start;
+  text-decoration: none;
+  border-radius: var(--surface-radius);
+}
+
+.header-theme-option[data-active="true"] {
+  border: 1px solid currentColor;
 }
 
 /* ------------------------------------------------------------
@@ -191,7 +268,7 @@ body {
   padding: var(--space-5);
   border: 1px solid currentColor;
   border-radius: var(--surface-radius);
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--color-surface-soft);
 }
 
 .page-hero-copy {
@@ -213,7 +290,7 @@ body {
   padding: var(--space-3) var(--space-4);
   border: 1px solid currentColor;
   border-radius: var(--surface-radius);
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--color-surface-strong);
 }
 
 .page-hero-label {
@@ -352,7 +429,7 @@ body {
 .home-page .card-image {
   aspect-ratio: 3 / 1;
   min-height: 5.5rem;
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-surface-muted);
 }
 
 .card {
@@ -414,7 +491,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-5);
 }
 
 .quiz-header {
@@ -425,59 +502,112 @@ body {
   flex-wrap: wrap;
 }
 
-.quiz-overview {
+.quiz-header > div {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
+#quiz-restart {
+  align-self: flex-start;
+  padding-top: var(--space-1);
+}
+
+.quiz-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: var(--color-surface-soft);
+}
+
 .quiz-meta {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-4);
+  line-height: 1.6;
+}
+
+.quiz-help,
+.quiz-shortcuts {
+  opacity: 0.82;
 }
 
 .quiz-body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
 .quiz-loading {
   padding: var(--space-8);
   text-align: center;
+  border: 1px dashed currentColor;
+  border-radius: var(--surface-radius);
 }
 
 .quiz-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
 }
 
 .quiz-options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .quiz-option {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
+  display: block;
+  width: 100%;
   padding: var(--space-3) var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: var(--color-card-bg);
   cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  white-space: normal;
+  line-height: 1.6;
 }
 
 .quiz-option input[type="radio"] {
   margin-top: 2px;
 }
 
+.quiz-option.is-selected {
+  background: var(--color-surface-soft);
+}
+
 .quiz-actions {
   display: flex;
+  justify-content: flex-end;
   gap: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid currentColor;
+}
+
+.quiz-actions button {
+  padding: 0.45rem 0.85rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  text-decoration: none;
 }
 
 .quiz-results {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  padding: var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
 }
 
 .quiz-result-card {
@@ -491,12 +621,15 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
 }
 
 .quiz-play-header {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .quiz-cards {
@@ -508,6 +641,64 @@ body {
 .quiz-card-slot {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.quiz-choice-shell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 100%;
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  overflow: hidden;
+  background: var(--color-card-bg);
+}
+
+.quiz-choice-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  text-decoration: none;
+}
+
+.quiz-choice-button .tutkintonimike-card {
+  height: 100%;
+  border: none;
+  border-radius: 0;
+}
+
+.quiz-choice-button .tutkintonimike-card-body {
+  padding-bottom: var(--space-5);
+}
+
+.quiz-choice-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid currentColor;
+}
+
+.quiz-choice-footer .tutkintonimike-link-action,
+.quiz-choice-footer .tutkintonimike-action {
+  text-decoration: none;
+}
+
+.quiz-choice-footer .tutkintonimike-link-action {
+  font-weight: 600;
+}
+
+.quiz-choice-shell--empty {
+  justify-content: center;
+  min-height: 18rem;
+  padding: var(--space-4);
+  opacity: 0.7;
 }
 
 .quiz-ranking {
@@ -537,7 +728,7 @@ body {
   padding: var(--space-5);
   border: 1px solid currentColor;
   border-radius: var(--surface-radius);
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--color-surface-soft);
 }
 
 .saved-hero-copy {
@@ -559,7 +750,7 @@ body {
   padding: var(--space-3) var(--space-4);
   border: 1px solid currentColor;
   border-radius: var(--surface-radius);
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--color-surface-strong);
 }
 
 .saved-hero-label {
@@ -764,7 +955,7 @@ body {
 }
 
 .saved-stats-metric[data-accent="strong"] {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--color-surface-muted);
 }
 
 .saved-stats-metric-label {
@@ -1065,7 +1256,7 @@ body {
   padding: var(--space-5);
   border: 1px solid currentColor;
   border-radius: var(--surface-radius);
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--color-surface-soft);
 }
 
 .oma-suunnitelma-hero-copy {
@@ -1084,7 +1275,7 @@ body {
   padding: var(--space-3) var(--space-4);
   border: 1px solid currentColor;
   border-radius: var(--surface-radius);
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--color-surface-strong);
 }
 
 .oma-suunnitelma-palaute {
@@ -1239,7 +1430,8 @@ body {
   flex-direction: column;
   overflow: hidden;
   border-radius: var(--radius-md, 8px);
-  background: var(--color-surface, #fff);
+  background: var(--color-card-bg);
+  box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .opintopolku-card img {
@@ -1276,6 +1468,10 @@ textarea {
   padding: var(--space-2) var(--space-3);
   font-family: inherit;
   line-height: var(--line-height);
+  color: inherit;
+  border: 1px solid currentColor;
+  border-radius: var(--surface-radius);
+  background: var(--color-card-bg);
 }
 
 textarea {

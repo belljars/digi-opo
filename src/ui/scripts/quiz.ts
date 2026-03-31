@@ -113,6 +113,7 @@ let currentIndex = 0;
 let answers: Answer[] = [];
 let selectedOptionId: string | null = null;
 let activeApi: Api | null = null;
+let advanceInFlight = false;
 
 function setStatus(message: string): void {
   if (quizStatusEl) {
@@ -123,6 +124,7 @@ function setStatus(message: string): void {
 function setFeedback(message: string): void {
   if (quizFeedbackEl) {
     quizFeedbackEl.textContent = message;
+    quizFeedbackEl.toggleAttribute("hidden", message.length === 0);
   }
 }
 
@@ -210,6 +212,9 @@ function renderQuestion(): void {
       button.classList.add("is-selected");
     }
     button.addEventListener("click", () => {
+      if (advanceInFlight) {
+        return;
+      }
       selectedOptionId = option.id;
       setNextEnabled(true);
       if (quizOptionsEl) {
@@ -217,6 +222,7 @@ function renderQuestion(): void {
         optionButtons.forEach((btn) => btn.classList.remove("is-selected"));
         button.classList.add("is-selected");
       }
+      void handleNext();
     });
     quizOptionsEl?.append(button);
   });
@@ -397,26 +403,36 @@ function storeAnswer(questionId: string, optionId: string): void {
 }
 
 async function handleNext(): Promise<void> {
+  if (advanceInFlight) {
+    return;
+  }
+
   const question = findCurrentQuestion();
   if (!quizData || !question || !selectedOptionId) {
     return;
   }
 
-  storeAnswer(question.id, selectedOptionId);
-
-  if (currentIndex >= quizData.questions.length - 1) {
-    await showResultsView();
-    return;
-  }
-
-  currentIndex += 1;
-  renderQuestion();
+  advanceInFlight = true;
 
   try {
-    await saveSession();
-    setStatus("Edistyminen tallennettu");
-  } catch {
-    setFeedback("Edistymisen tallennus epäonnistui.");
+    storeAnswer(question.id, selectedOptionId);
+
+    if (currentIndex >= quizData.questions.length - 1) {
+      await showResultsView();
+      return;
+    }
+
+    currentIndex += 1;
+    renderQuestion();
+
+    try {
+      await saveSession();
+      setStatus("Edistyminen tallennettu");
+    } catch {
+      setFeedback("Edistymisen tallennus epäonnistui.");
+    }
+  } finally {
+    advanceInFlight = false;
   }
 }
 
@@ -424,6 +440,7 @@ async function resetQuiz(clearSavedSession = true): Promise<void> {
   currentIndex = 0;
   answers = [];
   selectedOptionId = null;
+  advanceInFlight = false;
   showResults(false);
   showForm(true);
   renderQuestion();

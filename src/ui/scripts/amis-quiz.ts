@@ -124,6 +124,7 @@ let sessionWriteChain: Promise<void> = Promise.resolve();
 function setFeedback(message = ""): void {
   if (quizFeedbackEl) {
     quizFeedbackEl.textContent = message;
+    quizFeedbackEl.toggleAttribute("hidden", message.length === 0);
   }
 }
 
