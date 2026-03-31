@@ -99,6 +99,7 @@ const quizLoadingEl = document.getElementById("quiz-loading");
 const quizFormEl = document.getElementById("quiz-form") as HTMLFormElement | null;
 const quizQuestionEl = document.getElementById("quiz-question");
 const quizOptionsEl = document.getElementById("quiz-options");
+const quizPrevEl = document.getElementById("quiz-prev") as HTMLButtonElement | null;
 const quizNextEl = document.getElementById("quiz-next") as HTMLButtonElement | null;
 const quizProgressEl = document.getElementById("quiz-progress");
 const quizStatusEl = document.getElementById("quiz-status");
@@ -179,6 +180,12 @@ function setNextEnabled(enabled: boolean): void {
   }
 }
 
+function setPreviousEnabled(enabled: boolean): void {
+  if (quizPrevEl) {
+    quizPrevEl.disabled = !enabled;
+  }
+}
+
 function findCurrentQuestion(): QuizQuestion | null {
   if (!quizData) {
     return null;
@@ -201,6 +208,7 @@ function renderQuestion(): void {
   quizQuestionEl.textContent = question.text;
   clearOptions();
   setNextEnabled(Boolean(selectedOptionId));
+  setPreviousEnabled(currentIndex > 0);
   setProgress();
 
   question.options.forEach((option) => {
@@ -436,6 +444,22 @@ async function handleNext(): Promise<void> {
   }
 }
 
+async function handlePrevious(): Promise<void> {
+  if (!quizData || currentIndex <= 0 || advanceInFlight) {
+    return;
+  }
+
+  currentIndex -= 1;
+  renderQuestion();
+
+  try {
+    await saveSession();
+    setStatus("Palattu edelliseen kysymykseen");
+  } catch {
+    setFeedback("Edistymisen tallennus epäonnistui.");
+  }
+}
+
 async function resetQuiz(clearSavedSession = true): Promise<void> {
   currentIndex = 0;
   answers = [];
@@ -524,6 +548,10 @@ const initPage = createRetryingPageInit(loadQuiz);
 
 quizNextEl?.addEventListener("click", () => {
   void handleNext();
+});
+
+quizPrevEl?.addEventListener("click", () => {
+  void handlePrevious();
 });
 
 quizRestartEl?.addEventListener("click", () => {
