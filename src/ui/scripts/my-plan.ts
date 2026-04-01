@@ -49,8 +49,6 @@ type Rajapinta = {
 };
 
 const SUUNNITELMA_MUISTIO_AVAIN = "digi-opo.my-plan.note";
-const SUUNNITELMA_YKSINKERTAINEN_TILA_AVAIN = "digi-opo.my-plan.simple-mode";
-
 const QUIZ_PAGES: Record<string, string> = {
   "amis-quiz": "./amis-quiz.html",
   opintopolku: "./quiz.html"
@@ -69,7 +67,6 @@ const SUUNNITELMA_TILA_TEKSTIT: Record<string, string> = {
 };
 
 const palauteEl = document.getElementById("oma-suunnitelma-palaute");
-const omaSuunnitelmaSivuEl = document.querySelector(".oma-suunnitelma-sivu") as HTMLElement | null;
 const vaihtoehdotLkmEl = document.getElementById("oma-suunnitelma-vaihtoehdot-lkm");
 const vaihtoehdotEl = document.getElementById("oma-suunnitelma-vaihtoehdot");
 const jatkaLkmEl = document.getElementById("oma-suunnitelma-jatka-lkm");
@@ -78,12 +75,9 @@ const tuloksetLkmEl = document.getElementById("oma-suunnitelma-tulokset-lkm");
 const tuloksetEl = document.getElementById("oma-suunnitelma-tulokset");
 const muistiinpanotLkmEl = document.getElementById("oma-suunnitelma-muistiinpanot-lkm");
 const muistiinpanotEl = document.getElementById("oma-suunnitelma-muistiinpanot");
-const yksinkertainenTilaKytkinEl = document.getElementById("oma-suunnitelma-yksinkertainen-tila") as HTMLInputElement | null;
-const yksinkertainenTilaVihjeEl = document.getElementById("oma-suunnitelma-yksinkertainen-tila-vihje");
 const muistioEl = document.getElementById("oma-suunnitelma-muistio") as HTMLTextAreaElement | null;
 const muistioTilaEl = document.getElementById("oma-suunnitelma-muistio-tila");
 let muistioAlustettu = false;
-let yksinkertainenTilaAlustettu = false;
 
 function haeRajapinta(): Rajapinta | null {
   return (window.pywebview?.api as Rajapinta | undefined) ?? null;
@@ -94,50 +88,6 @@ function naytaPalaute(message = ""): void {
     palauteEl.textContent = message;
     palauteEl.toggleAttribute("hidden", message.length === 0);
   }
-}
-
-function lueYksinkertainenTila(): boolean {
-  try {
-    return window.localStorage.getItem(SUUNNITELMA_YKSINKERTAINEN_TILA_AVAIN) === "true";
-  } catch {
-    return false;
-  }
-}
-
-function tallennaYksinkertainenTila(enabled: boolean): void {
-  try {
-    window.localStorage.setItem(SUUNNITELMA_YKSINKERTAINEN_TILA_AVAIN, enabled ? "true" : "false");
-  } catch {
-    return;
-  }
-}
-
-function otaYksinkertainenTilaKayttoon(enabled: boolean): void {
-  if (omaSuunnitelmaSivuEl) {
-    omaSuunnitelmaSivuEl.dataset.yksinkertainenTila = String(enabled);
-  }
-  if (yksinkertainenTilaKytkinEl) {
-    yksinkertainenTilaKytkinEl.checked = enabled;
-  }
-  if (yksinkertainenTilaVihjeEl) {
-    yksinkertainenTilaVihjeEl.textContent = enabled
-      ? "Yksinkertainen tila on päällä. Sisältö näytetään yhdessä pystysuuntaisessa kokonaisuudessa."
-      : "Yksinkertainen tila on pois päältä. Leveällä näytöllä osiot voivat asettua vierekkäin.";
-  }
-}
-
-function alustaYksinkertainenTila(): void {
-  if (yksinkertainenTilaAlustettu) {
-    return;
-  }
-
-  yksinkertainenTilaAlustettu = true;
-  otaYksinkertainenTilaKayttoon(lueYksinkertainenTila());
-
-  yksinkertainenTilaKytkinEl?.addEventListener("change", () => {
-    tallennaYksinkertainenTila(yksinkertainenTilaKytkinEl.checked);
-    otaYksinkertainenTilaKayttoon(yksinkertainenTilaKytkinEl.checked);
-  });
 }
 
 function naytaTyhja(container: HTMLElement | null, message: string): void {
@@ -486,7 +436,6 @@ async function piirraOmaSuunnitelma(): Promise<void> {
 
 async function init(): Promise<InitAttemptResult> {
   naytaPalaute("");
-  alustaYksinkertainenTila();
   alustaMuistio();
 
   const api = await waitForPywebviewApi<Rajapinta>();
@@ -513,8 +462,6 @@ async function init(): Promise<InitAttemptResult> {
 }
 
 const initPage = createRetryingPageInit(init);
-
-alustaYksinkertainenTila();
 
 window.addEventListener("pywebviewready", () => {
   initPage();
