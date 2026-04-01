@@ -1,4 +1,4 @@
-export {};
+export {}; // quiz.ts on opintopolku-kyselyn skripti, joka hakee kyselyn datan taustalta pywebviewn kautta, renderöi kysymykset ja vaihtoehdot, tallentaa vastaukset ja näyttää lopuksi suositellut opintopolut. Skripti sisältää myös tilanhallinnan, edistymisen tallennuksen ja palauttamisen sekä virheenkäsittelyn
 
 import {
   createRetryingPageInit,

@@ -2,11 +2,11 @@ export {};
 
 // Asetussivun tutkintojen ja tutkintonimikkeiden piilotusten hallinta
 
-import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
+import { createTutkintonimikeCard } from "./tutkintonimike-card.js"; 
 import {
-  createRetryingPageInit,
+  createRetryingPageInit, // Yleinen apufunktio, joka yrittää ajaa alustustoiminnon uudestaan, jos pywebviewn API ei ole vielä valmis
   waitForPywebviewApi,
-  type InitAttemptResult
+  type InitAttemptResult // Alustustoiminnon paluuarvo, joka kertoo onnistuiko alustus ja kuinka kauan odottaa ennen uudelleenyritystä
 } from "./pywebview-init.js";
 
 type TutkintoListItem = {
@@ -58,7 +58,7 @@ const visibleTutkintonimikkeetEl = document.getElementById("asetukset-visible-tu
 const hiddenTutkintonimikkeetEl = document.getElementById("asetukset-hidden-tutkintonimikkeet");
 
 // Sivu säilyttää viimeksi ladatun näkyvän ja piilotetun datan paikallisessa muistissa renderöintiä varten
-let activeApi: Api | null = null;
+let activeApi: Api | null = null; // 
 let visibleTutkinnot: TutkintoListItem[] = [];
 let hiddenTutkinnot: HiddenTutkintoListItem[] = [];
 let visibleTutkintonimikkeet: TutkintonimikeItem[] = [];
