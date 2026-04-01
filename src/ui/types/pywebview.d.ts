@@ -53,6 +53,12 @@ type QuizSessionEntry = {
   session: Record<string, unknown>;
 };
 
+type DeleteUserInfoResult = {
+  success: boolean;
+  deletedJsonFiles: string[];
+  deletedDbFiles: string[];
+};
+
 type TutkintonimikeNoteItem = TutkintonimikeItem & {
   noteText: string;
   updatedAt: string;
@@ -83,6 +89,7 @@ type PywebviewApi = {
   get_quiz_session: (quizId: string) => Promise<QuizSessionEntry | null>;
   save_quiz_session: (quizId: string, session: Record<string, unknown>) => Promise<QuizSessionEntry>;
   clear_quiz_session: (quizId: string) => Promise<boolean>;
+  delete_user_info: () => Promise<DeleteUserInfoResult>;
 };
 
 // Laajentaa selainikkunan tyypin vastaamaan pywebviewn injektoimaa API:a

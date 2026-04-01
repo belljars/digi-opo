@@ -387,6 +387,40 @@ class BackendApiTests(unittest.TestCase):
         sessions_path = self.root / "user" / "quiz_sessions.json"
         self.assertTrue(sessions_path.exists())
 
+    def test_delete_user_info_removes_json_and_db_files_and_recreates_database(self) -> None:
+        # Tietojen poisto poistaa user-jsonit ja data-db:t mutta jattaa backendin kayttokelpoiseksi
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
+        api.save_quiz_result("opintopolku", {"topPathId": "lukio"})
+        api.save_quiz_session("opintopolku", {"currentIndex": 1})
+        api.save_tutkintonimike(all_items[0]["id"])
+
+        legacy_saved_path = self.root / "user" / "saved_tutkintonimikkeet.json"
+        legacy_saved_path.write_text(
+            json.dumps({"items": [{"id": all_items[0]["id"]}]}),
+            encoding="utf-8",
+        )
+
+        results = api.delete_user_info()
+
+        self.assertTrue(results["success"])
+        self.assertCountEqual(
+            results["deletedJsonFiles"],
+            [
+                "quiz_results.json",
+                "quiz_sessions.json",
+                "saved_tutkintonimikkeet.json",
+            ],
+        )
+        self.assertEqual(results["deletedDbFiles"], ["tutkinnot.db"])
+
+        self.assertFalse((self.root / "user" / "quiz_results.json").exists())
+        self.assertFalse((self.root / "user" / "quiz_sessions.json").exists())
+        self.assertFalse(legacy_saved_path.exists())
+        self.assertTrue((self.root / "data" / "tutkinnot.db").exists())
+        self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
+        self.assertEqual(len(api.list_tutkinnot()), 2)
+
     def test_static_server_allows_only_ui_paths(self) -> None:
         # Staattinen palvelin sallii vain käyttöliittymän tiedostopolut
         self.assertTrue(self.app.is_allowed_static_path("/src/ui/pages/home.html"))

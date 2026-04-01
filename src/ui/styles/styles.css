@@ -179,6 +179,7 @@ body {
   padding: var(--space-2) var(--space-3);
 }
 
+.header-pill-action,
 .header-theme-toggle {
   display: inline-flex;
   align-items: center;
@@ -194,6 +195,10 @@ body {
 
 .header-theme-toggle::-webkit-details-marker {
   display: none;
+}
+
+.header-pill-action {
+  text-decoration: none;
 }
 
 .header-theme-toggle::after {

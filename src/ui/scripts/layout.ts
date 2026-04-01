@@ -18,6 +18,17 @@ type NavItem = {
   label: string;
 };
 
+// Poistaa API-kutsuilla käyttäjän tiedot, eli user-kansion JSON-tiedostot ja data-kansion DB-tiedostot
+type DeleteUserInfoResult = {
+  success: boolean;
+  deletedJsonFiles: string[];
+  deletedDbFiles: string[];
+};
+
+type DeleteUserInfoApi = {
+  delete_user_info?: () => Promise<DeleteUserInfoResult>;
+};
+
 const navItems: NavItem[] = [
   { id: "home", href: "./home.html", label: "Etusivu" },
   { id: "index", href: "./pankki.html", label: "Tutkintopankki" },
@@ -64,7 +75,49 @@ function updateThemeToggleButton(): void {
   }
 }
 
-// Rakentaa sivun yläreunan navigaation keskitetystä linkkilistasta
+function updateDeleteInfoButtonState(isDeleting: boolean): void {
+  const deleteButton = document.getElementById("delete-info-button") as HTMLButtonElement | null;
+  if (!deleteButton) {
+    return;
+  }
+
+  deleteButton.disabled = isDeleting;
+  deleteButton.textContent = isDeleting ? "Poistetaan tietoja..." : "Poista tiedot";
+}
+
+async function handleDeleteInfo(): Promise<void> {
+  const api = (window.pywebview?.api as DeleteUserInfoApi | undefined) ?? null;
+  if (!api?.delete_user_info) {
+    window.alert("Tietojen poisto ei ole viela valmis.");
+    return;
+  }
+
+  const confirmed = window.confirm(
+    "Poistetaanko kaikki user-kansion JSON-tiedostot ja data-kansion DB-tiedostot? Toimintoa ei voi kumota."
+  );
+  if (!confirmed) {
+    return;
+  }
+
+  updateDeleteInfoButtonState(true);
+  try {
+    const result = await api.delete_user_info();
+    const shouldReload = result.deletedJsonFiles.length > 0 || result.deletedDbFiles.length > 0;
+    const message = shouldReload
+      ? `Poistettiin ${result.deletedJsonFiles.length} JSON-tiedostoa ja ${result.deletedDbFiles.length} DB-tiedostoa.`
+      : "Poistettavia JSON- tai DB-tiedostoja ei löytynyt.";
+    window.alert(message);
+    if (shouldReload) {
+      window.location.reload();
+    }
+  } catch {
+    window.alert("Tietojen poisto epäonnistui.");
+  } finally {
+    updateDeleteInfoButtonState(false);
+  }
+}
+
+// Rakentaa sivun ylareunan navigaation keskitetysta linkkilistasta
 function renderHeader(): void {
   const headerHost = document.getElementById("app-header");
   if (!headerHost) {
@@ -74,7 +127,6 @@ function renderHeader(): void {
   const currentPage = document.body.dataset.page ?? "";
   const subtitle = document.body.dataset.subtitle ?? "Digitaalinen opintoapu";
 
-  // Aktiivinen sivu merkitään sekä tyyliluokalla että aria-attribuutilla
   const links = navItems
     .map((item) => {
       const isActive = item.id === currentPage;
@@ -92,6 +144,7 @@ function renderHeader(): void {
       </div>
       <nav class="header-actions site-nav" aria-label="Päävalikko">
         ${links}
+        <button type="button" id="delete-info-button" class="header-pill-action">Poista tiedot</button>
         <details id="theme-menu" class="header-theme-menu">
           <summary id="theme-toggle" class="header-theme-toggle"></summary>
           <div class="header-theme-menu-body" role="menu" aria-label="Väriteema">
@@ -118,10 +171,16 @@ function renderHeader(): void {
       }
     });
   });
+
+  document.getElementById("delete-info-button")?.addEventListener("click", () => {
+    void handleDeleteInfo();
+  });
+
+  updateDeleteInfoButtonState(false);
   updateThemeToggleButton();
 }
 
-// Lisää sivulle yhteisen alatunnisteen ja pysyvät linkit
+// Lisaa sivulle yhteisen alatunnisteen ja pysyvat linkit
 function renderFooter(): void {
   const footerHost = document.getElementById("app-footer");
   if (!footerHost) {
@@ -147,7 +206,6 @@ function initLayout(): void {
 }
 
 if (document.readyState === "loading") {
-  // Yhteinen layout alustetaan vasta kun sivun paikkasäilöt ovat varmasti olemassa
   window.addEventListener("DOMContentLoaded", initLayout, { once: true });
 } else {
   initLayout();
