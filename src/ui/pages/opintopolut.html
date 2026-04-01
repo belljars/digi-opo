@@ -8,6 +8,29 @@
       content="Tutustu erilaisiin opintopolkuihin ja suunnittele oma reittisi kohti jatko-opintoja."
     />
     <title>digi-opo - opintopolut</title>
+    <script>
+      (() => {
+        const storageKey = "digi-opo.theme-mode";
+        const isThemeMode = (value) => value === "auto" || value === "light" || value === "dark";
+        let mode = "auto";
+        try {
+          const storedValue = window.localStorage.getItem(storageKey);
+          if (isThemeMode(storedValue)) {
+            mode = storedValue;
+          }
+        } catch {
+          mode = "auto";
+        }
+
+        const effectiveTheme = mode === "auto"
+          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+          : mode;
+
+        document.documentElement.dataset.themeMode = mode;
+        document.documentElement.dataset.theme = effectiveTheme;
+        document.documentElement.style.colorScheme = effectiveTheme;
+      })();
+    </script>
     <link rel="stylesheet" href="../styles/styles.css" />
   </head>
   <body data-page="opintopolut" data-subtitle="Erilaiset opintopolut">
