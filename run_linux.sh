@@ -7,6 +7,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Selvittaa skriptin oman hakemiston ja vaihtaa siihen, jotta suhteelliset polut toimivat varmasti
 cd "$ROOT_DIR"
 
+# Poistaa vanhat käyttäjätiedot ja tietokannat, jotta sovellus alkaa puhtaalta pöydältä joka kerta
+rm -f user/*.json data/*.db
+
 # Tulostaa tavalliset infoviestit yhtenaisessa muodossa
 log() {
   printf '[INFO] %s\n' "$1"

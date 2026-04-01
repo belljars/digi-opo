@@ -2,6 +2,10 @@
 rem Piilottaa komentojen tulostuksen niin, että näkyviin jäävät vain tarkoituksella echo-komennolla näytetyt viestit
 setlocal
 
+rem Poistaa vanhat käyttäjätiedot ja tietokannat, jotta sovellus alkaa puhtaalta pöydältä joka kerta
+del /f /q user\*.json data\*.db >nul 2>nul
+
+
 rem Muuttujaan tallennetaan löydetty Python-launcher-komento, esimerkiksi "py -3.12"
 set "PY_LAUNCHER="
 echo [INFO] Aloitetaan digi-opo Windows-kaynnistys.
