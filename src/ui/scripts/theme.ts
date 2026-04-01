@@ -11,6 +11,11 @@ export const THEME_CHANGE_EVENT = "digi-opo:themechange";
 
 let initialized = false;
 const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+const handleSystemThemeChange = (): void => {
+  if (getThemeMode() === "auto") {
+    applyTheme("auto");
+  }
+};
 
 function isThemeMode(value: string | null): value is ThemeMode {
   return value === "auto" || value === "light" || value === "dark";
@@ -69,11 +74,11 @@ export function initTheme(): void {
   }
 
   initialized = true;
-  mediaQuery.addEventListener("change", () => {
-    if (getThemeMode() === "auto") {
-      applyTheme("auto");
-    }
-  });
+  if (typeof mediaQuery.addEventListener === "function") {
+    mediaQuery.addEventListener("change", handleSystemThemeChange);
+  } else if (typeof mediaQuery.addListener === "function") {
+    mediaQuery.addListener(handleSystemThemeChange);
+  }
 
   window.addEventListener("storage", (event) => {
     if (event.key === THEME_STORAGE_KEY) {
