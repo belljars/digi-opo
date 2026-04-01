@@ -1,13 +1,5 @@
 # digi-opo dokumentaatio
 
-Tämä kansio kokoaa koko reposta suomenkielisen teknisen dokumentaation. Tavoite on auttaa ymmärtämään:
-
-- mitä sovellus tekee
-- miten Python-backend, TypeScript-käyttöliittymä ja tallennus toimivat yhdessä
-- miten data liikkuu sovelluksen läpi
-- missä tärkein logiikka sijaitsee
-- miten kehitystä, testausta ja ylläpitoa kannattaa tehdä
-
 ## Lukujärjestys
 
 Jos haluat ymmärtää projektin nopeasti alusta loppuun, etene tässä järjestyksessä:
