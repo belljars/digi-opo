@@ -2,7 +2,7 @@
 
 ## Yleiskuva
 
-`digi-opo` on paikallinen `pywebview`-pohjainen työpöytäsovellus suomalaisten tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun.
+`digi-opo` on paikallinen `pywebview`-pohjainen työpöytäsovellus Luovin tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun.
 
 Sovellus yhdistää:
 
