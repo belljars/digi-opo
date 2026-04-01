@@ -71,6 +71,8 @@ Hyvä huomio:
 
 ## Nix-kehitysympäristö
 
+Nix on tehokas, funktionaalinen ja deklaratiivinen paketinhallintajärjestelmä. Se varmistaa luotettavat, toistettavat (reproducible) asennukset ja päivitykset eristämällä paketit toisistaan, mikä estää riippuvuusongelmat. 
+
 `flake.nix` määrittää Linux-kehitysympäristön, joka sisältää:
 
 - Python 3.12
