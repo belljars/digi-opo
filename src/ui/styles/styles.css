@@ -1135,6 +1135,17 @@ body {
   flex-wrap: wrap;
 }
 
+.asetukset-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.asetukset-export-actions .saved-page-copy {
+  margin-top: 0;
+}
+
 .asetukset-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;

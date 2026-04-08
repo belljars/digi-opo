@@ -59,6 +59,18 @@ type DeleteUserInfoResult = {
   deletedDbFiles: string[];
 };
 
+type ExportUserDataPdfResult = {
+  success: boolean;
+  path: string;
+  fileName: string;
+  savedCount: number;
+  noteCount: number;
+  hiddenTutkinnotCount: number;
+  hiddenTutkintonimikkeetCount: number;
+  quizResultCount: number;
+  quizSessionCount: number;
+};
+
 type TutkintonimikeNoteItem = TutkintonimikeItem & {
   noteText: string;
   updatedAt: string;
@@ -90,6 +102,7 @@ type PywebviewApi = {
   save_quiz_session: (quizId: string, session: Record<string, unknown>) => Promise<QuizSessionEntry>;
   clear_quiz_session: (quizId: string) => Promise<boolean>;
   delete_user_info: () => Promise<DeleteUserInfoResult>;
+  export_user_data_pdf: () => Promise<ExportUserDataPdfResult>;
 };
 
 // Laajentaa selainikkunan tyypin vastaamaan pywebviewn injektoimaa API:a

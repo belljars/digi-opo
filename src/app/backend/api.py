@@ -9,6 +9,7 @@ from .perusta import BackendBase  # Tarjoaa tietokantayhteyden ja yhteiset talle
 from .quizit import QuizitApiMixin  # Lisää visatulosten ja -istuntojen käsittelyn
 from .sisalto import SisaltoApiMixin  # Lisää staattisen sisältödatan lukemisen JSON-lähteistä
 from .tutkinnot import TutkinnotApiMixin  # Lisää tutkintojen, suosikkien ja muistiinpanojen hallinnan
+from .vienti import VientiApiMixin  # Lisää PDF-viennin käyttäjän tallentamille tiedoille
 
 
 class Api(
@@ -17,6 +18,7 @@ class Api(
     AsetuksetApiMixin,
     QuizitApiMixin,
     SisaltoApiMixin,
+    VientiApiMixin,
 ):
     # Sovelluksen varsinainen backend-API yhdistettynä useasta osa-alueesta
 

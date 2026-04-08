@@ -7,7 +7,7 @@ from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhe
 
 import importlib.util  # Lataa sovelluksen moduulin tiedostopolusta ilman normaalia import-ketjua
 import json  # Rakentaa testidataa JSON-tiedostoiksi ja lukee tallennuksia takaisin
-import sys  # Lisää vale-webview-moduulin Pythonin moduulirekisteriin testejä varten
+import sys
 import tempfile  # Luo eristetyn väliaikaisen projektihakemiston jokaiselle testille
 import types  # Rakentaa kevyen vale-olion webview-riippuvuuden korvaamiseen
 import unittest  # Tarjoaa testikehyksen ja testien ajotavan
@@ -420,6 +420,54 @@ class BackendApiTests(unittest.TestCase):
         self.assertTrue((self.root / "data" / "tutkinnot.db").exists())
         self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
         self.assertEqual(len(api.list_tutkinnot()), 2)
+
+    def test_export_user_data_pdf_collects_saved_data_and_writes_to_exports_directory(self) -> None:
+        # PDF-vienti kokoaa käyttäjän tiedot yhdeksi raportiksi ja käyttää exports-kansiota
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
+        sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
+        kokki = next(item for item in all_items if item["nimi"] == "Kokki")
+
+        api.save_tutkintonimike(sahkoasentaja["id"])
+        api.save_tutkintonimike_plan(
+            sahkoasentaja["id"],
+            "ensisijainen",
+            "vahva-vaihtoehto",
+            "Kysy opolta lisää sähköalasta.",
+        )
+        api.save_tutkintonimike_note(sahkoasentaja["id"], "Kiinnostava vaihtoehto.")
+        api.hide_tutkinto(kokki["tutkinto_id"])
+        api.hide_tutkintonimike(sahkoasentaja["id"])
+        api.save_quiz_result("opintopolku", {"topPathId": "lukio", "scores": {"lukio": 3}})
+        api.save_quiz_session("amis-quiz", {"currentIndex": 2, "winnerId": 7})
+
+        vienti_module = sys.modules.get("backend.vienti")
+        self.assertIsNotNone(vienti_module)
+        calls: list[tuple[str, Path]] = []
+
+        def fake_render(html: str, output_path: Path) -> None:
+            calls.append((html, output_path))
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_bytes(b"%PDF-test")
+
+        with mock.patch.object(vienti_module, "render_html_to_pdf", side_effect=fake_render):
+            result = api.export_user_data_pdf()
+
+        self.assertTrue(result["success"])
+        self.assertTrue(str(result["path"]).endswith(".pdf"))
+        self.assertEqual(Path(result["path"]).parent, self.root / "exports")
+        self.assertEqual(len(calls), 1)
+        html, output_path = calls[0]
+        self.assertEqual(output_path, Path(result["path"]))
+        self.assertIn("digi-opo - kayttajatietojen vienti", html)
+        self.assertIn("Kysy opolta lisää sähköalasta.", html)
+        self.assertIn("Kiinnostava vaihtoehto.", html)
+        self.assertIn("opintopolku", html)
+        self.assertIn("amis-quiz", html)
+        self.assertIn("Kokki", html)
+        self.assertTrue(output_path.exists())
+        self.assertEqual(result["quizResultCount"], 1)
+        self.assertEqual(result["quizSessionCount"], 1)
 
     def test_static_server_allows_only_ui_paths(self) -> None:
         # Staattinen palvelin sallii vain käyttöliittymän tiedostopolut

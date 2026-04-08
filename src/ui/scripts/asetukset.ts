@@ -32,6 +32,18 @@ type HiddenTutkintonimikeItem = TutkintonimikeItem & {
   hiddenAt: string;
 };
 
+type ExportUserDataPdfResult = {
+  success: boolean;
+  path: string;
+  fileName: string;
+  savedCount: number;
+  noteCount: number;
+  hiddenTutkinnotCount: number;
+  hiddenTutkintonimikkeetCount: number;
+  quizResultCount: number;
+  quizSessionCount: number;
+};
+
 type Api = {
   list_tutkinnot: () => Promise<TutkintoListItem[]>;
   list_hidden_tutkinnot: () => Promise<HiddenTutkintoListItem[]>;
@@ -41,9 +53,12 @@ type Api = {
   unhide_tutkinto: (id: number) => Promise<boolean>;
   hide_tutkintonimike: (id: number) => Promise<boolean>;
   unhide_tutkintonimike: (id: number) => Promise<boolean>;
+  export_user_data_pdf: () => Promise<ExportUserDataPdfResult>;
 };
 
 const feedbackEl = document.getElementById("asetukset-feedback");
+const exportStatusEl = document.getElementById("asetukset-export-status");
+const exportPdfButtonEl = document.getElementById("asetukset-export-pdf-button") as HTMLButtonElement | null;
 const tutkintoSearchEl = document.getElementById("asetukset-tutkinto-search") as HTMLInputElement | null;
 const tutkintonimikeSearchEl = document.getElementById("asetukset-tutkintonimike-search") as
   | HTMLInputElement
@@ -63,6 +78,7 @@ let visibleTutkinnot: TutkintoListItem[] = [];
 let hiddenTutkinnot: HiddenTutkintoListItem[] = [];
 let visibleTutkintonimikkeet: TutkintonimikeItem[] = [];
 let hiddenTutkintonimikkeet: HiddenTutkintonimikeItem[] = [];
+let exportInFlight = false;
 
 // Päivittää asetussivun palautetekstin yhdestä paikasta
 function setFeedback(message = ""): void {
@@ -76,6 +92,23 @@ function setCount(host: HTMLElement | null, label: string, count: number): void 
   if (host) {
     host.textContent = `${count} ${label}`;
   }
+}
+
+function setExportStatus(message = ""): void {
+  if (exportStatusEl) {
+    exportStatusEl.textContent = message;
+  }
+}
+
+function updateExportButtonState(): void {
+  if (!exportPdfButtonEl) {
+    return;
+  }
+
+  exportPdfButtonEl.disabled = exportInFlight || !activeApi;
+  exportPdfButtonEl.textContent = exportInFlight
+    ? "Luodaan PDF-vienti..."
+    : "Vie käyttäjätiedot PDF:nä";
 }
 
 // Laskurit päivitetään erikseen, jotta listojen renderöinti voi keskittyä vain sisältöön
@@ -273,6 +306,28 @@ async function reloadAll(): Promise<void> {
   renderAll();
 }
 
+async function exportUserDataPdf(): Promise<void> {
+  if (!activeApi || exportInFlight) {
+    return;
+  }
+
+  exportInFlight = true;
+  updateExportButtonState();
+  setExportStatus("Luodaan PDF-vientiä...");
+
+  try {
+    const result = await activeApi.export_user_data_pdf();
+    setExportStatus(
+      `PDF luotu: ${result.path} (${result.savedCount} tallennettua, ${result.noteCount} muistiinpanoa, ${result.quizResultCount} visatulosta).`
+    );
+  } catch {
+    setExportStatus("PDF-viennin luonti epäonnistui.");
+  } finally {
+    exportInFlight = false;
+    updateExportButtonState();
+  }
+}
+
 // Piilottaa tutkinnon koko sovelluksesta ja päivittää näkymän onnistumisen jälkeen
 async function hideTutkinto(item: TutkintoListItem): Promise<void> {
   if (!activeApi) {
@@ -350,12 +405,14 @@ async function init(): Promise<InitAttemptResult> {
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
+    updateExportButtonState();
     return { success: false, retryDelayMs: 500 };
   }
 
   try {
     activeApi = api;
     await reloadAll();
+    updateExportButtonState();
 
     // Hakukentät suodattavat jo muistissa olevaa dataa ilman uusia backend-kutsuja
     tutkintoSearchEl?.addEventListener("input", () => {
@@ -364,6 +421,9 @@ async function init(): Promise<InitAttemptResult> {
     tutkintonimikeSearchEl?.addEventListener("input", () => {
       renderVisibleTutkintonimikkeet();
     });
+    exportPdfButtonEl?.addEventListener("click", () => {
+      void exportUserDataPdf();
+    });
     return { success: true };
   } catch {
     setFeedback("Asetusten lataus epäonnistui. Yritetään uudelleen...");
@@ -371,6 +431,7 @@ async function init(): Promise<InitAttemptResult> {
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
+    updateExportButtonState();
     return { success: false, retryDelayMs: 1000 };
   }
 }

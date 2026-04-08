@@ -6,6 +6,8 @@ from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhe
 
 from dataclasses import dataclass  # Luo kevyen luokan, joka säilyttää projektin polut selkeästi
 
+from datetime import datetime  # Muodostaa vientitiedostoille luettavan aikaleiman
+
 from functools import partial  # Esitäyttää HTTP-käsittelijälle projektijuuren palvelinhakemistoksi
 
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer  # Tarjoaa kevyen paikallisen HTTP-palvelimen UI-tiedostoille
@@ -43,6 +45,17 @@ class ProjectPaths:
         user_dir = self.project_root / "user"
         user_dir.mkdir(exist_ok=True)
         return user_dir
+
+    def vienti_dir(self) -> Path:
+        # Palauttaa PDF-vientien tallennuskansion ja luo sen tarvittaessa
+        export_dir = self.project_root / "exports"
+        export_dir.mkdir(exist_ok=True)
+        return export_dir
+
+    def user_export_pdf_path(self) -> Path:
+        # Muodostaa käyttäjän datan PDF-viennille yksilöllisen aikaleimatun tiedostonimen
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        return self.vienti_dir() / f"digi-opo-kayttajatiedot-{timestamp}.pdf"
 
     def lahde_json_path(self) -> Path:
         # Palauttaa tutkintodatan päälähteen polun
