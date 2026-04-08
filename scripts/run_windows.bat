@@ -2,9 +2,13 @@
 rem Piilottaa komentojen tulostuksen niin, että näkyviin jäävät vain tarkoituksella echo-komennolla näytetyt viestit
 setlocal
 
+rem Selvittää skriptin oman kansion ja projektijuuren, jotta kaikki polut toimivat scripts-kansiosta ajettaessa
+set "SCRIPT_DIR=%~dp0"
+for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
+cd /d "%ROOT_DIR%"
+
 rem Poistaa vanhat käyttäjätiedot ja tietokannat, jotta sovellus alkaa puhtaalta pöydältä joka kerta
 del /f /q user\*.json data\*.db >nul 2>nul
-
 
 rem Muuttujaan tallennetaan löydetty Python-launcher-komento, esimerkiksi "py -3.12"
 set "PY_LAUNCHER="

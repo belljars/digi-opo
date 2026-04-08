@@ -56,14 +56,14 @@ Käyttöliittymä ei lue tietokantaa tai lähde-JSONeita suoraan. Kaikki dynaami
 digi-opo/
 ├── docs/                 # Tämä dokumentaatio
 ├── data/                 # Ajonaikainen SQLite-tietokanta
+├── scripts/              # Varsinaiset käynnistys- ja apuskriptit
 ├── src/
 │   ├── app/              # Python-backend ja käynnistys
 │   ├── data/             # Versionhallittava lähdedata
 │   └── ui/               # HTML, CSS, TypeScript ja staattiset assetit
 ├── tests/                # Backend-, UI- ja init-testit
 ├── user/                 # Käyttäjäkohtaiset tallennukset ajon aikana
-├── run_linux.sh          # Linux/Nix-käynnistys
-└── run_windows.bat       # Windows-käynnistys
+└── scripts/              # Käynnistys- ja apuskriptit
 ```
 
 ## Mitä kannattaa lukea lähdekoodista ensin

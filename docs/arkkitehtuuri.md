@@ -13,7 +13,7 @@ Kokonaisuus jakautuu kolmeen pääkerrokseen:
 ## Arkkitehtuurikaavio
 
 ```text
-run_linux.sh / run_windows.bat
+scripts/run_linux.sh / scripts/run_windows.bat
         │
         ▼
    TypeScript build
@@ -42,7 +42,7 @@ run_linux.sh / run_windows.bat
 
 Käynnistys etenee käytännössä näin:
 
-1. `run_linux.sh` tai `run_windows.bat` tarkistaa Python-version.
+1. `scripts/run_linux.sh` tai `scripts/run_windows.bat` tarkistaa Python-version.
 2. Skripti luo tai käyttää `.venv`-ympäristöä, ellei Linuxissa olla Nix-shellissä.
 3. Python-riippuvuudet asennetaan `requirements.txt`:stä.
 4. TypeScript käännetään komennolla `npm run build`.

@@ -43,7 +43,7 @@
               export QT_PLUGIN_PATH="${pkgs.qt6.qtbase}/lib/qt-6/plugins:${pkgs.qt6.qtdeclarative}/lib/qt-6/plugins:${pkgs.qt6.qtwayland}/lib/qt-6/plugins:${pkgs.qt6.qtwebengine}/lib/qt-6/plugins''${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}"
               export QML2_IMPORT_PATH="${pkgs.qt6.qtdeclarative}/lib/qt-6/qml:${pkgs.qt6.qtwebengine}/lib/qt-6/qml''${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
               export QTWEBENGINEPROCESS_PATH="${pkgs.qt6.qtwebengine}/libexec/QtWebEngineProcess"
-              echo "digi-opo Nix-shell valmis. Kaynnista: ./run_linux.sh"
+              echo "digi-opo Nix-shell valmis. Kaynnista: ./scripts/run_linux.sh"
             '';
           };
         });
@@ -52,11 +52,11 @@
         let
           pkgs = import nixpkgs { inherit system; };
           launcher = pkgs.writeShellScript "digi-opo-launcher" ''
-            if [ ! -x ./run_linux.sh ]; then
-              echo "Suorita nix run repojuuresta, jossa ./run_linux.sh on olemassa." >&2
+            if [ ! -x ./scripts/run_linux.sh ]; then
+              echo "Suorita nix run repojuuresta, jossa ./scripts/run_linux.sh on olemassa." >&2
               exit 1
             fi
-            exec ./run_linux.sh "$@"
+            exec ./scripts/run_linux.sh "$@"
           '';
         in
         {

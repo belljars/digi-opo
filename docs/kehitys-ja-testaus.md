@@ -44,7 +44,7 @@ Tämä näkyy myös käynnistysskripteissä, jotka tarkistavat että tietyt `.js
 
 ## Linux-käynnistys
 
-`run_linux.sh` tekee seuraavaa:
+`scripts/run_linux.sh` tekee seuraavaa:
 
 1. etsii Python 3.12:n tai 3.11:n
 2. yrittää tarvittaessa käynnistyä Nix-flaken kautta
@@ -60,7 +60,7 @@ Hyvä huomio:
 
 ## Windows-käynnistys
 
-`run_windows.bat`:
+`scripts/run_windows.bat`:
 
 1. etsii `py -3.12` tai `py -3.11`
 2. luo `.venv`:n
@@ -96,7 +96,7 @@ Jos käytät Nixiä:
 
 ```bash
 nix develop
-./run_linux.sh
+./scripts/run_linux.sh
 ```
 
 ## Testit

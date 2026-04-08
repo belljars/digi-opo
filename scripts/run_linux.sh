@@ -3,8 +3,9 @@
 set -euo pipefail
 
 # Lopettaa heti virheessa, estaa maarittelemattomien muuttujien kayton ja huomioi pipe-virheet oikein
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Selvittaa skriptin oman hakemiston ja vaihtaa siihen, jotta suhteelliset polut toimivat varmasti
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+# Selvittaa skriptin oman hakemiston, projektijuuren ja vaihtaa siihen, jotta suhteelliset polut toimivat varmasti
 cd "$ROOT_DIR"
 
 # Poistaa vanhat käyttäjätiedot ja tietokannat, jotta sovellus alkaa puhtaalta pöydältä joka kerta
@@ -62,7 +63,7 @@ reexec_in_nix_shell() {
   fi
 
   log "Tuettua Python-versiota ei loytynyt. Kaynnistetaan sovellus flaken kautta."
-  exec nix develop "path:$ROOT_DIR" --command env DIGI_OPO_IN_NIX_SHELL=1 bash "$ROOT_DIR/run_linux.sh" "$@"
+  exec nix develop "path:$ROOT_DIR" --command env DIGI_OPO_IN_NIX_SHELL=1 bash "$SCRIPT_DIR/run_linux.sh" "$@"
 }
 
 # Luo .venv-virtuaaliympariston, tai kayttaa olemassa olevaa jos se on tehty tuetulla Python-versiolla

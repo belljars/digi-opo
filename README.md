@@ -88,7 +88,7 @@ Python-riippuvuudet löytyvät tiedostosta `requirements.txt`.
 Helpoin tapa käynnistää projekti on ajaa:
 
 ```powershell
-.\run_windows.bat
+.\scripts\run_windows.bat
 ```
 
 Skripti:
@@ -105,7 +105,7 @@ Skripti:
 Linuxissa projekti käynnistyy komennolla:
 
 ```bash
-./run_linux.sh
+./scripts/run_linux.sh
 ```
 
 Skripti:
@@ -122,7 +122,7 @@ NixOS:ssa helpoin tapa on:
 
 ```bash
 nix develop
-./run_linux.sh
+./scripts/run_linux.sh
 ```
 
 Voit myös ajaa:
@@ -208,6 +208,7 @@ python -m unittest tests.test_ui_smoke
 digi-opo/
 ├── docs/                 # Projektin dokumentaatio suomeksi
 ├── data/                 # SQLite-tietokannat
+├── scripts/              # Varsinaiset käynnistys- ja apuskriptit
 ├── src/
 │   ├── app/              # pywebview-sovellus ja Python API
 │   ├── data/             # JSON-lähdedata
@@ -220,8 +221,7 @@ digi-opo/
 ├── user/                 # Käyttäjäkohtaiset tallennukset
 ├── requirements.txt
 ├── package.json
-├── run_linux.sh
-├── run_windows.bat
+├── scripts/              # Käynnistys- ja apuskriptit
 └── README.md
 ```
 
