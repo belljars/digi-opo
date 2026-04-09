@@ -40,10 +40,9 @@ def _paragraph(text: str) -> str:
 
 def _definition_rows(rows: list[tuple[str, str]]) -> str:
     items = "".join(
-        f"<tr><th>{escape(label)}</th><td>{escape(value)}</td></tr>"
-        for label, value in rows
+        f'<li><strong>{escape(label)}:</strong> {escape(value)}</li>' for label, value in rows
     )
-    return f'<table class="meta-table">{items}</table>'
+    return f"<ul>{items}</ul>"
 
 
 def _empty_state(message: str) -> str:
@@ -63,27 +62,71 @@ def _format_scalar(value) -> str:
     return str(value)
 
 
-def _render_data_value(value) -> str:
+def _format_quiz_label(value: str | None) -> str:
+    labels = {
+        "amis-quiz": "Amis-korttivertailu",
+        "opintopolku": "Opintopolku-kysely",
+    }
+    normalized = str(value or "").strip()
+    return labels.get(normalized, normalized or "-")
+
+
+def _format_export_label(key: str) -> str:
+    labels = {
+        "answerCount": "Vastausten määrä",
+        "answers": "Vastaukset",
+        "comparisons": "Vertailujen määrä",
+        "count": "Vaihtoehtojen määrä",
+        "createdAt": "Tallennettu",
+        "currentIndex": "Nykyinen kysymys",
+        "durationMs": "Käytetty aika (ms)",
+        "optionId": "Valittu vaihtoehto",
+        "questionId": "Kysymys",
+        "quizId": "Kysely",
+        "rankingIds": "Vaihtoehtojen tunnisteet järjestyksessä",
+        "rankingNames": "Vaihtoehdot järjestyksessä",
+        "result": "Tulos",
+        "runnerUpPathId": "Toiseksi sopivin opintopolku (tunniste)",
+        "runnerUpPathLabel": "Toiseksi sopivin opintopolku",
+        "scores": "Pisteet",
+        "session": "Tallennettu keskeneräinen tila",
+        "topId": "Suosikin tunniste",
+        "topName": "Suosikki",
+        "topPathId": "Sopivin opintopolku (tunniste)",
+        "topPathLabel": "Sopivin opintopolku",
+        "updatedAt": "Päivitetty",
+        "winnerId": "Voittanut vaihtoehto (tunniste)",
+    }
+    return labels.get(key, key)
+
+
+def _format_export_scalar(value, key: str | None = None) -> str:
+    if key == "quizId":
+        return _format_quiz_label(value)
+    return _format_scalar(value)
+
+
+def _render_data_value(value, key: str | None = None) -> str:
     if isinstance(value, dict):
         if not value:
             return "<p>-</p>"
         rows = "".join(
             (
-                "<tr>"
-                f"<th>{escape(str(key))}</th>"
-                f"<td>{_render_data_value(nested_value)}</td>"
-                "</tr>"
+                "<li>"
+                f"<strong>{escape(_format_export_label(str(child_key)))}:</strong> "
+                f"{_render_data_value(nested_value, str(child_key))}"
+                "</li>"
             )
-            for key, nested_value in value.items()
+            for child_key, nested_value in value.items()
         )
-        return f'<table class="nested-table">{rows}</table>'
+        return f'<ul class="plain-list">{rows}</ul>'
 
     if isinstance(value, list):
         if not value:
             return "<p>-</p>"
-        return _unordered_list([_render_data_value(item) for item in value])
+        return _unordered_list([_render_data_value(item, key) for item in value])
 
-    return f"<p>{escape(_format_scalar(value))}</p>"
+    return escape(_format_export_scalar(value, key))
 
 
 def _render_saved_items(items: list[dict]) -> str:
@@ -94,10 +137,10 @@ def _render_saved_items(items: list[dict]) -> str:
     for item in items:
         cards.append(
             (
-                '<section class="item-card">'
+                "<section>"
                 f"<h3>{escape(item['nimi'])}</h3>"
-                f"<p class=\"item-subtitle\">{escape(item['tutkinto_nimi'])}</p>"
-                f"{_definition_rows([('Tallennettu', format_iso_timestamp(item.get('savedAt'))), ('Piilotettu sovelluksessa', _format_scalar(item.get('isHidden'))), ('Prioriteetti', format_plan_priority(item.get('planPriority'))), ('Tila', format_plan_status(item.get('planStatus'))), ('Suunnitelma päivitetty', format_iso_timestamp(item.get('planUpdatedAt')))])}"
+                f"<p>{escape(item['tutkinto_nimi'])}</p>"
+                f"{_definition_rows([('Tallennettu', format_iso_timestamp(item.get('savedAt'))), ('Piilotettu sovelluksessa', _format_scalar(item.get('isHidden'))), ('Suunnitelman tärkeys', format_plan_priority(item.get('planPriority'))), ('Suunnitelman tila', format_plan_status(item.get('planStatus'))), ('Suunnitelma päivitetty', format_iso_timestamp(item.get('planUpdatedAt')))])}"
                 f"<p><strong>Seuraava askel:</strong> {escape(str(item.get('nextStep') or '-'))}</p>"
                 "</section>"
             )
@@ -113,10 +156,10 @@ def _render_notes(items: list[dict]) -> str:
     for item in items:
         cards.append(
             (
-                '<section class="item-card">'
+                "<section>"
                 f"<h3>{escape(item['nimi'])}</h3>"
-                f"<p class=\"item-subtitle\">{escape(item['tutkinto_nimi'])}</p>"
-                f"{_definition_rows([('Paivitetty', format_iso_timestamp(item.get('updatedAt'))), ('Piilotettu sovelluksessa', _format_scalar(item.get('isHidden')))])}"
+                f"<p>{escape(item['tutkinto_nimi'])}</p>"
+                f"{_definition_rows([('Päivitetty', format_iso_timestamp(item.get('updatedAt'))), ('Piilotettu sovelluksessa', _format_scalar(item.get('isHidden')))])}"
                 f"<div class=\"note-body\">{_paragraph(str(item.get('noteText') or '-'))}</div>"
                 "</section>"
             )
@@ -156,7 +199,71 @@ def _render_hidden_nimikkeet(items: list[dict]) -> str:
     )
 
 
-def _render_quiz_entries(items: list[dict], title_timestamp_key: str, body_key: str) -> str:
+def _render_top_items(items: list[str], max_items: int = 5) -> str:
+    if not items:
+        return "<p>-</p>"
+    limited_items = items[:max_items]
+    rows = [escape(str(item)) for item in limited_items]
+    return _unordered_list(rows)
+
+
+def _render_quiz_result_body(item: dict) -> str:
+    result = item.get("result")
+    if not isinstance(result, dict):
+        return _render_data_value(result, "result")
+
+    quiz_id = str(item.get("quizId") or "").strip()
+    details: list[str] = []
+
+    if quiz_id == "opintopolku":
+        details.append(
+            f"<p><strong>Sopivin opintopolku:</strong> {escape(str(result.get('topPathLabel') or result.get('topPathId') or '-'))}</p>"
+        )
+        runner_up = result.get("runnerUpPathLabel") or result.get("runnerUpPathId")
+        if runner_up:
+            details.append(
+                f"<p><strong>Toiseksi sopivin opintopolku:</strong> {escape(str(runner_up))}</p>"
+            )
+        details.append(
+            f"<p><strong>Vastausten määrä:</strong> {escape(_format_scalar(result.get('answerCount')))}</p>"
+        )
+        scores = result.get("scores")
+        if isinstance(scores, dict) and scores:
+            sorted_scores = sorted(
+                scores.items(),
+                key=lambda entry: (-int(entry[1]), str(entry[0])),
+            )
+            details.append("<p><strong>Top 5:</strong></p>")
+            details.append(
+                _unordered_list(
+                    [
+                        f"{escape(str(path_id))}: {escape(str(score))} pistettä"
+                        for path_id, score in sorted_scores[:5]
+                    ]
+                )
+            )
+        return "".join(details)
+
+    if quiz_id == "amis-quiz":
+        details.append(
+            f"<p><strong>Suosikki:</strong> {escape(str(result.get('topName') or '-'))}</p>"
+        )
+        details.append(
+            f"<p><strong>Vertailujen määrä:</strong> {escape(_format_scalar(result.get('comparisons')))}</p>"
+        )
+        details.append(
+            f"<p><strong>Vaihtoehtojen määrä:</strong> {escape(_format_scalar(result.get('count')))}</p>"
+        )
+        ranking_names = result.get("rankingNames")
+        if isinstance(ranking_names, list):
+            details.append("<p><strong>Top 5:</strong></p>")
+            details.append(_render_top_items([str(item) for item in ranking_names], 5))
+        return "".join(details)
+
+    return _render_data_value(result, "result")
+
+
+def _render_quiz_entries(items: list[dict], title_timestamp_key: str) -> str:
     if not items:
         return _empty_state("Tallennuksia ei ole.")
 
@@ -164,10 +271,10 @@ def _render_quiz_entries(items: list[dict], title_timestamp_key: str, body_key: 
     for item in items:
         cards.append(
             (
-                '<section class="item-card">'
-                f"<h3>{escape(str(item.get('quizId') or 'Tuntematon visa'))}</h3>"
+                "<section>"
+                f"<h3>{escape(_format_quiz_label(item.get('quizId')))}</h3>"
                 f"{_definition_rows([(title_timestamp_key, format_iso_timestamp(item.get('createdAt') or item.get('updatedAt')))])}"
-                f"{_render_data_value(item.get(body_key))}"
+                f"{_render_quiz_result_body(item)}"
                 "</section>"
             )
         )
@@ -181,88 +288,28 @@ def build_user_export_html(payload: dict) -> str:
 <html lang="fi">
   <head>
     <meta charset="utf-8" />
-    <title>digi-opo - Kayttajatietojen PDF-vienti</title>
+    <title>Kayttajatiedot</title>
     <style>
       @page {{
         size: A4;
         margin: 18mm 16mm;
       }}
       body {{
-        font-family: Arial, sans-serif;
-        color: #1b1b1b;
+        font-family: "Times New Roman", Times, serif;
         font-size: 11pt;
         line-height: 1.45;
       }}
-      h1, h2, h3 {{
-        color: #0f2f57;
-        margin: 0 0 8px 0;
-      }}
-      h1 {{
-        font-size: 22pt;
-      }}
-      h2 {{
-        font-size: 15pt;
-        margin-top: 22px;
-        padding-bottom: 4px;
-        border-bottom: 1px solid #c7d5e6;
-      }}
-      h3 {{
-        font-size: 12pt;
-      }}
+      h1, h2, h3 {{ margin: 0 0 8px 0; }}
       p {{
         margin: 0 0 8px 0;
       }}
       ul {{
-        margin: 0;
-        padding-left: 18px;
+        margin: 0 0 10px 18px;
+        padding: 0;
       }}
-      li {{
-        margin-bottom: 8px;
-      }}
-      .lead {{
-        margin-bottom: 18px;
-      }}
-      .summary-grid {{
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 12px;
-      }}
-      .summary-grid th,
-      .summary-grid td,
-      .meta-table th,
-      .meta-table td,
-      .nested-table th,
-      .nested-table td {{
-        border: 1px solid #c7d5e6;
-        padding: 6px 8px;
-        text-align: left;
-        vertical-align: top;
-      }}
-      .summary-grid th,
-      .meta-table th,
-      .nested-table th {{
-        width: 35%;
-        background: #eef4fb;
-      }}
-      .meta-table,
-      .nested-table {{
-        width: 100%;
-        border-collapse: collapse;
-        margin: 8px 0 12px;
-      }}
-      .item-card {{
-        border: 1px solid #c7d5e6;
-        border-radius: 6px;
-        padding: 12px;
-        margin-bottom: 12px;
+      section {{
+        margin-bottom: 16px;
         page-break-inside: avoid;
-      }}
-      .item-subtitle {{
-        color: #475569;
-      }}
-      .empty-state {{
-        color: #5b6470;
-        font-style: italic;
       }}
       .note-body {{
         white-space: pre-wrap;
@@ -271,22 +318,23 @@ def build_user_export_html(payload: dict) -> str:
   </head>
   <body>
     <header>
-      <h1>digi-opo - kayttajatietojen vienti</h1>
-      <p class="lead">Tama PDF kokoaa sovellukseen tallennetut kayttajatiedot yhteen helposti luettavaan muotoon.</p>
-      {_definition_rows([("Vienti luotu", format_iso_timestamp(payload.get("exportedAt"))), ("PDF-tiedosto", str(payload.get("fileName") or "-"))])}
-      <table class="summary-grid">
-        <tr><th>Osio</th><th>Maara</th></tr>
-        <tr><td>Tallennetut tutkintonimikkeet</td><td>{summary['savedCount']}</td></tr>
-        <tr><td>Muistiinpanot</td><td>{summary['noteCount']}</td></tr>
-        <tr><td>Piilotetut tutkinnot</td><td>{summary['hiddenTutkinnotCount']}</td></tr>
-        <tr><td>Piilotetut tutkintonimikkeet</td><td>{summary['hiddenTutkintonimikkeetCount']}</td></tr>
-        <tr><td>Visatulokset</td><td>{summary['quizResultCount']}</td></tr>
-        <tr><td>Keskeneraiset visat</td><td>{summary['quizSessionCount']}</td></tr>
-      </table>
+      <h1>Käyttäjätiedot</h1>
+      <p>Luotu {format_iso_timestamp(payload.get("exportedAt"))}</p>
     </header>
 
     <section>
-      <h2>Tallennetut tutkintonimikkeet ja suunnitelmat</h2>
+      <h2>Yhteenveto</h2>
+      <ul>
+        <li>Tallennettuja tutkintonimikkeitä: {summary['savedCount']}</li>
+        <li>Muistiinpanoja: {summary['noteCount']}</li>
+        <li>Piilotettuja tutkintoja: {summary['hiddenTutkinnotCount']}</li>
+        <li>Piilotettuja tutkintonimikkeitä: {summary['hiddenTutkintonimikkeetCount']}</li>
+        <li>Valmiita kyselytuloksia: {summary['quizResultCount']}</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Tallennetut tutkintonimikkeet</h2>
       {_render_saved_items(sections["savedTutkintonimikkeet"])}
     </section>
 
@@ -306,13 +354,8 @@ def build_user_export_html(payload: dict) -> str:
     </section>
 
     <section>
-      <h2>Visatulokset</h2>
-      {_render_quiz_entries(sections["quizResults"], "Tallennettu", "result")}
-    </section>
-
-    <section>
-      <h2>Keskeneraiset visat</h2>
-      {_render_quiz_entries(sections["quizSessions"], "Paivitetty", "session")}
+      <h2>Valmiit kyselytulokset</h2>
+      {_render_quiz_entries(sections["quizResults"], "Tallennettu")}
     </section>
   </body>
 </html>
