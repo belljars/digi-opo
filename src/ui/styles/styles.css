@@ -23,21 +23,21 @@
 
   --color-bg: #fffdf8;
   --color-text: #171717;
-  --color-surface-soft: rgba(0, 0, 0, 0.03);
-  --color-surface-strong: rgba(255, 255, 255, 0.6);
-  --color-surface-muted: rgba(0, 0, 0, 0.04);
+  --color-surface-soft: #f3f1eb;
+  --color-surface-strong: #ffffff;
+  --color-surface-muted: #eeebe4;
   --color-card-bg: #fffdf8;
-  --color-shadow: rgba(0, 0, 0, 0.12);
+  --color-shadow: transparent;
 }
 
 :root[data-theme="dark"] {
   --color-bg: #111315;
   --color-text: #f3efe7;
-  --color-surface-soft: rgba(255, 255, 255, 0.05);
-  --color-surface-strong: rgba(255, 255, 255, 0.04);
-  --color-surface-muted: rgba(255, 255, 255, 0.08);
+  --color-surface-soft: #1a1d20;
+  --color-surface-strong: #202428;
+  --color-surface-muted: #262b30;
   --color-card-bg: #171a1d;
-  --color-shadow: rgba(0, 0, 0, 0.32);
+  --color-shadow: transparent;
 }
 
 /* ------------------------------------------------------------
@@ -59,6 +59,7 @@ ul, ol {
 }
 
 body {
+  font-family: Arial, sans-serif;
   line-height: var(--line-height);
   color: var(--color-text);
   background: var(--color-bg);
