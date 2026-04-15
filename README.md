@@ -1,108 +1,151 @@
 # digi-opo
 
+`digi-opo` on paikallinen työpöytäsovellus Luovin tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun. Se yhdistää Python-backendin, `pywebview`-ikkunan, TypeScript-käyttöliittymän, ajonaikaisen SQLite-tietokannan ja repoon versionhallittavan JSON-lähdedatan.
+
+Sovellus toimii kokonaan paikallisesti. Backend käynnistää HTTP-palvelimen osoitteeseen `127.0.0.1`, palvelee tiedostot hakemistosta `src/ui/` ja tarjoaa frontendille sovellusmetodit `window.pywebview.api`-rajapinnan kautta.
+
 ## Yleiskuva
 
-`digi-opo` on paikallinen `pywebview`-pohjainen työpöytäsovellus Luovin tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun.
+Nykyiset näkymät hakemistossa `src/ui/pages/`:
 
-Sovellus yhdistää:
+- `home.html`
+- `pankki.html`
+- `saved-tutkintonimikkeet.html`
+- `my-plan.html`
+- `opintopolut.html`
+- `quiz.html`
+- `amis-quiz.html`
+- `asetukset.html`
+- `tietosuoja.html`
 
-- Python-backendin
-- HTML/CSS/TypeScript-käyttöliittymän
-- SQLite-tietokannan
-- JSON-muotoisen lähdedatan
+Sovellus tukee esimerkiksi seuraavia työnkulkuja:
 
-Sovellus käynnistää paikallisen HTTP-palvelimen osoitteeseen `127.0.0.1`, avaa käyttöliittymän `pywebview`-ikkunaan ja tarjoaa sivuille Python-API:n `window.pywebview.api`-rajapinnan kautta.
+- tutkintojen ja tutkintonimikkeiden selaus ja haku
+- tutkinnon detaljinäkymä ja siihen kuuluvien nimikkeiden tarkastelu
+- tutkintonimikkeiden tallennus
+- muistiinpanojen kirjoittaminen tallennetuille nimikkeille
+- oman suunnitelman ylläpito prioriteetin, tilan ja seuraavan askeleen avulla
+- opintopolkujen selaus
+- opintopolku-kyselyn tekeminen ja keskeneräisen session jatkaminen
+- tutkintonimikkeiden järjestäminen parivertailuun perustuvalla quizilla
+- tutkintojen ja tutkintonimikkeiden globaali piilotus
+- käyttäjädatan vienti PDF:ksi asetuksista
 
-## Ominaisuudet
+## Arkkitehtuuri lyhyesti
 
-Sovelluksessa on tällä hetkellä seuraavat näkymät:
+Projektissa on kolme pääkerrosta:
 
-- `Etusivu` (`src/ui/pages/home.html`)
-- `Tutkintopankki` (`src/ui/pages/pankki.html`)
-- `Tallennetut tutkintonimikkeet` (`src/ui/pages/saved-tutkintonimikkeet.html`)
-- `Oma suunnitelma` (`src/ui/pages/my-plan.html`)
-- `Opintopolut` (`src/ui/pages/opintopolut.html`)
-- `Opintopolku-kysely` (`src/ui/pages/quiz.html`)
-- `Amis-korttivertailu` (`src/ui/pages/amis-quiz.html`)
-- `Asetukset` (`src/ui/pages/asetukset.html`)
-- `Tietosuojakäytäntö` (`src/ui/pages/tietosuoja.html`)
+1. käynnistys ja ajonaikainen ympäristö
+2. Python-backend
+3. HTML-, CSS- ja TypeScript-frontend
 
-Sovellus mahdollistaa esimerkiksi:
+Ajonaikainen virta:
 
-- tutkintojen ja tutkintonimikkeiden selailun ja haun
-- yksittäisen tutkinnon tarkastelun nimikkeineen
-- tutkintonimikkeiden tallentamisen
-- omien muistiinpanojen kirjoittamisen tallennetuille tutkintonimikkeille
-- opintopolkujen selaamisen
-- opintopolku-kyselyn tulosten tallennuksen
-- quiz-istuntojen jatkamisen myöhemmin
-- tutkintojen ja tutkintonimikkeiden globaalin piilotuksen asetuksista
+```text
+scripts/run_linux.sh tai scripts/run_windows.bat
+        |
+        v
+TypeScript build
+        |
+        v
+src/app/app.py
+        |
+        +-- ProjectPaths
+        +-- Backend API
+        +-- paikallinen HTTP-palvelin /src/ui/*-poluille
+        |
+        v
+pywebview-ikkuna
+        |
+        v
+HTML + CSS + TypeScript
+        |
+        v
+window.pywebview.api
+        |
+        v
+SQLite + user JSON -tiedostot + lähde-JSON:t
+```
+
+Keskeiset toteutusratkaisut:
+
+- `src/app/app.py` on sovelluksen käynnistyspiste.
+- `src/app/backend/api.py` kokoaa julkisen backend-API:n mixin-luokista.
+- `src/app/projekti_paths.py` määrittää ajonaikaiset polut ja käynnistää paikallisen staattisen palvelimen.
+- Frontend ei käytä REST-API:a, vaan kutsuu Python-metodeja `window.pywebview.api`-rajapinnan kautta.
+- Staattinen palvelin tarjoaa vain `/src/ui/`-polut. Raaka lähdedata ja käyttäjädata eivät ole suoraan selaimen luettavissa.
 
 ## Data ja tallennus
 
-Projektissa käytetään kahta pääasiallista datamuotoa:
+Projektissa on kolme erillistä tallennuskerrosta.
 
-- `src/data/` sisältää versionhallittavan lähdedatan
-- `data/tutkinnot.db` sisältää ajonaikaisen SQLite-tietokannan
+### Versionhallittava lähdedata
 
-Keskeiset lähdetiedostot ovat:
+Hakemiston `src/data/` tiedostot määrittävät sovelluksen sisällön:
 
 - `src/data/ammatit.json`
 - `src/data/opiskeluSuunnat.json`
 - `src/data/opintopolkuQuiz.json`
 
-Käytännössä tämä tarkoittaa:
+`ammatit.json` tuodaan SQLiteen käynnistyksen yhteydessä, jos lähdedatan hash tai import-versio on muuttunut.
 
-- muokkaa tutkintoja, tutkintonimikkeitä, linkkejä ja kuvia tiedostossa `src/data/ammatit.json`
-- sovellus tuo tutkintodatan automaattisesti SQLiteen käynnistyksen yhteydessä
-- jos lähdedata muuttuu, tietokannan tutkintosisältö rakennetaan uudelleen
-- käyttöliittymä ei lue JSON- tai SQLite-tiedostoja suoraan, vaan hakee datan Python-API:n kautta
+### Ajonaikainen tietokanta
 
-Käyttäjäkohtaisia tiedostoja tallennetaan `user/`-kansioon, esimerkiksi:
+Backend luo ja ylläpitää tiedostoa `data/tutkinnot.db`.
 
-- `quiz_results.json`
-- `quiz_sessions.json`
+SQLite sisältää:
 
-## Teknologiat
+- `ammatit.json`:stä tuodut tutkinnot ja tutkintonimikkeet
+- tallennetut tutkintonimikkeet
+- muistiinpanot
+- suunnitelmakentät
+- piilotetut tutkinnot
+- piilotetut tutkintonimikkeet
+- sovelluksen metatiedot
 
-- Python
-- `pywebview`
-- PyQt6 + Qt WebEngine
-- TypeScript
-- HTML + CSS
-- SQLite
+### Käyttäjäkohtaiset JSON-tiedostot
 
-## Vaatimukset
+Backend tallentaa quiz-datan hakemistoon `user/`:
 
-- Python 3.11 tai 3.12
+- `user/quiz_results.json`
+- `user/quiz_sessions.json`
+
+PDF-viennit kirjoitetaan hakemistoon `exports/`.
+
+## Asennus
+
+Vaatimukset:
+
+- Python `3.11` tai `3.12`
 - Node.js ja npm
-- Windowsissa `py`-launcher on suositeltava
-- Linuxissa Qt-riippuvuudet järjestelmätasolla tai Nix-flaken kautta
+- `requirements.txt`:n Qt-pohjaiset `pywebview`-riippuvuudet
+- Linuxissa joko järjestelmätason Qt-riippuvuudet tai `flake.nix`:n mukainen Nix-ympäristö
 
-Python-riippuvuudet löytyvät tiedostosta `requirements.txt`.
+Asenna riippuvuudet manuaalisesti:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+npm install
+npm run build
+```
+
+Windowsissa:
+
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+npm install
+npm run build
+```
 
 ## Käynnistys
 
-### Windows
+### Linux
 
-Helpoin tapa käynnistää projekti on ajaa:
-
-```powershell
-.\scripts\run_windows.bat
-```
-
-Skripti:
-
-1. etsii Python 3.12:n tai 3.11:n
-2. luo tai päivittää tarvittaessa `.venv`-virtuaaliympäristön
-3. asentaa Python-riippuvuudet
-4. ajaa TypeScript-buildin komennolla `npm run build`
-5. tarkistaa, että tarvittavat käyttöliittymän `.js`-tiedostot syntyivät
-6. käynnistää sovelluksen
-
-### Linux ja NixOS
-
-Linuxissa projekti käynnistyy komennolla:
+Käynnistä sovellus skriptillä:
 
 ```bash
 ./scripts/run_linux.sh
@@ -110,15 +153,34 @@ Linuxissa projekti käynnistyy komennolla:
 
 Skripti:
 
-1. etsii Python 3.12:n tai 3.11:n
-2. käyttää Nix-shelliä automaattisesti, jos sopivaa Pythonia ei löydy mutta `flake.nix` ja `nix` ovat saatavilla
-3. luo `.venv`-virtuaaliympäristön, jos ei ajeta Nix-ympäristössä
-4. asentaa Python-riippuvuudet, jos käytössä on `.venv`
-5. ajaa TypeScript-buildin paikallisella `tsc`:llä, `npm`:llä tai järjestelmän `tsc`:llä
-6. tarkistaa buildin tulostiedostot
-7. käynnistää sovelluksen
+- etsii Pythonin `3.12`- tai `3.11`-version
+- siirtyy tarvittaessa automaattisesti `nix develop` -ympäristöön, jos tuettua paikallista Pythonia ei ole
+- luo tai käyttää `.venv`-ympäristöä Nixin ulkopuolella
+- asentaa Python-riippuvuudet Nixin ulkopuolella
+- buildaa TypeScript-frontendin
+- tarkistaa odotetut `.js`-tulostiedostot
+- käynnistää `src/app/app.py`:n
 
-NixOS:ssa helpoin tapa on:
+### Windows
+
+Käytä:
+
+```powershell
+.\scripts\run_windows.bat
+```
+
+Skripti:
+
+- etsii `py -3.12`- tai `py -3.11`-version
+- luo tai rakentaa `.venv`:n uudelleen tarvittaessa
+- asentaa Python-riippuvuudet
+- ajaa `npm run build`
+- tarkistaa odotetut `.js`-tulostiedostot
+- käynnistää `src\app\app.py`
+
+### Nix
+
+NixOS:ssa tai Linux-ympäristössä, jossa käytetään flakea:
 
 ```bash
 nix develop
@@ -131,45 +193,29 @@ Voit myös ajaa:
 nix run
 ```
 
-Työpöytälauncher asentuu komennolla:
+Asenna työpöytäkäynnistin komennolla:
 
 ```bash
 ./scripts/install_linux_launcher.sh
 ```
 
-Tämä luo tiedoston `~/.local/share/applications/digi-opo.desktop`.
+### Manuaalinen käynnistys
 
-### Manuaalisesti
-
-Windows:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-npm install
-npm run build
-python src\app\app.py
-```
-
-Linux:
+Manuaalinen käynnistys on käytännöllinen, kun haluat säilyttää ajonaikaisen datan käynnistysten välillä:
 
 ```bash
-python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-npm install
 npm run build
 python src/app/app.py
 ```
 
 Huomio:
 
-- `npm run build` kääntää TypeScript-tiedostot suoraan kansioon `src/ui/scripts/`
-- sovellus luo tietokannan automaattisesti tiedostoon `data/tutkinnot.db`
-- käyttöliittymää palvellaan projektipuusta, eikä buildin jälkeen tarvitse kopioida tiedostoja erilliseen `dist/`-hakemistoon
+- `npm run build` kääntää TypeScriptin suoraan hakemistoon `src/ui/scripts/`.
+- Erillistä `dist/`-hakemistoa ei ole.
+- `scripts/run_linux.sh` ja `scripts/run_windows.bat` poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä. Ne ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
 
-## Kehitys
+## Kehitystyö
 
 Yleisimmät komennot:
 
@@ -180,11 +226,25 @@ npm run build
 python src/app/app.py
 ```
 
-## Testit
+Koska TypeScriptin tulostiedostot syntyvät lähdekoodin viereen hakemistoon `src/ui/scripts/`, käyttöliittymämuutokset etenevät yleensä tällä kierrolla:
 
-Projektissa on backend-, käyttöliittymä- ja frontend-init-testejä `tests/`-kansiossa.
+```bash
+npm run check
+npm run build
+python src/app/app.py
+```
 
-Esimerkkejä:
+## Käyttöesimerkit
+
+### Käynnistä sovellus manuaalisesti riippuvuuksien asennuksen jälkeen
+
+```bash
+source .venv/bin/activate
+npm run build
+python src/app/app.py
+```
+
+### Aja kehityksessä käytetty testisetti
 
 ```bash
 npm run check
@@ -193,41 +253,70 @@ python -m unittest tests.test_backend_api
 python -m unittest tests.test_ui_smoke
 ```
 
-`tests/test_backend_api.py` kattaa esimerkiksi:
+### Päivitä tutkintojen lähdedata
 
-- tutkintodatan tuonnin
-- haut ja yksityiskohtanäkymät
-- tallennettujen tutkintonimikkeiden pysyvyyden
-- muistiinpanojen tallennuksen
-- globaalin piilotuksen
-- quiz-tulosten ja quiz-istuntojen tallennuksen
+Muokkaa tiedostoa `src/data/ammatit.json` ja käynnistä sovellus uudelleen:
 
-## Projektin rakenne
+```bash
+python src/app/app.py
+```
+
+Backend laskee import-signaturen uudelleen ja rakentaa tutkintotaulut SQLiteen uudestaan, jos lähdedata on muuttunut.
+
+## Vianmääritys
+
+### Sovellus käynnistyy tyhjällä käyttäjädatalla
+
+Jos käynnistät sovelluksen skripteillä `scripts/run_linux.sh` tai `scripts/run_windows.bat`, tämä on odotettu toiminta. Molemmat skriptit poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä.
+
+Käytä manuaalista käynnistystä, jos haluat säilyttää paikallisen ajonaikaisen datan käynnistysten välillä.
+
+### Käyttöliittymä latautuu, mutta dynaaminen sisältö ei näy
+
+Tarkista, että:
+
+- frontendin build valmistui ilman virheitä
+- odotetut `.js`-tiedostot ovat olemassa hakemistossa `src/ui/scripts/`
+- sivu käyttää `waitForPywebviewApi()`- tai `createRetryingPageInit()`-mallia ennen backend-kutsuja
+
+### Tutkintodata näyttää vanhalta JSON-muutosten jälkeen
+
+Tiedoston `src/data/ammatit.json` muutokset tulevat voimaan, kun käynnistät sovelluksen uudelleen ja SQLite-importti ajetaan uudestaan. Tiedostojen `opiskeluSuunnat.json` ja `opintopolkuQuiz.json` kohdalla uudelleenkäynnistys on myös helpoin tapa varmistaa, että backend lukee uusimman lähdetiedoston.
+
+### Qt tai `pywebview` ei toimi Linuxissa
+
+Käytä flake-pohjaista ympäristöä:
+
+```bash
+nix develop
+./scripts/run_linux.sh
+```
+
+Flake asettaa tämän projektin tarvitsemat Qt-ympäristömuuttujat.
+
+## Projektirakenne
 
 ```text
 digi-opo/
-├── docs/                 # Projektin dokumentaatio suomeksi
-├── data/                 # SQLite-tietokannat
-├── scripts/              # Varsinaiset käynnistys- ja apuskriptit
+├── docs/                 # Projektin dokumentaatio
+├── data/                 # Ajonaikainen SQLite-tietokanta
+├── exports/              # Luodut PDF-viennit
+├── scripts/              # Käynnistys- ja apuskriptit
 ├── src/
-│   ├── app/              # pywebview-sovellus ja Python API
-│   ├── data/             # JSON-lähdedata
+│   ├── app/              # Pythonin käynnistyspiste, backend ja runtime-apurit
+│   ├── data/             # Versionhallittava JSON-lähdedata
 │   └── ui/
 │       ├── assets/       # Kuvat ja muut staattiset tiedostot
 │       ├── pages/        # HTML-näkymät
-│       ├── scripts/      # TypeScript- ja JavaScript-tiedostot
-│       └── styles/       # Tyylit
-├── tests/                # Testit
-├── user/                 # Käyttäjäkohtaiset tallennukset
-├── requirements.txt
-├── package.json
-├── scripts/              # Käynnistys- ja apuskriptit
-└── README.md
+│       ├── scripts/      # TypeScript-lähdekoodi ja käännetty JavaScript
+│       └── styles/       # CSS
+├── tests/                # Backend- ja UI-testit
+└── user/                 # Käyttäjäkohtainen ajonaikainen data
 ```
 
-## Dokumentaatio
+## Lisälukeminen
 
-Lisädokumentaatio löytyy `docs/`-kansiosta:
+Tarkempi dokumentaatio löytyy hakemistosta `docs/`:
 
 - `docs/README.md`
 - `docs/arkkitehtuuri.md`

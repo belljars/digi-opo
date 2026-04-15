@@ -2,174 +2,93 @@
 
 ## Rooli
 
-Python-backend on sovelluksen varsinainen palvelukerros. Se:
+Python-backend on sovelluksen palvelukerros. Se lukee lähdedatan, ylläpitää SQLite-tietokantaa, tallentaa käyttäjän valinnat, kokoaa PDF-viennin ja tarjoaa kaiken dynaamisen datan frontendille `window.pywebview.api`-rajapinnan kautta.
 
-- avaa ja ylläpitää SQLite-tietokantaa
-- lukee staattiset JSON-lähteet
-- normalisoi ja validoi käyttöliittymästä tulevat pyynnöt
-- tallentaa käyttäjän omat valinnat
-- tarjoaa kaiken dynaamisen datan `window.pywebview.api`-rajapinnan kautta
+## Päämoduulit
 
-## Tiedostot ja vastuut
-
-## `src/app/app.py`
+### `src/app/app.py`
 
 Sovelluksen käynnistyspiste.
 
 Vastuut:
 
-- asettaa Linuxissa `QT_API`- ja tarvittaessa `QT_QPA_PLATFORM`-ympäristömuuttujat
-- muodostaa projektijuuren
+- asettaa Linuxissa Qt-ympäristömuuttujia
+- muodostaa projektin juuren
 - luo `ProjectPaths`-olion
 - luo API-instanssin
-- käynnistää staattisen HTTP-palvelimen
+- käynnistää paikallisen HTTP-palvelimen
 - avaa `pywebview`-ikkunan
-- sulkee palvelimen ja tietokantayhteyden siististi lopussa
+- sulkee palvelimen ja backendin siististi lopuksi
 
-## `src/app/backend_rajapinta.py`
+### `src/app/backend_rajapinta.py`
 
-Ohut vientikerros. Sen tarkoitus on tarjota muualla käytettävä `Api` yhdestä paikasta ilman, että kutsujan tarvitsee tietää backend-paketin sisäistä rakennetta.
+Ohut vientikerros, joka tarjoaa `Api`-luokan yhdestä paikasta.
 
-## `src/app/backend/api.py`
+### `src/app/backend/api.py`
 
-Kokoaa varsinaisen API:n useista mixineistä:
+Kokoaa julkisen API:n mixineistä:
 
 - `BackendBase`
 - `TutkinnotApiMixin`
 - `AsetuksetApiMixin`
 - `QuizitApiMixin`
 - `SisaltoApiMixin`
+- `VientiApiMixin`
 
-Tämä on se luokka, jonka frontend näkee `window.pywebview.api`-rajapinnassa.
+### `src/app/backend/perusta.py`
 
-## `src/app/backend/perusta.py`
-
-Backendin perusluokka.
-
-Vastuut:
+Perusluokka, joka:
 
 - avaa SQLite-yhteyden
 - varmistaa skeeman ja lähdedatan
-- ajaa vanhan suosikki-JSON:n migraation SQLiteen
-- ylläpitää säielukkoa (`threading.Lock`)
-- tarjoaa yhteiset metodit quiz-tulosten ja quiz-sessioiden lukuun sekä kirjoitukseen
+- hoitaa vanhan `saved_tutkintonimikkeet.json`-muodon migraation
+- sarjallistaa tietokanta- ja tiedostokirjoitukset `threading.Lock`-lukolla
+- tarjoaa yhteiset apurit quiz-tulosten ja sessioiden lukuun sekä kirjoitukseen
 
-Huomio:
+## Tietokanta
 
-- `pywebview`-kutsut voivat tulla eri säikeistä, joten tietokantaoperaatiot suojataan lukolla
-- tietokantayhteys avataan `check_same_thread=False`, mutta käyttö on silti sarjallistettu lukolla
-
-## `src/app/backend/tietokanta.py`
-
-Tietokantakerroksen tärkein tiedosto.
-
-Vastuut:
-
-- SQLite-yhteyden avaaminen
-- skeeman luonti ja kevyt migraatio
-- tutkintodatan tuonti `ammatit.json`:stä
-- importin hash- ja versionhallinta
-- vanhan tallennusformaatin migraatio
+Päätoteutus on tiedostossa `src/app/backend/tietokanta.py`.
 
 ### Skeemataulut
 
-#### `tutkinnot`
-
-Perustutkintojen päätaso:
-
-- `id`
-- `nimi`
-- `desc`
-
-#### `tutkintonimikkeet`
-
-Tutkinnon alle kuuluvat nimikkeet:
-
-- `id`
-- `tutkinto_id`
-- `nimi`
-- `linkki`
-- `img`
-
-#### `saved_tutkintonimikkeet`
-
-Käyttäjän tallentamat nimikkeet sekä suunnitelmakentät:
-
-- `tutkintonimike_id`
-- `saved_at`
-- `plan_priority`
-- `plan_status`
-- `next_step`
-- `plan_updated_at`
-
-#### `hidden_tutkinnot`
-
-Globaalisti piilotetut tutkinnot:
-
-- `tutkinto_id`
-- `hidden_at`
-
-#### `hidden_tutkintonimikkeet`
-
-Globaalisti piilotetut tutkintonimikkeet:
-
-- `tutkintonimike_id`
-- `hidden_at`
-
-#### `tutkintonimike_notes`
-
-Käyttäjän omat muistiinpanot nimikkeille:
-
-- `tutkintonimike_id`
-- `note_text`
-- `updated_at`
-
-#### `app_settings`
-
-Varattu yleisille sovellusasetuksille:
-
-- `key`
-- `value`
-- `updated_at`
-
-#### `app_meta`
-
-Sisäinen metadata, kuten lähdedatan import-signature:
-
-- `key`
-- `value`
-
-### Datan tuonti
-
-`ensure_data()` tekee seuraavat asiat:
-
-1. luo taulut, jos niitä ei ole
-2. lukee `src/data/ammatit.json`-tiedoston
-3. laskee tiedostosta SHA-256-hashin
-4. yhdistää hashin ja `AMMATIT_IMPORT_VERSION`-version import-signatureksi
-5. vertailee signaturea `app_meta`-taulussa olevaan arvoon
-6. jos data tai importtiversio on muuttunut, tyhjentää tutkintotaulut ja tuo sisällön uudelleen
-
-Tämä tarkoittaa, että tutkintosisältö rakennetaan aina lähde-JSONista, eikä SQLite ole tässä kohden käsin ylläpidettävä “totuuden lähde”.
-
-### Kevyet migraatiot
-
-Skeemaa ei hallita erillisellä migraatiotyökalulla, vaan puuttuvat sarakkeet lisätään tarvittaessa `ALTER TABLE` -kutsuilla.
-
-Tämä näkyy erityisesti tauluissa:
-
+- `tutkinnot`
 - `tutkintonimikkeet`
 - `saved_tutkintonimikkeet`
+- `hidden_tutkinnot`
+- `hidden_tutkintonimikkeet`
+- `tutkintonimike_notes`
+- `app_settings`
+- `app_meta`
 
-Ratkaisu on yksinkertainen ja sopii tämän projektin kokoon, mutta kannattaa huomata, että laajemmassa sovelluksessa tätä varten käytettäisiin yleensä migraatiokehystä.
+Keskeiset vastuut:
 
-## `src/app/backend/tutkinnot.py`
+- yhteyden avaaminen tiedostoon `data/tutkinnot.db`
+- taulujen luonti
+- kevyet skeemamuutokset `ALTER TABLE` -kutsuilla
+- `ammatit.json`-datan tuonti
+- import-signaturen laskenta lähdehashista ja import-versiosta
 
-Sisältää tutkintoihin, suosikkeihin, muistiinpanoihin ja suunnitelmatietoihin liittyvän logiikan.
+`ammatit.json` on tutkintosisällön totuuden lähde. SQLite on sen ajonaikainen, normalisoitu muoto.
 
-### Keskeiset metodit
+## Sisältö-API
 
-#### Luku
+`src/app/backend/sisalto.py` lukee JSON-lähteet, joita ei tuoda SQLiteen.
+
+Metodit:
+
+- `list_opiskelu_suunnat()`
+- `get_opintopolku_quiz()`
+
+Tiedostot:
+
+- `src/data/opiskeluSuunnat.json`
+- `src/data/opintopolkuQuiz.json`
+
+## Tutkinnot, tallennukset ja suunnitelmat
+
+Päätoteutus on tiedostossa `src/app/backend/tutkinnot.py`.
+
+### Luku
 
 - `list_tutkinnot()`
 - `get_tutkinto(tutkinto_id)`
@@ -178,7 +97,7 @@ Sisältää tutkintoihin, suosikkeihin, muistiinpanoihin ja suunnitelmatietoihin
 - `list_saved_tutkintonimikkeet()`
 - `list_tutkintonimike_notes()`
 
-#### Kirjoitus
+### Kirjoitus
 
 - `save_tutkintonimike(id)`
 - `remove_saved_tutkintonimike(id)`
@@ -188,44 +107,45 @@ Sisältää tutkintoihin, suosikkeihin, muistiinpanoihin ja suunnitelmatietoihin
 
 ### Näkyvyyslogiikka
 
-Tärkeä sisäinen apuri on `_get_visible_tutkintonimike_row()`. Se palauttaa nimikkeen vain silloin, kun:
+Sisäinen apuri `_get_visible_tutkintonimike_row()` palauttaa nimikkeen vain, jos:
 
 - nimike on olemassa
-- sen emätutkintoa ei ole piilotettu
-- itse nimikettä ei ole piilotettu
+- sen emätutkinto ei ole piilotettu
+- nimikettä itseään ei ole piilotettu
 
-Tämän ansiosta tallennus- ja suunnitelmatoiminnot eivät vahingossa toimi piilotettuihin kohteisiin.
+Tämä sääntö suojaa kaikkia tallennus- ja suunnitelmatoimintoja.
 
 ### Hakulogiikka
 
-`search_tutkinnot()` hakee näkyviä tutkintoja seuraavien kenttien perusteella:
+`search_tutkinnot()` hakee näkyviä tutkintoja seuraavista kentistä:
 
 - tutkinnon nimi
 - tutkinnon kuvaus
 - näkyvien tutkintonimikkeiden nimet
 
-Haku käyttää SQLite `LIKE` -ehtoja.
+Haku perustuu SQLite `LIKE` -ehtoihin.
 
-### Suunnitelmatiedot
+### Suunnitelmakentät
 
-`save_tutkintonimike_plan()` tallentaa samaan tauluun kuin suosikit. Tämä on tärkeä toteutusvalinta:
+Suunnitelmatieto tallennetaan samaan `saved_tutkintonimikkeet`-tauluun kuin tallennusmerkintä.
 
-- suunnitelmatieto kuuluu aina tutkintonimikkeeseen
-- metodi varmistaa, että nimike on olemassa `saved_tutkintonimikkeet`-taulussa
-- jos nimike ei ollut ennestään tallennettu, se syntyy samalla
+Sallitut prioriteetit:
 
-Sallitut arvot on rajattu:
+- `ensisijainen`
+- `selvitettava`
+- `varavaihtoehto`
 
-- prioriteetit: `ensisijainen`, `selvitettava`, `varavaihtoehto`
-- tilat: `en-tieda-viela`, `haluan-selvittaa-lisaa`, `vahva-vaihtoehto`
+Sallitut tilat:
 
-Tyhjä suunnitelma tyhjentää kentät ja asettaa `planUpdatedAt`-arvon takaisin `null`:ksi.
+- `en-tieda-viela`
+- `haluan-selvittaa-lisaa`
+- `vahva-vaihtoehto`
 
-## `src/app/backend/asetukset.py`
+Jos käyttäjä tallentaa suunnitelman tyhjillä arvoilla, backend tyhjentää kentät ja palauttaa `planUpdatedAt`-arvon `null`:ksi.
 
-Sisältää piilotuslogiikan.
+## Asetukset ja piilotukset
 
-### Piilotetut tutkinnot ja nimikkeet
+Päätoteutus on tiedostossa `src/app/backend/asetukset.py`.
 
 Metodit:
 
@@ -236,24 +156,20 @@ Metodit:
 - `hide_tutkintonimike(id)`
 - `unhide_tutkintonimike(id)`
 
-Tärkeä sääntö:
+Keskeinen sääntö:
 
-- jos koko tutkinto on piilotettu, sen yksittäisiä nimikkeitä ei erikseen listata piilotettuihin nimikkeisiin
+- jos tutkinto on piilotettu, sen nimikkeitä ei enää listata erillisinä piilotettuina nimikkeinä
 
-Tämä pitää datan ja näkymän loogisena.
+## Quizit
 
-## `src/app/backend/quizit.py`
+Päätoteutus on tiedostossa `src/app/backend/quizit.py`.
 
-Sisältää visatulosten ja visaistuntojen tallennuksen.
-
-### Tietojen säilytyspaikka
-
-Tulokset ja sessiot tallennetaan JSON-tiedostoihin:
+Tulokset ja sessiot tallennetaan tiedostoihin:
 
 - `user/quiz_results.json`
 - `user/quiz_sessions.json`
 
-### Metodit
+Metodit:
 
 - `list_quiz_results(quiz_id=None)`
 - `save_quiz_result(quiz_id, result)`
@@ -262,72 +178,55 @@ Tulokset ja sessiot tallennetaan JSON-tiedostoihin:
 - `save_quiz_session(quiz_id, session)`
 - `clear_quiz_session(quiz_id)`
 
-### Tunnisteet
+Tuloksille muodostetaan yksilöllinen tunniste SHA-256-pohjaisesti tallennushetkellä.
 
-`save_quiz_result()` muodostaa tulokselle tunnisteen SHA-256-hashista, joka lasketaan seuraavasta yhdistelmästä:
+## PDF-vienti
 
-- `quizId`
-- `result`
-- `createdAt`
+PDF-vienti on toteutettu tiedostoissa:
 
-Tämä antaa jokaiselle tallennukselle vakaan mutta käytännössä uniikin ID:n.
+- `src/app/backend/vienti.py`
+- `src/app/backend/pdf_vienti.py`
 
-## `src/app/backend/sisalto.py`
+Julkinen metodi:
 
-Lukee staattiset sisältö-JSONit.
+- `export_user_data_pdf()`
 
-Metodit:
+Vienti kokoaa yhteen:
 
-- `list_opiskelu_suunnat()`
-- `get_opintopolku_quiz()`
+- tallennetut tutkintonimikkeet
+- muistiinpanot
+- piilotetut tutkinnot
+- piilotetut tutkintonimikkeet
+- visatulokset
+- keskeneräiset visaistunnot
 
-Huomio:
+Vientitiedosto kirjoitetaan kansioon `exports/` aikaleimatulla nimellä.
 
-- kuvat normalisoidaan UI:ssa käytettävään HTTP-polkuun
-- `opintopolkuQuiz.json` palautetaan käytännössä sellaisenaan frontendille
+## Tallennusrajat
 
-## `src/app/projekti_paths.py`
+Backend käyttää kolmea pysyvän datan tasoa:
 
-Kokoaa kaikki tärkeät polut yhteen.
+- `src/data/` sisältää versionhallittavan lähdedatan
+- `data/tutkinnot.db` sisältää ajonaikaisen relaatiodatan
+- `user/*.json` sisältää käyttäjäkohtaiset quiz-tallennukset
 
-Vastuut:
+Lisäksi `my-plan.ts` käyttää selaimen `localStorage`a käyttöliittymäkohtaisiin asetuksiin, mutta sitä ei hallita backendissä.
 
-- tietokannan polku
-- käyttäjädatan polut
-- lähde-JSON-polut
-- UI:n aloitussivun polku
-- asset-viittausten normalisointi
-- staattisen HTTP-palvelimen käynnistys
+## Esimerkkikutsut frontendistä
 
-### Asset-viittausten normalisointi
+Frontend kutsuu backendiä `window.pywebview.api`-rajapinnan kautta:
 
-`normalize_ui_asset_ref()` muuntaa esimerkiksi tämän:
+```ts
+const api = window.pywebview.api;
 
-- `assets/ammatit/automekaanikko.png`
+const tutkinnot = await api.list_tutkinnot();
+const tutkinto = await api.get_tutkinto(12);
+const saved = await api.save_tutkintonimike(42);
+await api.save_tutkintonimike_plan(42, "ensisijainen", "vahva-vaihtoehto", "Kysy opolta harjoittelusta");
+```
 
-tähän muotoon:
+## Muutoksia tehdessä huomioi
 
-- `/src/ui/assets/ammatit/automekaanikko.png`
-
-Tämä mahdollistaa sen, että JSON-lähdedatassa voidaan käyttää yksinkertaisia polkuja, mutta frontend saa aina toimivan HTTP-osoitteen.
-
-## `src/app/backend_apu.py`
-
-Pieni apumoduuli, joka tarjoaa:
-
-- JSON-parsinnan
-- SHA-256-laskennan
-- UTC ISO 8601 -aikaleimat
-- turvallisen JSON-luku- ja kirjoituslogiikan
-
-Erityisen tärkeä yksityiskohta on `parse_json_payload()`, joka sietää myös tilanteen, jossa JSON-objektin perässä on ylimääräistä tekstiä. Tämä tekee lähdedatan lukemisesta hieman robustimpaa.
-
-## Tärkeimmät backendin säännöt
-
-Projektia muokatessa nämä säännöt kannattaa pitää mielessä:
-
-1. Frontend ei saa ohittaa backendiä dynaamisessa datassa.
-2. Piilotuslogiikka kuuluu backendille, ei yksittäisille sivuille.
-3. Käyttäjän tekemät muutokset pitää normalisoida ennen tallennusta.
-4. Tutkintojen lähdedata tulee aina `ammatit.json`:stä.
-5. Pitkäikäinen rakenteinen data kuuluu SQLiteen, kevyt dokumenttimainen tila voi olla JSONissa.
+- Lisää näkyvyys- ja validointisäännöt backendiin, ei vain frontendiin.
+- Jos muokkaat `saved_tutkintonimikkeet`-rakennetta, tarkista myös `saved-tutkintonimikkeet.ts`, `my-plan.ts` ja PDF-vienti.
+- Jos muokkaat `ammatit.json`-importtia, tarkista myös `tietokanta.py` ja backend-testit.

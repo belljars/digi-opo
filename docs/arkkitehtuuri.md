@@ -1,121 +1,114 @@
 # Arkkitehtuuri
 
-## Kokonaiskuva
+## Kokonaisuus
 
-`digi-opo` on paikallinen työpöytäsovellus, jonka käyttöliittymä rakennetaan web-teknologioilla mutta ajetaan `pywebview`-ikkunassa. Sovellus ei tarvitse erillistä pilvipalvelinta, vaan kaikki toimii käyttäjän koneella.
+`digi-opo` on paikallinen työpöytäsovellus. Käyttöliittymä on rakennettu web-teknologioilla, mutta se ajetaan `pywebview`-ikkunassa Qt-taustalla. Erillistä palvelinympäristöä ei ole. Kaikki suoritetaan käyttäjän koneella.
 
-Kokonaisuus jakautuu kolmeen pääkerrokseen:
+Sovellus jakautuu kolmeen kerrokseen:
 
-1. Käynnistys- ja alustakerros
+1. käynnistys ja ajonaikainen ympäristö
 2. Python-backend
-3. HTML/CSS/TypeScript-käyttöliittymä
-
-## Arkkitehtuurikaavio
-
-```text
-scripts/run_linux.sh / scripts/run_windows.bat
-        │
-        ▼
-   TypeScript build
-        │
-        ▼
-   src/app/app.py
-        │
-        ├── ProjectPaths
-        ├── Backend API
-        └── paikallinen HTTP-palvelin (/src/ui/*)
-                │
-                ▼
-         pywebview-ikkuna
-                │
-                ▼
-      HTML + CSS + TypeScript
-                │
-                ▼
-      window.pywebview.api
-                │
-                ▼
-   SQLite + user/*.json + src/data/*.json
-```
+3. HTML, CSS ja TypeScript -käyttöliittymä
 
 ## Käynnistysketju
 
-Käynnistys etenee käytännössä näin:
+```text
+scripts/run_linux.sh / scripts/run_windows.bat
+        |
+        v
+TypeScript build
+        |
+        v
+src/app/app.py
+        |
+        +-- ProjectPaths
+        +-- Api
+        +-- paikallinen HTTP-palvelin
+        |
+        v
+pywebview-ikkuna
+        |
+        v
+src/ui/pages/*.html
+        |
+        v
+src/ui/scripts/*.js
+        |
+        v
+window.pywebview.api
+        |
+        v
+SQLite + user/*.json + src/data/*.json
+```
 
-1. `scripts/run_linux.sh` tai `scripts/run_windows.bat` tarkistaa Python-version.
-2. Skripti luo tai käyttää `.venv`-ympäristöä, ellei Linuxissa olla Nix-shellissä.
-3. Python-riippuvuudet asennetaan `requirements.txt`:stä.
-4. TypeScript käännetään komennolla `npm run build`.
-5. `src/app/app.py` käynnistetään.
-6. `app.py`:
-   - muodostaa projektin juuren
-   - luo `ProjectPaths`-olion
-   - alustaa backend-API:n
-   - käynnistää paikallisen HTTP-palvelimen satunnaiseen `127.0.0.1`-porttiin
-   - avaa `pywebview`-ikkunan osoitteeseen `http://127.0.0.1:{port}/src/ui/pages/home.html`
-7. Selainpuolen skriptit lataavat yhteisen layoutin ja odottavat `window.pywebview.api`-rajapinnan valmistumista.
+Käynnistys etenee näin:
 
-## Miksi paikallinen HTTP-palvelin on olemassa
+1. Käynnistysskripti tarkistaa Python-version ja valmistelee ympäristön.
+2. Frontend käännetään komennolla `npm run build`.
+3. `src/app/app.py` luo `ProjectPaths`-olion ja backend-API:n.
+4. `app.py` käynnistää paikallisen HTTP-palvelimen osoitteeseen `127.0.0.1` satunnaisella portilla.
+5. `pywebview` avaa ikkunan osoitteeseen `http://127.0.0.1:{port}/src/ui/pages/home.html`.
+6. Sivukohtaiset skriptit odottavat `window.pywebview.api`-rajapinnan valmistumista ja hakevat tarvitsemansa datan backendiltä.
 
-Vaikka kyse on työpöytäsovelluksesta, HTML-sivut ja assetit tarjoillaan kevyen paikallisen HTTP-palvelimen kautta. Syitä:
+## Paikallinen HTTP-palvelin
 
-- selainympäristö käyttäytyy luotettavammin kuin suoraan `file://`-poluista ladattaessa
-- suhteelliset asset-polut toimivat johdonmukaisesti
-- `pywebview` saa saman lähestymistavan kaikille UI-resursseille
+HTML-, CSS-, JavaScript- ja asset-tiedostot tarjoillaan kevyen paikallisen HTTP-palvelimen kautta. Toteutus on tiedostossa `src/app/projekti_paths.py`.
 
-Palvelin sallii vain polut, jotka alkavat `/src/ui/`. Tämä rajaa näkyvistä pois:
+Palvelin sallii vain polut, jotka alkavat `/src/ui/`. Tällä on kaksi seurausta:
 
-- `src/data/*.json`
-- `data/tutkinnot.db`
-- `user/*.json`
+- UI-resurssit toimivat samalla tavalla kaikilla sivuilla ilman `file://`-polkujen rajoitteita.
+- Käyttöliittymä ei pääse lukemaan suoraan tiedostoja kuten `src/data/*.json`, `data/tutkinnot.db` tai `user/*.json`.
 
-Tämä on tärkeä rajaus, koska käyttöliittymä ei saa lukea raakadataa tai käyttäjätiedostoja HTTP:n yli.
+Sovelluksen dynaaminen data kulkee aina backendin kautta.
 
-## Frontendin ja backendin integraatio
+## Backendin ja frontendin rajapinta
 
-Frontend ei tee tavallisia HTTP-API-kutsuja. Sen sijaan jokainen sivu käyttää `window.pywebview.api`-rajapintaa.
+Frontend ei käytä HTTP-API:a. Se kutsuu Python-metodeja `window.pywebview.api`-rajapinnan kautta.
 
-Tämä tarkoittaa:
+Käytännössä tämä tarkoittaa:
 
-- TypeScript-koodi kutsuu Python-metodeja kuin asynkronisia funktioita
-- Python palauttaa JSON-serialisoitavia rakenteita
-- sivut eivät tunne tietokantaa suoraan
-- backend toimii samalla sovelluslogiikan ja tallennuksen rajapintana
+- TypeScript kutsuu Pythonia asynkronisina metodeina.
+- Backend palauttaa JSON-serialisoitavia rakenteita.
+- Käyttöliittymä ei tunne tietokantaskeemaa suoraan.
+- Näkyvyys-, validointi- ja tallennussäännöt pysyvät backendissä.
 
 Yhteinen alustusmalli on:
 
-1. HTML lataa `layout.js` ja sivukohtaisen skriptin.
-2. Sivuskripti kutsuu `waitForPywebviewApi()`.
-3. Jos API ei ole vielä valmis, `createRetryingPageInit()` ajastaa uuden yrityksen.
-4. Kun API löytyy, sivu hakee tarvitsemansa datan ja renderöi näkymän.
+1. HTML lataa `layout.js`:n ja mahdollisen sivukohtaisen skriptin.
+2. Sivuskripti kutsuu `waitForPywebviewApi()` tai `createRetryingPageInit()`.
+3. Kun API on valmis, sivu hakee datan ja renderöi näkymän.
 
-## Tallennusarkkitehtuuri
+## Tallennusmalli
 
-Projektissa on kolme eri datakerrosta, joilla on eri vastuut:
+Projektissa on kolme erillistä tallennuskerrosta.
 
 ### 1. Versionhallittava lähdedata
 
-Sijainti:
+Tiedostot:
 
 - `src/data/ammatit.json`
 - `src/data/opiskeluSuunnat.json`
 - `src/data/opintopolkuQuiz.json`
 
-Tämä data kuuluu repoon ja määrittää sovelluksen sisältörungon.
+Tämä data määrittää sovelluksen lähtösisällön.
 
-### 2. SQLite-tietokanta
+### 2. Ajonaikainen SQLite-tietokanta
 
 Sijainti:
 
 - `data/tutkinnot.db`
 
-SQLiteen tuodaan tutkintodata `ammatit.json`:stä käynnistyksen yhteydessä. Tietokantaan tallennetaan myös käyttäjän pysyvät sisältömuokkaukset, kuten:
+SQLite sisältää:
 
+- tutkinnot ja tutkintonimikkeet
 - tallennetut tutkintonimikkeet
-- suunnitelmatiedot
+- suunnitelmakentät
 - muistiinpanot
 - piilotetut tutkinnot
 - piilotetut tutkintonimikkeet
+- sovelluksen metatiedot
+
+`ammatit.json` tuodaan SQLiteen käynnistyksen yhteydessä, jos lähdedatan hash tai import-versio on muuttunut.
 
 ### 3. Käyttäjäkohtaiset JSON-tiedostot
 
@@ -124,122 +117,60 @@ Sijainti:
 - `user/quiz_results.json`
 - `user/quiz_sessions.json`
 
-Näihin tallennetaan visatulokset ja keskeneräiset visaistunnot.
+Niihin tallennetaan visatulokset ja keskeneräiset visat.
 
-## Miksi kaikki ei ole SQLitessä
+Lisäksi PDF-viennit kirjoitetaan kansioon `exports/`.
 
-Tietokantaan on viety erityisesti rakenteinen, relaatioita hyödyntävä data:
+## Vastuurajat
 
-- tutkinnot
-- nimikkeet
-- suosikit
-- muistiinpanot
-- asetukset
+### Python-backend
 
-Visatulokset ja sessiot ovat sen sijaan dokumenttimaisempaa JSON-dataa. Niiden nykyinen tallennustapa:
+Backend vastaa:
 
-- on yksinkertainen toteuttaa
-- riittää tämän sovelluksen tarpeisiin
-- ei vaadi relaatioita tai hakuja useiden taulujen yli
+- tietokannan avaamisesta ja skeeman ylläpidosta
+- lähdedatan tuonnista
+- syötteiden validoinnista ja normalisoinnista
+- näkyvyyslogiikasta
+- käyttäjän tallennusten, muistiinpanojen ja visatietojen pysyvyydestä
+- PDF-viennistä
 
-## Backendin sisäinen rakenne
+### Frontend
 
-Backend on koottu mixin-luokista:
+Frontend vastaa:
 
-- `BackendBase`
-- `TutkinnotApiMixin`
-- `AsetuksetApiMixin`
-- `QuizitApiMixin`
-- `SisaltoApiMixin`
+- sivukohtaisesta näkymälogiikasta
+- paikallisesta käyttöliittymätilasta
+- DOM-renderöinnistä
+- käyttäjän toimintojen välittämisestä backendille
 
-Ne yhdistetään yhdeksi `Api`-luokaksi tiedostossa `src/app/backend/api.py`.
+## Koodin keskeiset periaatteet
 
-Tämä rakenne tekee yhdestä julkisesta rajapinnasta selkeän, mutta pitää vastuualueet erillään.
+### Backend ratkaisee näkyvyyden
 
-## Frontendin sisäinen rakenne
+Tutkintojen ja tutkintonimikkeiden piilotus ei ole vain käyttöliittymäsuodatin. Backend rajaa piilotetut kohteet pois listauksista, hauista, detaljinäkymistä ja tallennetuista listoista.
 
-Frontend jakautuu kolmeen tasoon:
+### Frontend pitää tilan näkymän lähellä
 
-### Yhteiset apurit
+Sivukohtaiset skriptit ylläpitävät omat tilansa. Esimerkiksi:
 
-- `layout.ts`
-- `pywebview-init.ts`
-- `tutkintonimike-card.ts`
+- `pankki.ts` hallitsee aktiivista tutkintoa, suodattimia ja detail-cachea
+- `quiz.ts` hallitsee kyselyn etenemistä ja vastauksia
+- `amis-quiz.ts` hallitsee koko pairwise ranking -session tilaa
+- `my-plan.ts` kokoaa useasta lähteestä johdetun näkymän
 
-### Sivukohtaiset skriptit
+### Alustus kestää viiveen
 
-Jokaisella näkymällä on oma `.ts`-tiedosto, joka:
+`pywebview` ei välttämättä ole valmis heti DOM:n valmistuessa. Siksi dynaamiset sivut käyttävät uudelleenyrityksiä tukevaa init-mallia.
 
-- hakee datan backendiltä
-- ylläpitää paikallista UI-tilaa
-- renderöi DOM-elementit
-- käsittelee käyttäjän toiminnot
+## Kriittiset tiedostot
 
-### Tyylikerros
+Muutokset näissä vaikuttavat laajasti:
 
-- `src/ui/styles/styles.css` sisältää sovelluksen yhteiset ja sivukohtaiset tyylit
-
-## Yhteiset suunnitteluperiaatteet koodissa
-
-Projektissa näkyy muutama johdonmukainen toteutusperiaate:
-
-### 1. Käyttöliittymä odottaa backendiä rauhallisesti
-
-Koska `pywebview` ei välttämättä ole heti valmis DOM:n valmistuessa, alustus on tehty uudelleenyrityksiä tukevaksi.
-
-### 2. Frontend pitää tilan mahdollisimman lähellä näkymää
-
-Esimerkiksi:
-
-- `pankki.ts` pitää aktiivisen tutkinnon, suodattimet ja cachet muistissa
-- `quiz.ts` pitää vastaukset muistissa, mutta tallentaa etenemisen backendiin
-- `amis-quiz.ts` pitää koko merge sort -istunnon muistissa ja serialisoi siitä tallennettavan snapshotin
-
-### 3. Backend normalisoi ja validoi syötteet
-
-Esimerkiksi:
-
-- suunnitelmakentissä hyväksytään vain sallitut tilakoodit
-- tunnisteet muunnetaan turvallisesti kokonaisluvuiksi
-
-### 4. Piilotus on globaali näkymäsääntö
-
-Kun tutkinto tai tutkintonimike piilotetaan:
-
-- se häviää listauksista
-- haut eivät palauta sitä
-- detail-näkymä ei näytä sitä
-- tallennetut ja muistiinpanot eivät enää listaa sitä näkyvänä
-
-Piilotus ei siis ole vain yhden sivun UI-suodatin, vaan backendin tarjoama näkyvyyssääntö.
-
-## Tärkeimmät datavirrat
-
-### Tutkintodata
-
-`src/data/ammatit.json` -> `ensure_data()` -> SQLite `tutkinnot` + `tutkintonimikkeet` -> frontendin listat ja detailit
-
-### Opintopolut
-
-`src/data/opiskeluSuunnat.json` -> `list_opiskelu_suunnat()` -> `opintopolut.ts`
-
-### Opintopolku-kysely
-
-`src/data/opintopolkuQuiz.json` -> `get_opintopolku_quiz()` -> `quiz.ts` -> käyttäjän vastaukset -> `quiz_results.json` / `quiz_sessions.json`
-
-### Tallennetut suosikit ja oma suunnitelma
-
-`pankki.ts` / `amis-quiz.ts` tallentavat suosikkeja -> SQLite `saved_tutkintonimikkeet` -> `saved-tutkintonimikkeet.ts` ja `my-plan.ts`
-
-## Missä arkkitehtuurin kriittisimmät kohdat ovat
-
-Jos projektiin tehdään muutoksia, nämä kohdat vaikuttavat laajasti:
-
+- `src/app/app.py`
 - `src/app/projekti_paths.py`
-- `src/app/backend/tietokanta.py`
 - `src/app/backend/api.py`
+- `src/app/backend/tietokanta.py`
+- `src/app/backend/tutkinnot.py`
 - `src/ui/scripts/pywebview-init.ts`
 - `src/ui/scripts/layout.ts`
 - `src/ui/scripts/tutkintonimike-card.ts`
-
-Näiden muuttaminen vaikuttaa yleensä useaan sivuun tai koko sovelluksen käynnistymiseen.

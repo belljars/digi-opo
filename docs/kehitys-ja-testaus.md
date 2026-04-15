@@ -1,19 +1,16 @@
 # Kehitys ja testaus
 
-## Teknologiat
+## Kehitysympäristö
 
-Projektissa käytetään seuraavia pääteknologioita:
+Pääteknologiat:
 
 - Python
 - `pywebview`
 - PyQt6 + Qt WebEngine
 - TypeScript
-- HTML
-- CSS
+- HTML ja CSS
 - SQLite
-- Nix kehitysympäristöön Linuxissa
-
-## Riippuvuudet
+- Nix Linux-kehitysympäristönä
 
 Python-riippuvuudet tulevat tiedostosta `requirements.txt`:
 
@@ -23,9 +20,29 @@ Python-riippuvuudet tulevat tiedostosta `requirements.txt`:
 - `QtPy`
 - `typing-extensions`
 
-Node-puolella tärkein kehitysriippuvuus on:
+Node-puolella projekti käyttää `typescript`-pakettia.
 
-- `typescript`
+## Asennus
+
+### Linux tai macOS-tyylinen shell
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+npm install
+npm run build
+```
+
+### Windows
+
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+npm install
+npm run build
+```
 
 ## TypeScript-build
 
@@ -35,43 +52,59 @@ Käännös tehdään komennolla:
 npm run build
 ```
 
-Tärkeä yksityiskohta:
+Tärkeää:
 
-- käännös ei mene `dist/`-hakemistoon
+- build ei kirjoita `dist/`-hakemistoon
 - `.js`-tiedostot syntyvät suoraan `src/ui/scripts/`-hakemistoon
+- käynnistysskriptit tarkistavat, että tärkeimmät `.js`-tiedostot ovat olemassa ennen sovelluksen käynnistämistä
 
-Tämä näkyy myös käynnistysskripteissä, jotka tarkistavat että tietyt `.js`-tiedostot ovat olemassa ennen sovelluksen käynnistämistä.
+Tyyppitarkistus ilman buildiä:
 
-## Linux-käynnistys
+```bash
+npm run check
+```
 
-`scripts/run_linux.sh` tekee seuraavaa:
+## Käynnistysskriptit
 
-1. etsii Python 3.12:n tai 3.11:n
-2. yrittää tarvittaessa käynnistyä Nix-flaken kautta
+### Linux
+
+`scripts/run_linux.sh`:
+
+1. etsii Python `3.12` tai `3.11`
+2. yrittää tarvittaessa siirtyä automaattisesti Nix-flaken ympäristöön
 3. luo `.venv`:n, jos ei olla Nix-shellissä
-4. asentaa Python-riippuvuudet
-5. ajaa TypeScript-buildin
-6. tarkistaa tärkeimmät builditulosteet
-7. käynnistää `src/app/app.py`:n
+4. asentaa Python-riippuvuudet, jos ei olla Nix-shellissä
+5. buildaa frontendin
+6. tarkistaa buildin tulostiedostot
+7. käynnistää `src/app/app.py`
 
-Hyvä huomio:
-
-- jos paikallista sopivaa Pythonia ei löydy mutta `flake.nix` ja `nix` ovat saatavilla, skripti osaa siirtyä Nix-kehitysympäristöön automaattisesti
-
-## Windows-käynnistys
+### Windows
 
 `scripts/run_windows.bat`:
 
 1. etsii `py -3.12` tai `py -3.11`
-2. luo `.venv`:n
+2. luo tai tarvittaessa rakentaa `.venv`:n uudelleen
 3. asentaa Python-riippuvuudet
 4. ajaa `npm run build`
-5. tarkistaa että tärkeimmät `.js`-tiedostot ovat olemassa
-6. käynnistää sovelluksen
+5. tarkistaa buildin tulostiedostot
+6. käynnistää `src\app\app.py`
 
-## Nix-kehitysympäristö
+### Tärkeä käyttäytyminen
 
-Nix on tehokas, funktionaalinen ja deklaratiivinen paketinhallintajärjestelmä. Se varmistaa luotettavat, toistettavat (reproducible) asennukset ja päivitykset eristämällä paketit toisistaan, mikä estää riippuvuusongelmat. 
+Molemmat käynnistysskriptit poistavat ennen käynnistystä:
+
+- `user/*.json`
+- `data/*.db`
+
+Niitä kannattaa käyttää puhtaan testikäynnistyksen komentona. Jos haluat säilyttää paikalliset tallennukset kehityksen aikana, käynnistä sovellus manuaalisesti:
+
+```bash
+source .venv/bin/activate
+npm run build
+python src/app/app.py
+```
+
+## Nix-ympäristö
 
 `flake.nix` määrittää Linux-kehitysympäristön, joka sisältää:
 
@@ -79,77 +112,66 @@ Nix on tehokas, funktionaalinen ja deklaratiivinen paketinhallintajärjestelmä.
 - Node.js 22
 - TypeScriptin
 - Qt Wayland -paketit
-- tarvittavat Python-kirjastot
+- projektin tarvitsemat Python-kirjastot
 
-Se myös asettaa Qt-ympäristömuuttujia, jotta `pywebview` + Qt WebEngine toimivat Nix-ympäristössä vakaasti.
-
-## Yleisimmät kehityskomennot
-
-```bash
-npm install
-npm run check
-npm run build
-python src/app/app.py
-```
-
-Jos käytät Nixiä:
+Käyttö:
 
 ```bash
 nix develop
 ./scripts/run_linux.sh
 ```
 
+Tai:
+
+```bash
+nix run
+```
+
 ## Testit
 
-Projektissa on kolme testiryhmää.
+Projektissa on kolme päätestiryhmää.
 
-## 1. Backend-integraatiotestit
+### Backend-integraatiotestit
 
 Tiedosto:
 
 - `tests/test_backend_api.py`
 
-Nämä testit:
+Ne kattavat esimerkiksi:
 
-- rakentavat tilapäisen projektijuurirakenteen
-- kirjoittavat sinne testidataa
-- lataavat oikean `Api`-luokan
-- testaavat backendin toimintaa ilman oikean ikkunan avaamista
-
-Niissä tarkistetaan muun muassa:
-
-- tutkintodatan import
-- haun toiminta
-- kuvapolkujen normalisointi
-- suosikkien tallennus ja poisto
-- piilotuslogiikka
+- tutkintodatan importin
+- haun
+- kuvapolkujen normalisoinnin
+- tallennukset ja poistot
+- piilotuslogiikan
 - muistiinpanot
 - suunnitelmakentät
 - quiz-tulokset ja sessiot
-- staattisen palvelimen polkurajaus
+- staattisen palvelimen polkurajauksen
+- PDF-viennin
 
-## 2. Frontend-init-testit
+### Frontend-init-testit
 
 Tiedosto:
 
 - `tests/test_pywebview_init.mjs`
 
-Nämä testit tarkistavat:
+Ne tarkistavat, että:
 
-- että `waitForPywebviewApi()` toimii viiveellisessä tilanteessa
-- että alustus yrittää uudelleen onnistuneesti
+- `waitForPywebviewApi()` toimii viiveellisessä tilanteessa
+- init-logiikka yrittää uudelleen oikein
 
-## 3. HTML-sivujen savutestit
+### HTML-sivujen savutestit
 
 Tiedosto:
 
 - `tests/test_ui_smoke.py`
 
-Nämä testit tarkistavat:
+Ne tarkistavat, että:
 
-- että sivut viittaavat olemassa oleviin CSS-tiedostoihin
-- että sivut viittaavat olemassa oleviin skripteihin
-- että `.js`-tiedostoille hyväksytään tarvittaessa `.ts` fallback
+- HTML viittaa olemassa oleviin CSS-tiedostoihin
+- HTML viittaa olemassa oleviin skripteihin
+- `.js`-tiedoston puuttuessa hyväksytään tarvittaessa `.ts`-fallback
 
 ## Testien ajaminen
 
@@ -160,19 +182,15 @@ python -m unittest tests.test_backend_api
 python -m unittest tests.test_ui_smoke
 ```
 
-## Mitä kannattaa testata muutosten jälkeen
+## Suositeltu minimisetti muutostyypeittäin
 
-### Jos muokkaat backendiä
-
-Vähintään:
+### Backend-muutos
 
 ```bash
 python -m unittest tests.test_backend_api
 ```
 
-### Jos muokkaat yhteisiä frontend-apureita
-
-Vähintään:
+### Yhteinen frontend-apuri
 
 ```bash
 npm run check
@@ -180,77 +198,31 @@ npm run test:frontend-init
 python -m unittest tests.test_ui_smoke
 ```
 
-### Jos muokkaat sivukohtaista UI-logiikkaa
-
-Vähintään:
+### Sivukohtainen frontend-muutos
 
 ```bash
 npm run check
 python -m unittest tests.test_ui_smoke
 ```
 
-Lisäksi kannattaa ajaa sovellus ja tarkistaa kyseinen sivu käsin.
+Käytä lisäksi manuaalista käynnistystä ja tarkista muokattu näkymä sovelluksessa.
 
-## Lähdedatan muuttaminen
+## Lähdedatan päivittäminen
 
-Jos muokkaat `src/data/ammatit.json`-tiedostoa:
+### `src/data/ammatit.json`
+
+Kun tiedosto muuttuu:
 
 - backend huomaa muutoksen hashin perusteella
 - tutkinto- ja nimiketaulut rakennetaan uudelleen käynnistyksen yhteydessä
 
-Tämä on tärkeää muistaa:
+### `src/data/opiskeluSuunnat.json` ja `src/data/opintopolkuQuiz.json`
 
-- itse tutkintosisältö ei ole tarkoitettu pysyvästi ylläpidettäväksi SQLiteen käsin
-- SQLite on tässä lähdedatan ajonaikainen, normalisoitu muoto
+Backend lukee nämä suoraan JSON-lähteinä ilman SQLite-importtia.
 
-Jos muokkaat:
+## Käytännön ohjeet
 
-- `src/data/opiskeluSuunnat.json`
-- `src/data/opintopolkuQuiz.json`
-
-muutokset näkyvät suoraan backendin JSON-luvuissa ilman SQLite-importtia.
-
-## Ylläpitovinkit
-
-### 1. Pidä yhteiset apurit pieninä
-
-Projektissa toistuvaa logiikkaa on jo keskitetty hyvin. Uutta yhteistä logiikkaa kannattaa lisätä mieluummin:
-
-- `pywebview-init.ts`
-- `tutkintonimike-card.ts`
-
-kuin kopioida useaan sivuun.
-
-### 2. Säilytä backendin vastuu näkyvyyssäännöissä
-
-Jos lisäät uusia listauksia, älä toteuta piilotuslogiikkaa vain frontendissä. Säännön pitää tulla backendiltä, jotta kaikki näkymät pysyvät johdonmukaisina.
-
-### 3. Muista kaksi eri pysyvän tallennuksen tasoa
-
-Projektissa on tarkoituksella:
-
-- SQLite
-- käyttäjäkohtaiset JSON-tiedostot
-- frontendin `localStorage`
-
-Kun lisäät uutta dataa, mieti mihin näistä se aidosti kuuluu.
-
-### 4. Huomioi init-viive
-
-Jos lisäät uuden sivun, käytä samaa mallia kuin muissa sivuissa:
-
-- odota `pywebview`-APIa
-- näytä lataus- tai virhetila
-- tue uudelleenyritystä
-
-## Suositeltu perehtymisjärjestys uudelle kehittäjälle
-
-1. `README.md`
-2. `docs/arkkitehtuuri.md`
-3. `src/app/app.py`
-4. `src/app/backend/api.py`
-5. `src/ui/scripts/layout.ts`
-6. `src/ui/scripts/pankki.ts`
-7. `src/ui/scripts/quiz.ts`
-8. `src/ui/scripts/amis-quiz.ts`
-9. `docs/kayttovirrat.md`
+- Lisää yhteinen logiikka mieluummin `pywebview-init.ts`, `layout.ts` tai `tutkintonimike-card.ts` -tiedostoihin kuin kopioi sitä usealle sivulle.
+- Säilytä näkyvyys- ja validointisäännöt backendissä.
+- Päätä uuden datan tallennuspaikka tietoisesti: `SQLite`, `user/*.json` tai frontendin `localStorage`.
+- Muista, että uuden dynaamisen sivun pitää odottaa `pywebview`-API:a ennen backend-kutsuja.
