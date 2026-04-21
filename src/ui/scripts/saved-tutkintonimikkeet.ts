@@ -102,6 +102,10 @@ const feedbackEl = document.getElementById("saved-feedback");
 let noteSaveInFlightIds = new Set<number>();
 let noteDeleteInFlightIds = new Set<number>();
 let planSaveInFlightIds = new Set<number>();
+let savedItems: SavedTutkintonimikeItem[] = [];
+let savedNotes: TutkintonimikeNoteItem[] = [];
+let quizResults: QuizResultEntry[] = [];
+let quizSessions: QuizSessionEntry[] = [];
 
 const PLAN_PRIORITY_OPTIONS = [
   { value: "", label: "Ei valintaa" },
@@ -306,6 +310,64 @@ function renderSavedStats(items: SavedTutkintonimikeItem[]): void {
     const maxCount = stats[0]?.count ?? 0;
     statsChartEl.replaceChildren(...stats.map((stat) => createStatsRow(stat, maxCount)));
   }
+}
+
+function sortSavedItems(items: SavedTutkintonimikeItem[]): SavedTutkintonimikeItem[] {
+  return [...items].sort((left, right) => left.nimi.localeCompare(right.nimi, "fi"));
+}
+
+function sortNotes(items: TutkintonimikeNoteItem[]): TutkintonimikeNoteItem[] {
+  return [...items].sort((left, right) => {
+    const dateOrder = new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+    return dateOrder || left.nimi.localeCompare(right.nimi, "fi");
+  });
+}
+
+function renderSavedItems(): void {
+  const noteMap = new Map(savedNotes.map((note) => [note.id, note.noteText]));
+
+  if (!savedItems.length) {
+    renderEmpty(listEl, "Et ole vielÃ¤ tallentanut tutkintonimikkeitÃ¤.");
+    return;
+  }
+
+  listEl?.replaceChildren(...savedItems.map((item) => createSavedCard(item, noteMap.get(item.id) ?? "")));
+}
+
+function renderQuizResults(): void {
+  if (!quizResults.length) {
+    renderEmpty(resultsListEl, "Et ole vielÃ¤ tallentanut kyselytuloksia.");
+    return;
+  }
+
+  resultsListEl?.replaceChildren(...quizResults.map((item) => createResultCard(item)));
+}
+
+function renderQuizSessions(): void {
+  if (!quizSessions.length) {
+    renderEmpty(sessionsListEl, "Ei kesken jÃ¤Ã¤neitÃ¤ kyselyitÃ¤.");
+    return;
+  }
+
+  sessionsListEl?.replaceChildren(...quizSessions.map((item) => createSessionCard(item)));
+}
+
+function renderSavedNotes(): void {
+  if (!savedNotes.length) {
+    renderEmpty(notesListEl, "Et ole vielÃ¤ kirjoittanut muistiinpanoja.");
+    return;
+  }
+
+  notesListEl?.replaceChildren(...savedNotes.map((item) => createNoteCard(item)));
+}
+
+function renderSavedState(): void {
+  setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+  renderSavedStats(savedItems);
+  renderSavedItems();
+  renderQuizResults();
+  renderQuizSessions();
+  renderSavedNotes();
 }
 
 function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLElement {
@@ -619,35 +681,13 @@ async function renderSavedHub(): Promise<void> {
     api.get_quiz_session("opintopolku")
   ]);
 
-  const noteMap = new Map(notes.map((note) => [note.id, note.noteText]));
   const sessions = [amisSession, opintopolkuSession].filter((item): item is QuizSessionEntry => item !== null);
 
-  setCounts(items.length, results.length, sessions.length, notes.length);
-  renderSavedStats(items);
-
-  if (!items.length) {
-    renderEmpty(listEl, "Et ole vielä tallentanut tutkintonimikkeitä.");
-  } else if (listEl) {
-    listEl.replaceChildren(...items.map((item) => createSavedCard(item, noteMap.get(item.id) ?? "")));
-  }
-
-  if (!results.length) {
-    renderEmpty(resultsListEl, "Et ole vielä tallentanut kyselytuloksia.");
-  } else if (resultsListEl) {
-    resultsListEl.replaceChildren(...results.map((item) => createResultCard(item)));
-  }
-
-  if (!sessions.length) {
-    renderEmpty(sessionsListEl, "Ei kesken jääneitä kyselyitä.");
-  } else if (sessionsListEl) {
-    sessionsListEl.replaceChildren(...sessions.map((item) => createSessionCard(item)));
-  }
-
-  if (!notes.length) {
-    renderEmpty(notesListEl, "Et ole vielä kirjoittanut muistiinpanoja.");
-  } else if (notesListEl) {
-    notesListEl.replaceChildren(...notes.map((item) => createNoteCard(item)));
-  }
+  savedItems = sortSavedItems(items);
+  savedNotes = sortNotes(notes);
+  quizResults = results;
+  quizSessions = sessions;
+  renderSavedState();
 }
 
 async function removeSavedItem(id: number, nimi: string): Promise<void> {
@@ -658,8 +698,13 @@ async function removeSavedItem(id: number, nimi: string): Promise<void> {
   }
 
   const removed = await api.remove_saved_tutkintonimike(id);
+  if (removed) {
+    savedItems = savedItems.filter((item) => item.id !== id);
+    renderSavedItems();
+    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+    renderSavedStats(savedItems);
+  }
   setFeedback(removed ? `"${nimi}" poistettiin tallennuksista.` : `"${nimi}" ei löytynyt tallennuksista.`);
-  await renderSavedHub();
 }
 
 async function saveNote(id: number, nimi: string, noteText: string): Promise<void> {
@@ -676,14 +721,21 @@ async function saveNote(id: number, nimi: string, noteText: string): Promise<voi
   }
 
   noteSaveInFlightIds.add(id);
+  renderSavedItems();
   try {
-    await api.save_tutkintonimike_note(id, normalized);
+    const savedNote = await api.save_tutkintonimike_note(id, normalized);
+    savedNotes = sortNotes([
+      savedNote,
+      ...savedNotes.filter((note) => note.id !== id)
+    ]);
     setFeedback(`Muistiinpano tallennettiin kohteelle "${nimi}".`);
-    await renderSavedHub();
   } catch {
     setFeedback(`Muistiinpanon tallennus epäonnistui kohteelle "${nimi}".`);
   } finally {
     noteSaveInFlightIds.delete(id);
+    renderSavedItems();
+    renderSavedNotes();
+    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
   }
 }
 
@@ -701,14 +753,20 @@ async function savePlan(
   }
 
   planSaveInFlightIds.add(id);
+  renderSavedItems();
   try {
-    await api.save_tutkintonimike_plan(id, priority || null, status || null, nextStep.trim() || null);
+    const savedItem = await api.save_tutkintonimike_plan(id, priority || null, status || null, nextStep.trim() || null);
+    savedItems = sortSavedItems([
+      savedItem,
+      ...savedItems.filter((item) => item.id !== id)
+    ]);
     setFeedback(`Suunnitelma tallennettiin kohteelle "${nimi}".`);
-    await renderSavedHub();
   } catch {
     setFeedback(`Suunnitelman tallennus epäonnistui kohteelle "${nimi}".`);
   } finally {
     planSaveInFlightIds.delete(id);
+    renderSavedItems();
+    renderSavedStats(savedItems);
   }
 }
 
@@ -720,14 +778,20 @@ async function removeNote(id: number, nimi: string): Promise<void> {
   }
 
   noteDeleteInFlightIds.add(id);
+  renderSavedItems();
   try {
     const removed = await api.remove_tutkintonimike_note(id);
+    if (removed) {
+      savedNotes = savedNotes.filter((note) => note.id !== id);
+    }
     setFeedback(removed ? `Muistiinpano poistettiin kohteelta "${nimi}".` : `Muistiinpanoa ei löytynyt kohteelta "${nimi}".`);
-    await renderSavedHub();
   } catch {
     setFeedback(`Muistiinpanon poisto epäonnistui kohteelle "${nimi}".`);
   } finally {
     noteDeleteInFlightIds.delete(id);
+    renderSavedItems();
+    renderSavedNotes();
+    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
   }
 }
 
@@ -739,8 +803,12 @@ async function removeQuizResult(resultId: string): Promise<void> {
   }
 
   const removed = await api.remove_quiz_result(resultId);
+  if (removed) {
+    quizResults = quizResults.filter((result) => result.id !== resultId);
+    renderQuizResults();
+    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+  }
   setFeedback(removed ? "Kyselytulos poistettiin." : "Kyselytulosta ei löytynyt.");
-  await renderSavedHub();
 }
 
 async function removeQuizSession(quizId: string): Promise<void> {
@@ -751,8 +819,12 @@ async function removeQuizSession(quizId: string): Promise<void> {
   }
 
   const removed = await api.clear_quiz_session(quizId);
+  if (removed) {
+    quizSessions = quizSessions.filter((session) => session.quizId !== quizId);
+    renderQuizSessions();
+    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+  }
   setFeedback(removed ? `${getQuizLabel(quizId)} poistettiin keskeneräisistä.` : "Keskeneräistä kyselytilaa ei löytynyt.");
-  await renderSavedHub();
 }
 
 async function init(): Promise<InitAttemptResult> {

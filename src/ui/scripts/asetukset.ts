@@ -87,6 +87,10 @@ let hiddenTutkintonimikkeet: HiddenTutkintonimikeItem[] = [];
 let exportInFlight = false;
 let unhideAllTutkinnotInFlight = false;
 let unhideAllTutkintonimikkeetInFlight = false;
+let tutkintoSearchTimeout: number | null = null;
+let tutkintonimikeSearchTimeout: number | null = null;
+
+const searchDebounceMs = 200;
 
 // Päivittää asetussivun palautetekstin yhdestä paikasta
 function setFeedback(message = ""): void {
@@ -106,6 +110,25 @@ function setExportStatus(message = ""): void {
   if (exportStatusEl) {
     exportStatusEl.textContent = message;
   }
+}
+
+function sortTutkinnot<T extends TutkintoListItem>(items: T[]): T[] {
+  return [...items].sort((left, right) => left.nimi.localeCompare(right.nimi, "fi"));
+}
+
+function sortTutkintonimikkeet<T extends TutkintonimikeItem>(items: T[]): T[] {
+  return [...items].sort((left, right) => left.nimi.localeCompare(right.nimi, "fi"));
+}
+
+function getHiddenTimestamp(): string {
+  return new Date().toISOString();
+}
+
+function getTutkintonimikeCountForTutkinto(tutkintoId: number): number {
+  return (
+    visibleTutkintonimikkeet.filter((item) => item.tutkinto_id === tutkintoId).length +
+    hiddenTutkintonimikkeet.filter((item) => item.tutkinto_id === tutkintoId).length
+  );
 }
 
 function updateExportButtonState(): void {
@@ -306,6 +329,29 @@ function renderAll(): void {
   updateBulkUnhideButtonStates();
 }
 
+// Aikatauluttaa hakutulosten piirron niin, ettei jokainen näppäinpainallus rakenna listoja uudestaan
+function scheduleVisibleTutkinnotRender(): void {
+  if (tutkintoSearchTimeout !== null) {
+    window.clearTimeout(tutkintoSearchTimeout);
+  }
+
+  tutkintoSearchTimeout = window.setTimeout(() => {
+    tutkintoSearchTimeout = null;
+    renderVisibleTutkinnot();
+  }, searchDebounceMs);
+}
+
+function scheduleVisibleTutkintonimikkeetRender(): void {
+  if (tutkintonimikeSearchTimeout !== null) {
+    window.clearTimeout(tutkintonimikeSearchTimeout);
+  }
+
+  tutkintonimikeSearchTimeout = window.setTimeout(() => {
+    tutkintonimikeSearchTimeout = null;
+    renderVisibleTutkintonimikkeet();
+  }, searchDebounceMs);
+}
+
 // Hakee asetussivun tarvitseman datan backendistä yhdellä rinnakkaisella latauksella
 async function loadData(): Promise<void> {
   if (!activeApi) {
@@ -363,9 +409,20 @@ async function hideTutkinto(item: TutkintoListItem): Promise<void> {
 
   try {
     await activeApi.hide_tutkinto(item.id);
-    // Uudelleenlataus pitää laskurit, haut ja kaikki listat samassa tilassa
+    const hiddenItem: HiddenTutkintoListItem = {
+      ...item,
+      hiddenAt: getHiddenTimestamp(),
+      tutkintonimikeCount: getTutkintonimikeCountForTutkinto(item.id)
+    };
+    visibleTutkinnot = visibleTutkinnot.filter((visibleItem) => visibleItem.id !== item.id);
+    hiddenTutkinnot = sortTutkinnot([
+      ...hiddenTutkinnot.filter((hidden) => hidden.id !== item.id),
+      hiddenItem
+    ]);
+    visibleTutkintonimikkeet = visibleTutkintonimikkeet.filter((nimike) => nimike.tutkinto_id !== item.id);
+    hiddenTutkintonimikkeet = hiddenTutkintonimikkeet.filter((nimike) => nimike.tutkinto_id !== item.id);
     setFeedback(`Tutkinto "${item.nimi}" piilotettiin koko sovelluksesta.`);
-    await reloadAll();
+    renderAll();
   } catch {
     setFeedback(`Tutkinnon "${item.nimi}" piilotus epäonnistui.`);
   }
@@ -399,8 +456,8 @@ async function unhideAllTutkinnot(): Promise<void> {
 
   try {
     await Promise.all(items.map((item) => api.unhide_tutkinto(item.id)));
-    setFeedback(`${items.length} piilotettua tutkintoa palautettiin näkyviin.`);
     await reloadAll();
+    setFeedback(`${items.length} piilotettua tutkintoa palautettiin näkyviin.`);
   } catch {
     setFeedback("Kaikkien tutkintojen palautus epäonnistui.");
   } finally {
@@ -417,8 +474,19 @@ async function hideTutkintonimike(item: TutkintonimikeItem): Promise<void> {
 
   try {
     await activeApi.hide_tutkintonimike(item.id);
+    const hiddenItem: HiddenTutkintonimikeItem = {
+      ...item,
+      hiddenAt: getHiddenTimestamp()
+    };
+    visibleTutkintonimikkeet = visibleTutkintonimikkeet.filter((visibleItem) => visibleItem.id !== item.id);
+    hiddenTutkintonimikkeet = sortTutkintonimikkeet([
+      ...hiddenTutkintonimikkeet.filter((hidden) => hidden.id !== item.id),
+      hiddenItem
+    ]);
     setFeedback(`Tutkintonimike "${item.nimi}" piilotettiin koko sovelluksesta.`);
-    await reloadAll();
+    renderVisibleTutkintonimikkeet();
+    renderHiddenTutkintonimikkeet();
+    updateBulkUnhideButtonStates();
   } catch {
     setFeedback(`Tutkintonimikkeen "${item.nimi}" piilotus epäonnistui.`);
   }
@@ -432,8 +500,23 @@ async function unhideTutkintonimike(item: HiddenTutkintonimikeItem): Promise<voi
 
   try {
     await activeApi.unhide_tutkintonimike(item.id);
+    const visibleItem: TutkintonimikeItem = {
+      id: item.id,
+      nimi: item.nimi,
+      linkki: item.linkki,
+      img: item.img,
+      tutkinto_id: item.tutkinto_id,
+      tutkinto_nimi: item.tutkinto_nimi
+    };
+    hiddenTutkintonimikkeet = hiddenTutkintonimikkeet.filter((hiddenItem) => hiddenItem.id !== item.id);
+    visibleTutkintonimikkeet = sortTutkintonimikkeet([
+      ...visibleTutkintonimikkeet.filter((visible) => visible.id !== item.id),
+      visibleItem
+    ]);
     setFeedback(`Tutkintonimike "${item.nimi}" palautettiin näkyviin.`);
-    await reloadAll();
+    renderVisibleTutkintonimikkeet();
+    renderHiddenTutkintonimikkeet();
+    updateBulkUnhideButtonStates();
   } catch {
     setFeedback(`Tutkintonimikkeen "${item.nimi}" palautus epäonnistui.`);
   }
@@ -452,8 +535,24 @@ async function unhideAllTutkintonimikkeet(): Promise<void> {
 
   try {
     await Promise.all(items.map((item) => api.unhide_tutkintonimike(item.id)));
+    hiddenTutkintonimikkeet = hiddenTutkintonimikkeet.filter(
+      (hiddenItem) => !items.some((item) => item.id === hiddenItem.id)
+    );
+    visibleTutkintonimikkeet = sortTutkintonimikkeet([
+      ...visibleTutkintonimikkeet,
+      ...items.map((item) => ({
+        id: item.id,
+        nimi: item.nimi,
+        linkki: item.linkki,
+        img: item.img,
+        tutkinto_id: item.tutkinto_id,
+        tutkinto_nimi: item.tutkinto_nimi
+      }))
+    ]);
     setFeedback(`${items.length} piilotettua tutkintonimikettä palautettiin näkyviin.`);
-    await reloadAll();
+    renderVisibleTutkintonimikkeet();
+    renderHiddenTutkintonimikkeet();
+    updateBulkUnhideButtonStates();
   } catch {
     setFeedback("Kaikkien tutkintonimikkeiden palautus epäonnistui.");
   } finally {
@@ -490,10 +589,10 @@ async function init(): Promise<InitAttemptResult> {
 
     // Hakukentät suodattavat jo muistissa olevaa dataa ilman uusia backend-kutsuja
     tutkintoSearchEl?.addEventListener("input", () => {
-      renderVisibleTutkinnot();
+      scheduleVisibleTutkinnotRender();
     });
     tutkintonimikeSearchEl?.addEventListener("input", () => {
-      renderVisibleTutkintonimikkeet();
+      scheduleVisibleTutkintonimikkeetRender();
     });
     exportPdfButtonEl?.addEventListener("click", () => {
       void exportUserDataPdf();
