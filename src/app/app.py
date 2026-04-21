@@ -33,7 +33,19 @@ import webview  # Avaa HTML-käyttöliittymän työpöytäsovelluksen ikkunaan
 
 def _project_root() -> Path:
     # Palauttaa projektin juuren, josta muut sovelluksen polut johdetaan
+    if getattr(sys, "frozen", False):
+        bundled_root = getattr(sys, "_MEIPASS", None)
+        if bundled_root:
+            return Path(bundled_root).resolve()
+        return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parents[2]
+
+
+def _project_paths() -> ProjectPaths:
+    project_root = _project_root()
+    if getattr(sys, "frozen", False):
+        return ProjectPaths.for_runtime(project_root)
+    return ProjectPaths(project_root)
 
 
 class Api(BackendApi):
@@ -41,12 +53,12 @@ class Api(BackendApi):
 
     def __init__(self) -> None:
         # Alustaa backendin projektin juuren pohjalta
-        super().__init__(ProjectPaths(_project_root()))
+        super().__init__(_project_paths())
 
 
 def main() -> None:
     # Käynnistää paikallisen tiedostopalvelimen ja avaa käyttöliittymäikkunan
-    paths = ProjectPaths(_project_root())
+    paths = _project_paths()
     api = Api()
     server, port = start_static_server(paths)
     try:

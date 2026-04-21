@@ -75,18 +75,18 @@ class BackendBase:
         )
 
     def delete_user_info(self) -> dict[str, list[str] | bool]:
-        # Poistaa vain projektin user-kansion JSON-tiedostot ja data-kansion DB-tiedostot
+        # Poistaa vain sovelluksen kirjoitettavan datajuuren JSON- ja DB-tiedostot
         user_dir = self._paths.kayttaja_data_dir().resolve()
         data_dir = self._paths.tietokanta_path().resolve().parent
-        project_root = self._paths.project_root.resolve()
+        writable_root = self._paths.user_data_root.resolve()
 
         deleted_json: list[str] = []
         deleted_db: list[str] = []
 
         def _delete_matching_files(base_dir: Path, pattern: str, deleted: list[str]) -> None:
             resolved_base = base_dir.resolve()
-            if project_root not in resolved_base.parents and resolved_base != project_root:
-                raise ValueError("Delete target is outside project root")
+            if writable_root not in resolved_base.parents and resolved_base != writable_root:
+                raise ValueError("Delete target is outside writable data root")
             if not resolved_base.exists():
                 return
 
@@ -99,13 +99,11 @@ class BackendBase:
 
         with self._lock: # Varmistetaan, etta tietokantayhteyden sulkeminen ja uudelleenavaaminen tapahtuu hallitusti
             _delete_matching_files(user_dir, "*.json", deleted_json)
+            self._conn.close()
             _delete_matching_files(data_dir, "*.db", deleted_db)
-
-            if deleted_db:
-                self._conn.close()
-                self._conn = connect_db(self._paths)
-                ensure_data(self._conn, self._paths)
-                migrate_saved_tutkintonimikkeet_from_json(self._conn, self._paths)
+            self._conn = connect_db(self._paths)
+            ensure_data(self._conn, self._paths)
+            migrate_saved_tutkintonimikkeet_from_json(self._conn, self._paths)
 
         return {
             "success": True,

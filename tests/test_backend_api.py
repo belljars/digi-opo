@@ -7,10 +7,12 @@ from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhe
 
 import importlib.util  # Lataa sovelluksen moduulin tiedostopolusta ilman normaalia import-ketjua
 import json  # Rakentaa testidataa JSON-tiedostoiksi ja lukee tallennuksia takaisin
+import os
+import shutil
 import sys
-import tempfile  # Luo eristetyn väliaikaisen projektihakemiston jokaiselle testille
 import types  # Rakentaa kevyen vale-olion webview-riippuvuuden korvaamiseen
 import unittest  # Tarjoaa testikehyksen ja testien ajotavan
+import uuid
 from pathlib import Path  # Käsittelee testien väliaikaisia tiedosto- ja kansiopolkuja
 from unittest import mock  # Korvaa sovelluksen projektijuuren testin omalla hakemistolla
 
@@ -42,8 +44,10 @@ class BackendApiTests(unittest.TestCase):
         # Rakentaa eristetyn testiprojektin datatiedostoineen jokaista testiä varten
         self.app = load_app_module()
         self._apis = []
-        self.tmpdir = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmpdir.name)
+        self.test_work_dir = Path(__file__).resolve().parents[1] / ".test-work"
+        self.root = self.test_work_dir / f"backend-{uuid.uuid4().hex}"
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.user_data_root = self.root / "runtime"
         (self.root / "data").mkdir(parents=True, exist_ok=True)
         (self.root / "src" / "data").mkdir(parents=True, exist_ok=True)
         (self.root / "src" / "ui" / "pages").mkdir(parents=True, exist_ok=True)
@@ -122,14 +126,66 @@ class BackendApiTests(unittest.TestCase):
     def tearDown(self) -> None:
         for api in self._apis:
             api.close()
-        self.tmpdir.cleanup()
+        shutil.rmtree(self.root, ignore_errors=True)
+        try:
+            self.test_work_dir.rmdir()
+        except OSError:
+            pass
 
     # Luo API-instanssin käyttämään testin väliaikaista projektijuurta
     def create_api(self):
-        with mock.patch.object(self.app, "_project_root", return_value=self.root):
+        paths = self.app.ProjectPaths(
+            resource_root=self.root,
+            user_data_root=self.user_data_root,
+        )
+        with mock.patch.object(self.app, "_project_paths", return_value=paths):
             api = self.app.Api()
         self._apis.append(api)
         return api
+
+    def test_project_paths_separate_bundled_resources_from_writable_data(self) -> None:
+        paths = self.app.ProjectPaths(
+            resource_root=self.root,
+            user_data_root=self.user_data_root,
+        )
+
+        self.assertEqual(paths.lahde_json_path(), self.root / "src" / "data" / "ammatit.json")
+        self.assertEqual(paths.opiskelu_suunnat_json_path(), self.root / "src" / "data" / "opiskeluSuunnat.json")
+        self.assertEqual(paths.tietokanta_path(), self.user_data_root / "data" / "tutkinnot.db")
+        self.assertEqual(paths.kayttaja_data_dir(), self.user_data_root / "user")
+        self.assertEqual(paths.vienti_dir(), self.user_data_root / "exports")
+        self.assertEqual(
+            paths.normalize_ui_asset_ref("assets/opiskeluSuunnat/lukio.jpg"),
+            "/src/ui/assets/opiskeluSuunnat/lukio.jpg",
+        )
+
+    def test_project_root_uses_pyinstaller_extraction_dir_when_frozen(self) -> None:
+        bundled_root = self.root / "bundle"
+        bundled_root.mkdir()
+
+        with mock.patch.object(self.app.sys, "frozen", True, create=True), mock.patch.object(
+            self.app.sys,
+            "_MEIPASS",
+            str(bundled_root),
+            create=True,
+        ):
+            self.assertEqual(self.app._project_root(), bundled_root.resolve())
+
+    def test_project_paths_use_user_data_directory_when_frozen(self) -> None:
+        bundled_root = self.root / "bundle"
+        appdata_root = self.root / "localappdata"
+        bundled_root.mkdir()
+
+        with mock.patch.object(self.app.sys, "frozen", True, create=True), mock.patch.object(
+            self.app.sys,
+            "_MEIPASS",
+            str(bundled_root),
+            create=True,
+        ), mock.patch.dict(os.environ, {"LOCALAPPDATA": str(appdata_root)}):
+            paths = self.app._project_paths()
+
+        self.assertEqual(paths.resource_root, bundled_root.resolve())
+        self.assertEqual(paths.user_data_root, appdata_root / "digi-opo")
 
     # Lähdedata tuodaan tietokantaan ja haku palauttaa oikeat tutkintorivit
     def test_api_imports_data_and_search_works(self) -> None:
@@ -183,7 +239,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(len(saved_items), 1)
         self.assertEqual(saved_items[0]["id"], all_items[0]["id"])
 
-        db_path = self.root / "data" / "tutkinnot.db"
+        db_path = self.user_data_root / "data" / "tutkinnot.db"
         self.assertTrue(db_path.exists())
         import sqlite3
 
@@ -347,7 +403,7 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(len(opintopolku_results), 1)
         self.assertEqual(opintopolku_results[0]["id"], first["id"])
 
-        results_path = self.root / "user" / "quiz_results.json"
+        results_path = self.user_data_root / "user" / "quiz_results.json"
         self.assertTrue(results_path.exists())
         payload = json.loads(results_path.read_text(encoding="utf-8"))
         self.assertEqual(len(payload["items"]), 2)
@@ -384,7 +440,7 @@ class BackendApiTests(unittest.TestCase):
 
         self.assertTrue(cleared)
         self.assertIsNone(api.get_quiz_session("opintopolku"))
-        sessions_path = self.root / "user" / "quiz_sessions.json"
+        sessions_path = self.user_data_root / "user" / "quiz_sessions.json"
         self.assertTrue(sessions_path.exists())
 
     def test_delete_user_info_removes_json_and_db_files_and_recreates_database(self) -> None:
@@ -395,7 +451,8 @@ class BackendApiTests(unittest.TestCase):
         api.save_quiz_session("opintopolku", {"currentIndex": 1})
         api.save_tutkintonimike(all_items[0]["id"])
 
-        legacy_saved_path = self.root / "user" / "saved_tutkintonimikkeet.json"
+        legacy_saved_path = self.user_data_root / "user" / "saved_tutkintonimikkeet.json"
+        legacy_saved_path.parent.mkdir(parents=True, exist_ok=True)
         legacy_saved_path.write_text(
             json.dumps({"items": [{"id": all_items[0]["id"]}]}),
             encoding="utf-8",
@@ -414,10 +471,10 @@ class BackendApiTests(unittest.TestCase):
         )
         self.assertEqual(results["deletedDbFiles"], ["tutkinnot.db"])
 
-        self.assertFalse((self.root / "user" / "quiz_results.json").exists())
-        self.assertFalse((self.root / "user" / "quiz_sessions.json").exists())
+        self.assertFalse((self.user_data_root / "user" / "quiz_results.json").exists())
+        self.assertFalse((self.user_data_root / "user" / "quiz_sessions.json").exists())
         self.assertFalse(legacy_saved_path.exists())
-        self.assertTrue((self.root / "data" / "tutkinnot.db").exists())
+        self.assertTrue((self.user_data_root / "data" / "tutkinnot.db").exists())
         self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
         self.assertEqual(len(api.list_tutkinnot()), 2)
 
@@ -455,7 +512,7 @@ class BackendApiTests(unittest.TestCase):
 
         self.assertTrue(result["success"])
         self.assertTrue(str(result["path"]).endswith(".pdf"))
-        self.assertEqual(Path(result["path"]).parent, self.root / "exports")
+        self.assertEqual(Path(result["path"]).parent, self.user_data_root / "exports")
         self.assertEqual(len(calls), 1)
         html, output_path = calls[0]
         self.assertEqual(output_path, Path(result["path"]))
