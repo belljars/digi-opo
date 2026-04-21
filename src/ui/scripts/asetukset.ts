@@ -59,6 +59,12 @@ type Api = {
 const feedbackEl = document.getElementById("asetukset-feedback");
 const exportStatusEl = document.getElementById("asetukset-export-status");
 const exportPdfButtonEl = document.getElementById("asetukset-export-pdf-button") as HTMLButtonElement | null;
+const unhideAllTutkinnotButtonEl = document.getElementById("asetukset-unhide-all-tutkinnot-button") as
+  | HTMLButtonElement
+  | null;
+const unhideAllTutkintonimikkeetButtonEl = document.getElementById(
+  "asetukset-unhide-all-tutkintonimikkeet-button"
+) as HTMLButtonElement | null;
 const tutkintoSearchEl = document.getElementById("asetukset-tutkinto-search") as HTMLInputElement | null;
 const tutkintonimikeSearchEl = document.getElementById("asetukset-tutkintonimike-search") as
   | HTMLInputElement
@@ -79,6 +85,8 @@ let hiddenTutkinnot: HiddenTutkintoListItem[] = [];
 let visibleTutkintonimikkeet: TutkintonimikeItem[] = [];
 let hiddenTutkintonimikkeet: HiddenTutkintonimikeItem[] = [];
 let exportInFlight = false;
+let unhideAllTutkinnotInFlight = false;
+let unhideAllTutkintonimikkeetInFlight = false;
 
 // Päivittää asetussivun palautetekstin yhdestä paikasta
 function setFeedback(message = ""): void {
@@ -109,6 +117,24 @@ function updateExportButtonState(): void {
   exportPdfButtonEl.textContent = exportInFlight
     ? "Luodaan PDF-vienti..."
     : "Vie käyttäjätiedot PDF:nä";
+}
+
+function updateBulkUnhideButtonStates(): void {
+  if (unhideAllTutkinnotButtonEl) {
+    unhideAllTutkinnotButtonEl.disabled =
+      unhideAllTutkinnotInFlight || !activeApi || hiddenTutkinnot.length === 0;
+    unhideAllTutkinnotButtonEl.textContent = unhideAllTutkinnotInFlight
+      ? "Palautetaan..."
+      : "Palauta kaikki";
+  }
+
+  if (unhideAllTutkintonimikkeetButtonEl) {
+    unhideAllTutkintonimikkeetButtonEl.disabled =
+      unhideAllTutkintonimikkeetInFlight || !activeApi || hiddenTutkintonimikkeet.length === 0;
+    unhideAllTutkintonimikkeetButtonEl.textContent = unhideAllTutkintonimikkeetInFlight
+      ? "Palautetaan..."
+      : "Palauta kaikki";
+  }
 }
 
 // Laskurit päivitetään erikseen, jotta listojen renderöinti voi keskittyä vain sisältöön
@@ -277,6 +303,7 @@ function renderAll(): void {
   renderHiddenTutkinnot();
   renderVisibleTutkintonimikkeet();
   renderHiddenTutkintonimikkeet();
+  updateBulkUnhideButtonStates();
 }
 
 // Hakee asetussivun tarvitseman datan backendistä yhdellä rinnakkaisella latauksella
@@ -359,6 +386,29 @@ async function unhideTutkinto(item: HiddenTutkintoListItem): Promise<void> {
   }
 }
 
+// Palauttaa kaikki listassa olevat piilotetut tutkinnot kerralla
+async function unhideAllTutkinnot(): Promise<void> {
+  if (!activeApi || unhideAllTutkinnotInFlight || hiddenTutkinnot.length === 0) {
+    return;
+  }
+
+  const api = activeApi;
+  const items = [...hiddenTutkinnot];
+  unhideAllTutkinnotInFlight = true;
+  updateBulkUnhideButtonStates();
+
+  try {
+    await Promise.all(items.map((item) => api.unhide_tutkinto(item.id)));
+    setFeedback(`${items.length} piilotettua tutkintoa palautettiin näkyviin.`);
+    await reloadAll();
+  } catch {
+    setFeedback("Kaikkien tutkintojen palautus epäonnistui.");
+  } finally {
+    unhideAllTutkinnotInFlight = false;
+    updateBulkUnhideButtonStates();
+  }
+}
+
 // Piilottaa yksittäisen tutkintonimikkeen kaikista sitä käyttävistä näkymistä
 async function hideTutkintonimike(item: TutkintonimikeItem): Promise<void> {
   if (!activeApi) {
@@ -389,6 +439,29 @@ async function unhideTutkintonimike(item: HiddenTutkintonimikeItem): Promise<voi
   }
 }
 
+// Palauttaa kaikki listassa olevat piilotetut tutkintonimikkeet kerralla
+async function unhideAllTutkintonimikkeet(): Promise<void> {
+  if (!activeApi || unhideAllTutkintonimikkeetInFlight || hiddenTutkintonimikkeet.length === 0) {
+    return;
+  }
+
+  const api = activeApi;
+  const items = [...hiddenTutkintonimikkeet];
+  unhideAllTutkintonimikkeetInFlight = true;
+  updateBulkUnhideButtonStates();
+
+  try {
+    await Promise.all(items.map((item) => api.unhide_tutkintonimike(item.id)));
+    setFeedback(`${items.length} piilotettua tutkintonimikettä palautettiin näkyviin.`);
+    await reloadAll();
+  } catch {
+    setFeedback("Kaikkien tutkintonimikkeiden palautus epäonnistui.");
+  } finally {
+    unhideAllTutkintonimikkeetInFlight = false;
+    updateBulkUnhideButtonStates();
+  }
+}
+
 // Alustaa asetussivun ja sitoo haku- sekä palautustoiminnot vasta backendin valmistuttua
 async function init(): Promise<InitAttemptResult> {
   setFeedback("");
@@ -406,6 +479,7 @@ async function init(): Promise<InitAttemptResult> {
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     updateExportButtonState();
+    updateBulkUnhideButtonStates();
     return { success: false, retryDelayMs: 500 };
   }
 
@@ -424,6 +498,12 @@ async function init(): Promise<InitAttemptResult> {
     exportPdfButtonEl?.addEventListener("click", () => {
       void exportUserDataPdf();
     });
+    unhideAllTutkinnotButtonEl?.addEventListener("click", () => {
+      void unhideAllTutkinnot();
+    });
+    unhideAllTutkintonimikkeetButtonEl?.addEventListener("click", () => {
+      void unhideAllTutkintonimikkeet();
+    });
     return { success: true };
   } catch {
     setFeedback("Asetusten lataus epäonnistui. Yritetään uudelleen...");
@@ -432,6 +512,7 @@ async function init(): Promise<InitAttemptResult> {
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     updateExportButtonState();
+    updateBulkUnhideButtonStates();
     return { success: false, retryDelayMs: 1000 };
   }
 }
