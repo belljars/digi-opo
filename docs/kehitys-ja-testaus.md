@@ -222,7 +222,7 @@ Backend lukee nämä suoraan JSON-lähteinä ilman SQLite-importtia.
 
 ## Käytännön ohjeet
 
-- Lisää yhteinen logiikka mieluummin `pywebview-init.ts`, `layout.ts` tai `tutkintonimike-card.ts` -tiedostoihin kuin kopioi sitä usealle sivulle.
+- Lisää yhteinen logiikka mieluummin `pywebview-init.ts`, `ulkoasu.ts` tai `tutkintonimike-kortti.ts` -tiedostoihin kuin kopioi sitä usealle sivulle.
 - Säilytä näkyvyys- ja validointisäännöt backendissä.
 - Päätä uuden datan tallennuspaikka tietoisesti: `SQLite`, `user/*.json` tai frontendin `localStorage`.
 - Muista, että uuden dynaamisen sivun pitää odottaa `pywebview`-API:a ennen backend-kutsuja.

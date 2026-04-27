@@ -3,7 +3,7 @@
 
 export {};
 
-import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
+import { createTutkintonimikeCard } from "./tutkintonimike-kortti.js";
 import {
   createRetryingPageInit,
   getPywebviewApi,
@@ -83,7 +83,7 @@ type Api = {
 
 const QUIZ_PAGES: Record<string, string> = {
   "amis-quiz": "./tutkinto-kysely",
-  opintopolku: "./opintopolku-kysely.html"
+  opintopolku: "./quiz.html"
 };
 
 const summaryEl = document.getElementById("saved-summary");

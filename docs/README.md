@@ -61,9 +61,9 @@ Jos haluat siirtyä dokumentaatiosta lähdekoodiin, aloita näistä:
 - `src/app/backend/tietokanta.py`
 - `src/app/backend/tutkinnot.py`
 - `src/ui/scripts/pywebview-init.ts`
-- `src/ui/scripts/layout.ts`
+- `src/ui/scripts/ulkoasu.ts`
 - `src/ui/scripts/pankki.ts`
 - `src/ui/scripts/tallennetut.ts`
 - `src/ui/scripts/suunitelma.ts`
 - `src/ui/scripts/quiz.ts`
-- `src/ui/scripts/amis-quiz.ts`
+- `src/ui/scripts/tutkinto-kysely.ts`

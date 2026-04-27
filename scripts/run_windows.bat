@@ -93,8 +93,8 @@ if not exist "src\ui\scripts\quiz.js" (
   exit /b 1
 )
 
-if not exist "src\ui\scripts\layout.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\layout.js
+if not exist "src\ui\scripts\ulkoasu.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\ulkoasu.js
   exit /b 1
 )
 
@@ -103,8 +103,8 @@ if not exist "src\ui\scripts\opintopolut.js" (
   exit /b 1
 )
 
-if not exist "src\ui\scripts\amis-quiz.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\amis-quiz.js
+if not exist "src\ui\scripts\tutkinto-kysely.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tutkinto-kysely.js
   exit /b 1
 )
 
@@ -118,8 +118,8 @@ if not exist "src\ui\scripts\asetukset.js" (
   exit /b 1
 )
 
-if not exist "src\ui\scripts\tutkintonimike-card.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tutkintonimike-card.js
+if not exist "src\ui\scripts\tutkintonimike-kortti.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tutkintonimike-kortti.js
   exit /b 1
 )
 

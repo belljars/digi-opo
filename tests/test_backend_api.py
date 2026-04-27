@@ -393,7 +393,7 @@ class BackendApiTests(unittest.TestCase):
             {"topPathId": "lukio", "scores": {"lukio": 3}},
         )
         second = api.save_quiz_result(
-            "amis-quiz",
+            "tutkinto-kysely",
             {"winnerId": 2, "comparisons": 5},
         )
 
@@ -414,7 +414,7 @@ class BackendApiTests(unittest.TestCase):
         # Yksittäinen visatulos voidaan poistaa tunnisteensa perusteella
         api = self.create_api()
         result = api.save_quiz_result(
-            "amis-quiz",
+            "tutkinto-kysely",
             {"winnerId": 2, "comparisons": 5},
         )
 
@@ -498,7 +498,7 @@ class BackendApiTests(unittest.TestCase):
         api.hide_tutkinto(kokki["tutkinto_id"])
         api.hide_tutkintonimike(sahkoasentaja["id"])
         api.save_quiz_result("opintopolku", {"topPathId": "lukio", "scores": {"lukio": 3}})
-        api.save_quiz_session("amis-quiz", {"currentIndex": 2, "winnerId": 7})
+        api.save_quiz_session("tutkinto-kysely", {"currentIndex": 2, "winnerId": 7})
 
         vienti_module = sys.modules.get("backend.vienti")
         self.assertIsNotNone(vienti_module)

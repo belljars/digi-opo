@@ -1,19 +1,19 @@
 export {};
 
-// Amis-quiz järjestää tutkintonimikkeet kiinnostavuusjärjestykseen parivertailujen avulla
+// tutkinto-kysely järjestää tutkintonimikkeet kiinnostavuusjärjestykseen parivertailujen avulla
 
 import {
   createTutkintonimikeCard,
   createTutkintonimikeLinkAction,
   type TutkintonimikeCardItem
-} from "./tutkintonimike-card.js";
+} from "./tutkintonimike-kortti.js";
 import {
   createRetryingPageInit,
   waitForPywebviewApi,
   type InitAttemptResult
 } from "./pywebview-init.js";
 
-const QUIZ_ID = "amis-quiz";
+const QUIZ_ID = "tutkinto-kysely";
 
 type TutkintonimikeItem = {
   id: number;

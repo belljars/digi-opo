@@ -1,123 +1,125 @@
 /* ============================================================
-   digi-opo – layout
+   digi-opo – ulkoasu
    ============================================================ */
 
 /* ------------------------------------------------------------
    1. Muuttujat
    ------------------------------------------------------------ */
 :root {
-  --font-scale: 1;
-  --line-height: 1.5;
-  --surface-radius: 0px;
+    --font-scale: 1;
+    --line-height: 1.5;
+    --surface-radius: 0px;
 
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
 
-  --max-width: 1280px;
-  --panel-min: 280px;
+    --max-width: 1280px;
+    --panel-min: 280px;
 
-  --color-bg: #ffff;
-  --color-text: #171717;
-  --color-surface-soft: #efefef;
-  --color-surface-strong: #ffffff;
-  --color-surface-muted: #e9e9e9;
-  --color-card-bg: #fbfbfb;
-  --color-shadow: transparent;
+    --color-bg: #ffff;
+    --color-text: #171717;
+    --color-surface-soft: #efefef;
+    --color-surface-strong: #ffffff;
+    --color-surface-muted: #e9e9e9;
+    --color-card-bg: #fbfbfb;
+    --color-shadow: transparent;
 }
 
 :root[data-theme="dark"] {
-  --color-bg: #111315;
-  --color-text: #ededed;
-  --color-surface-soft: #1a1d20;
-  --color-surface-strong: #202428;
-  --color-surface-muted: #262b30;
-  --color-card-bg: #171a1d;
-  --color-shadow: transparent;
+    --color-bg: #111315;
+    --color-text: #ededed;
+    --color-surface-soft: #1a1d20;
+    --color-surface-strong: #202428;
+    --color-surface-muted: #262b30;
+    --color-card-bg: #171a1d;
+    --color-shadow: transparent;
 }
 
 /* ------------------------------------------------------------
    2. Perusnollaus
    ------------------------------------------------------------ */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-img, svg {
-  display: block;
-  max-width: 100%;
+img,
+svg {
+    display: block;
+    max-width: 100%;
 }
 
-ul, ol {
-  list-style: none;
+ul,
+ol {
+    list-style: none;
 }
 
 body {
-  font-family: Arial, sans-serif;
-  line-height: var(--line-height);
-  color: var(--color-text);
-  background: var(--color-bg);
+    font-family: Arial, sans-serif;
+    line-height: var(--line-height);
+    color: var(--color-text);
+    background: var(--color-bg);
 }
 
 a,
 a:visited {
-  color: inherit;
-  text-decoration-color: currentColor;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.16em;
+    color: inherit;
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
 }
 
 a:focus-visible,
 button:focus-visible {
-  outline: 1px solid currentColor;
-  outline-offset: 3px;
+    outline: 1px solid currentColor;
+    outline-offset: 3px;
 }
 
 /* ------------------------------------------------------------
    3. Yhteiset rajaukset
    ------------------------------------------------------------ */
-:is(
-  .panel,
-  .card,
-  .tutkintonimike-card,
-  .quiz-overview,
-  .quiz-play,
-  .quiz-result-card,
-  .quiz-ranking,
-  .saved-section,
-  .oma-suunnitelma-osio,
-  .opintopolku-card
-) {
-  border: 1px solid currentColor;
+:is(.panel,
+    .card,
+    .tutkintonimike-kortti,
+    .quiz-overview,
+    .quiz-play,
+    .quiz-result-card,
+    .quiz-ranking,
+    .saved-section,
+    .oma-suunnitelma-osio,
+    .opintopolku-card) {
+    border: 1px solid currentColor;
 }
 
-:is(.card, .tutkintonimike-card) {
-  overflow: hidden;
+:is(.card, .tutkintonimike-kortti) {
+    overflow: hidden;
 }
 
 [hidden] {
-  display: none !important;
+    display: none !important;
 }
 
 /* ------------------------------------------------------------
    4. Ohituslinkki
    ------------------------------------------------------------ */
 .skip-link {
-  position: absolute;
-  top: -9999px;
-  left: var(--space-4);
-  z-index: 9999;
-  padding: var(--space-2) var(--space-4);
+    position: absolute;
+    top: -9999px;
+    left: var(--space-4);
+    z-index: 9999;
+    padding: var(--space-2) var(--space-4);
 }
 
 .skip-link:focus {
-  top: var(--space-4);
+    top: var(--space-4);
 }
 
 /* ------------------------------------------------------------
@@ -125,273 +127,273 @@ button:focus-visible {
    ------------------------------------------------------------ */
 html,
 body {
-  height: 100%;
-  overflow: hidden;
+    height: 100%;
+    overflow: hidden;
 }
 
 .app {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  max-width: var(--max-width);
-  margin-inline: auto;
-  padding-inline: var(--space-4);
-  overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    max-width: var(--max-width);
+    margin-inline: auto;
+    padding-inline: var(--space-4);
+    overflow: hidden;
 }
 
 /* Header ja footer pysyvät paikallaan */
 #app-header {
-  flex-shrink: 0;
+    flex-shrink: 0;
 }
 
 #app-footer {
-  flex-shrink: 0;
+    flex-shrink: 0;
 }
 
 /* Sisältöalue vieritetään headerin ja footerin välissä */
-.app > *:not(#app-header):not(#app-footer) {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  padding-block: var(--space-6);
+.app>*:not(#app-header):not(#app-footer) {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-block: var(--space-6);
 }
 
 /* ------------------------------------------------------------
    6. Ylätunniste ja navigaatio
    ------------------------------------------------------------ */
 .site-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  padding-block: var(--space-4);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    padding-block: var(--space-4);
+    flex-wrap: wrap;
 }
 
 .site-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-left: auto;
-  align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin-left: auto;
+    align-items: center;
 }
 
 .header-link {
-  padding: var(--space-2) var(--space-3);
+    padding: var(--space-2) var(--space-3);
 }
 
 .header-pill-action,
 .header-theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 0.35rem 0.75rem;
-  border: 1px solid currentColor;
-  font-size: 0.85rem;
-  text-decoration: none;
-  list-style: none;
-  cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0.35rem 0.75rem;
+    border: 1px solid currentColor;
+    font-size: 0.85rem;
+    text-decoration: none;
+    list-style: none;
+    cursor: pointer;
 }
 
 .header-theme-toggle::-webkit-details-marker {
-  display: none;
+    display: none;
 }
 
 .header-pill-action {
-  text-decoration: none;
+    text-decoration: none;
 }
 
 .header-theme-toggle::after {
-  content: "+";
-  font-weight: 700;
+    content: "+";
+    font-weight: 700;
 }
 
 .header-theme-menu[open] .header-theme-toggle::after {
-  content: "-";
+    content: "-";
 }
 
 .header-theme-menu {
-  position: relative;
+    position: relative;
 }
 
 .header-theme-menu-body {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  right: 0;
-  z-index: 20;
-  min-width: 10.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-2);
-  border: 1px solid currentColor;
-  background: var(--color-card-bg);
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    z-index: 20;
+    min-width: 10.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    border: 1px solid currentColor;
+    background: var(--color-card-bg);
 }
 
 .header-theme-option {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  justify-content: flex-start;
-  text-decoration: none;
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    justify-content: flex-start;
+    text-decoration: none;
 }
 
 .header-theme-option[data-active="true"] {
-  border: 1px solid currentColor;
+    border: 1px solid currentColor;
 }
 
 /* ------------------------------------------------------------
    7. Alatunniste
    ------------------------------------------------------------ */
 .site-footer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-block: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-block: var(--space-4);
 }
 
 /* ------------------------------------------------------------
    8. Paneeli
    ------------------------------------------------------------ */
 .panel {
-  padding: var(--space-6);
+    padding: var(--space-6);
 }
 
-.app > .panel {
-  padding: 0;
-  border: none;
+.app>.panel {
+    padding: 0;
+    border: none;
 }
 
 .page-hero {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  padding: var(--space-5);
-  border: 1px solid currentColor;
-  background: var(--color-surface-soft);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    padding: var(--space-5);
+    border: 1px solid currentColor;
+    background: var(--color-surface-soft);
 }
 
 .page-hero-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
 .page-hero-copy h2 {
-  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
-  line-height: 0.95;
+    font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+    line-height: 0.95;
 }
 
 .page-hero-note {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  max-width: 21rem;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid currentColor;
-  background: var(--color-surface-strong);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 21rem;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid currentColor;
+    background: var(--color-surface-strong);
 }
 
 .page-hero-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.72;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.72;
 }
 
 .page-hero-meta {
-  line-height: 1.6;
+    line-height: 1.6;
 }
 
 /* ------------------------------------------------------------
    9. Työtila – kaksipalstainen (pankki)
    ------------------------------------------------------------ */
-.app > .workspace {
-  overflow-y: hidden;
-  padding-block: 0;
+.app>.workspace {
+    overflow-y: hidden;
+    padding-block: 0;
 }
 
 .workspace {
-  display: grid;
-  grid-template-columns: minmax(var(--panel-min), 500px) 1fr;
-  gap: var(--space-4);
-  height: 100%;
-  overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(var(--panel-min), 500px) 1fr;
+    gap: var(--space-4);
+    height: 100%;
+    overflow: hidden;
 }
 
 .panel-list {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  height: 100%;
-  overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    height: 100%;
+    overflow-y: auto;
 }
 
 .panel-detail {
-  height: 100%;
-  overflow-y: auto;
+    height: 100%;
+    overflow-y: auto;
 }
 
 /* ------------------------------------------------------------
    10. Pankin suodattimet
    ------------------------------------------------------------ */
 .pankki-filters {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  width: 100%;
-  align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+    align-items: stretch;
 }
 
 .search {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
 }
 
 .search input,
 .search select {
-  width: 100%;
-  text-align: left;
+    width: 100%;
+    text-align: left;
 }
 
 .filter-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
 }
 
 .count {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2rem;
-  padding: 0.25rem 0.75rem;
-  border: 1px solid currentColor;
-  font-size: 0.9rem;
-  font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid currentColor;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
 /* ------------------------------------------------------------
    11. Listanäkymä
    ------------------------------------------------------------ */
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
 }
 
 .list li button {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  padding: var(--space-2) var(--space-3);
-  cursor: pointer;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
 }
 
 /* ------------------------------------------------------------
@@ -399,992 +401,992 @@ body {
    ------------------------------------------------------------ */
 #card-select,
 #kyselyt-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
 }
 
 .home-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
 }
 
 .home-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
 .home-section-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
 }
 
 .home-page .card-image {
-  aspect-ratio: 3 / 1;
-  min-height: 5.5rem;
-  background: var(--color-surface-muted);
+    aspect-ratio: 3 / 1;
+    min-height: 5.5rem;
+    background: var(--color-surface-muted);
 }
 
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    text-decoration: none;
 }
 
 .card-image {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
 }
 
 /* ------------------------------------------------------------
    13. Tutkintonimike-kortti
    ------------------------------------------------------------ */
 .tutkintonimike-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
 }
 
-.tutkintonimike-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  overflow: hidden;
+.tutkintonimike-kortti {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    overflow: hidden;
 }
 
 .tutkintonimike-image {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
 }
 
-.tutkintonimike-card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4);
+.tutkintonimike-kortti-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
 }
 
-.tutkintonimike-card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
+.tutkintonimike-kortti-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
 }
 
 /* ------------------------------------------------------------
    14. Kysely – yhteiset
    ------------------------------------------------------------ */
 .panel-quiz {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
 }
 
 .quiz-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
 }
 
-.quiz-header > div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.quiz-header>div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
 #quiz-restart {
-  align-self: flex-start;
-  padding-top: var(--space-1);
+    align-self: flex-start;
+    padding-top: var(--space-1);
 }
 
 .quiz-overview {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  border: 1px solid currentColor;
-  background: var(--color-surface-soft);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid currentColor;
+    background: var(--color-surface-soft);
 }
 
 .quiz-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  line-height: 1.6;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    line-height: 1.6;
 }
 
 .quiz-help,
 .quiz-shortcuts {
-  opacity: 0.82;
+    opacity: 0.82;
 }
 
 .quiz-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
 .quiz-loading {
-  padding: var(--space-8);
-  text-align: center;
-  border: 1px dashed currentColor;
+    padding: var(--space-8);
+    text-align: center;
+    border: 1px dashed currentColor;
 }
 
 .quiz-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  padding: var(--space-4);
-  border: 1px solid currentColor;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-4);
+    border: 1px solid currentColor;
 }
 
 .quiz-options {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
 }
 
 .quiz-option {
-  display: block;
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid currentColor;
-  background: var(--color-card-bg);
-  cursor: pointer;
-  text-align: left;
-  text-decoration: none;
-  white-space: normal;
-  line-height: 1.6;
+    display: block;
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid currentColor;
+    background: var(--color-card-bg);
+    cursor: pointer;
+    text-align: left;
+    text-decoration: none;
+    white-space: normal;
+    line-height: 1.6;
 }
 
 .quiz-option input[type="radio"] {
-  margin-top: 2px;
+    margin-top: 2px;
 }
 
 .quiz-option.is-selected {
-  background: var(--color-surface-soft);
+    background: var(--color-surface-soft);
 }
 
 .quiz-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding-top: var(--space-2);
-  border-top: 1px solid currentColor;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid currentColor;
 }
 
 .quiz-actions button {
-  padding: 0.45rem 0.85rem;
-  border: 1px solid currentColor;
-  text-decoration: none;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid currentColor;
+    text-decoration: none;
 }
 
 .quiz-results {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  padding: var(--space-4);
-  border: 1px solid currentColor;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-4);
+    border: 1px solid currentColor;
 }
 
 .quiz-result-card {
-  padding: var(--space-5);
+    padding: var(--space-5);
 }
 
 /* ------------------------------------------------------------
    15. Amis-korttivertailu
    ------------------------------------------------------------ */
 .quiz-play {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid currentColor;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid currentColor;
 }
 
 .quiz-play-header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
 .quiz-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
 }
 
 .quiz-card-slot {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .quiz-choice-shell {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 100%;
-  border: 1px solid currentColor;
-  overflow: hidden;
-  background: var(--color-card-bg);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 100%;
+    border: 1px solid currentColor;
+    overflow: hidden;
+    background: var(--color-card-bg);
 }
 
 .quiz-choice-button {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  text-align: left;
-  text-decoration: none;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    text-align: left;
+    text-decoration: none;
 }
 
-.quiz-choice-button .tutkintonimike-card {
-  height: 100%;
-  border: none;
+.quiz-choice-button .tutkintonimike-kortti {
+    height: 100%;
+    border: none;
 }
 
-.quiz-choice-button .tutkintonimike-card-body {
-  padding-bottom: var(--space-5);
+.quiz-choice-button .tutkintonimike-kortti-body {
+    padding-bottom: var(--space-5);
 }
 
 .quiz-choice-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    padding: var(--space-3) var(--space-4);
+    border-top: 1px solid currentColor;
 }
 
 .quiz-choice-footer .tutkintonimike-link-action,
 .quiz-choice-footer .tutkintonimike-action {
-  text-decoration: none;
+    text-decoration: none;
 }
 
 .quiz-choice-footer .tutkintonimike-link-action {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 .quiz-choice-shell--empty {
-  justify-content: center;
-  min-height: 18rem;
-  padding: var(--space-4);
-  opacity: 0.7;
+    justify-content: center;
+    min-height: 18rem;
+    padding: var(--space-4);
+    opacity: 0.7;
 }
 
 .quiz-ranking {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
 }
 
 .quiz-ranking-list {
-  list-style: decimal;
-  padding-left: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+    list-style: decimal;
+    padding-left: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
 /* ------------------------------------------------------------
    16. Tallennetut
    ------------------------------------------------------------ */
 .saved-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
 }
 
 .saved-page-feedback {
-  padding-inline: var(--space-1);
+    padding-inline: var(--space-1);
 }
 
 .saved-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
 }
 
 .saved-feedback {
-  min-height: 1.5em;
-  font-size: 0.95rem;
+    min-height: 1.5em;
+    font-size: 0.95rem;
 }
 
 .saved-page-copy {
-  margin-top: var(--space-1);
-  font-size: 0.9em;
-  opacity: 0.8;
-  max-width: 66ch;
+    margin-top: var(--space-1);
+    font-size: 0.9em;
+    opacity: 0.8;
+    max-width: 66ch;
 }
 
 .saved-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-4);
 }
 
 .saved-grid--stack {
-  grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
 }
 
 .saved-page-header,
 .saved-section-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
 }
 
-.saved-section-header > div:first-child {
-  min-width: 0;
+.saved-section-header>div:first-child {
+    min-width: 0;
 }
 
 .quiz-results-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
 }
 
 .quiz-saved-result {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid currentColor;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid currentColor;
 }
 
 .quiz-saved-result-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
 }
 
 .saved-note-preview {
-  margin-top: var(--space-2);
-  line-height: 1.6;
+    margin-top: var(--space-2);
+    line-height: 1.6;
 }
 
 .empty {
-  padding: var(--space-4);
-  border: 1px dashed currentColor;
-  opacity: 0.8;
-  line-height: 1.6;
+    padding: var(--space-4);
+    border: 1px dashed currentColor;
+    opacity: 0.8;
+    line-height: 1.6;
 }
 
 .tutkintonimike-link-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: var(--space-2);
-  padding: 0;
-  border: none;
-  white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-2);
+    padding: 0;
+    border: none;
+    white-space: nowrap;
 }
 
 .quiz-result-footer {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    flex-wrap: wrap;
 }
 
-.saved-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
-  gap: var(--space-4);
-  align-items: start;
+.saved-ulkoasu {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+    gap: var(--space-4);
+    align-items: start;
 }
 
 .saved-main,
 .saved-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
 .saved-sidebar {
-  position: sticky;
-  top: var(--space-2);
+    position: sticky;
+    top: var(--space-2);
 }
 
 .saved-section .count {
-  min-height: 1.8rem;
-  padding: 0.2rem 0.7rem;
-  font-size: 0.85rem;
+    min-height: 1.8rem;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.85rem;
 }
 
 .saved-dropdown {
-  border: 1px solid currentColor;
-  overflow: hidden;
+    border: 1px solid currentColor;
+    overflow: hidden;
 }
 
 .saved-dropdown-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  cursor: pointer;
-  list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    cursor: pointer;
+    list-style: none;
 }
 
 .saved-dropdown-summary::-webkit-details-marker {
-  display: none;
+    display: none;
 }
 
 .saved-dropdown-summary::after {
-  content: "+";
-  flex-shrink: 0;
-  font-weight: 700;
+    content: "+";
+    flex-shrink: 0;
+    font-weight: 700;
 }
 
 .saved-dropdown[open] .saved-dropdown-summary::after {
-  content: "-";
+    content: "-";
 }
 
 .saved-dropdown-title {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 .saved-dropdown .count {
-  margin-left: auto;
+    margin-left: auto;
 }
 
 .saved-dropdown-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: 0 var(--space-4) var(--space-4);
-  border-top: 1px solid currentColor;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 0 var(--space-4) var(--space-4);
+    border-top: 1px solid currentColor;
 }
 
 .saved-stats-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-3);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-3);
 }
 
 .saved-stats-metric {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--space-3);
-  min-height: 7rem;
-  padding: var(--space-4);
-  border: 1px solid currentColor;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: 7rem;
+    padding: var(--space-4);
+    border: 1px solid currentColor;
 }
 
 .saved-stats-metric[data-accent="strong"] {
-  background: var(--color-surface-muted);
+    background: var(--color-surface-muted);
 }
 
 .saved-stats-metric-label {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  opacity: 0.8;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    opacity: 0.8;
 }
 
 .saved-stats-metric-value {
-  font-size: clamp(1.4rem, 2.2vw, 2rem);
-  line-height: 1.2;
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    line-height: 1.2;
 }
 
 .saved-stats-chart {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
 }
 
 .saved-stat-row {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid currentColor;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid currentColor;
 }
 
 .saved-stat-row-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
 }
 
 .saved-stat-row-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
 }
 
 .saved-stat-row-meta,
 .saved-stat-row-items,
 .saved-plan-meta {
-  line-height: 1.6;
-  opacity: 0.82;
+    line-height: 1.6;
+    opacity: 0.82;
 }
 
 .saved-stat-row-value {
-  font-weight: 700;
+    font-weight: 700;
 }
 
 .saved-stat-bar-track {
-  height: 0.55rem;
-  border: 1px solid currentColor;
-  overflow: hidden;
+    height: 0.55rem;
+    border: 1px solid currentColor;
+    overflow: hidden;
 }
 
 .saved-stat-bar-fill {
-  width: calc(var(--saved-stat-ratio, 0) * 100%);
-  height: 100%;
-  background: currentColor;
+    width: calc(var(--saved-stat-ratio, 0) * 100%);
+    height: 100%;
+    background: currentColor;
 }
 
 .saved-item-card {
-  display: grid;
-  grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
-  align-items: stretch;
+    display: grid;
+    grid-template-columns: minmax(190px, 230px) minmax(0, 1fr);
+    align-items: stretch;
 }
 
 .saved-item-card .tutkintonimike-image,
 .saved-item-card .tutkintonimike-image--placeholder {
-  width: 100%;
-  height: 100%;
-  min-height: 100%;
-  aspect-ratio: auto;
-  object-fit: cover;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    aspect-ratio: auto;
+    object-fit: cover;
 }
 
-.saved-item-card .tutkintonimike-card-body {
-  gap: var(--space-3);
-  padding: var(--space-4);
+.saved-item-card .tutkintonimike-kortti-body {
+    gap: var(--space-3);
+    padding: var(--space-4);
 }
 
 .saved-note-editor,
 .saved-plan-editor {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px dashed currentColor;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px dashed currentColor;
 }
 
 .saved-note-label {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 .saved-note-input,
 .saved-plan-input {
-  border: 1px solid currentColor;
+    border: 1px solid currentColor;
 }
 
 .saved-plan-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
 }
 
 .saved-plan-next-step {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
 .saved-plan-meta {
-  font-size: 0.95rem;
+    font-size: 0.95rem;
 }
 
-.saved-grid--stack > .empty,
-.quiz-results-list > .empty,
-.saved-stats-chart > .empty {
-  width: 100%;
+.saved-grid--stack>.empty,
+.quiz-results-list>.empty,
+.saved-stats-chart>.empty {
+    width: 100%;
 }
 
 .saved-sidebar .quiz-saved-result {
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-3);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
 }
 
 .saved-sidebar .tutkintonimike-link-action,
 .saved-sidebar .quiz-result-footer {
-  align-self: flex-start;
+    align-self: flex-start;
 }
 
 /* ------------------------------------------------------------
    17. Asetukset-sivu
    ------------------------------------------------------------ */
 .asetukset-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
 }
 
 .asetukset-page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
 }
 
 .asetukset-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
-.asetukset-section + .asetukset-section {
-  padding-top: var(--space-6);
-  border-top: 1px solid currentColor;
+.asetukset-section+.asetukset-section {
+    padding-top: var(--space-6);
+    border-top: 1px solid currentColor;
 }
 
 .asetukset-section-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
 }
 
 .asetukset-export-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
 }
 
 .asetukset-export-actions .saved-page-copy {
-  margin-top: 0;
+    margin-top: 0;
 }
 
 .asetukset-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  align-items: start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    align-items: start;
 }
 
 .asetukset-pane {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
 }
 
 .asetukset-dropdown {
-  border: 1px solid currentColor;
-  overflow: hidden;
+    border: 1px solid currentColor;
+    overflow: hidden;
 }
 
 .asetukset-dropdown-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  cursor: pointer;
-  list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    cursor: pointer;
+    list-style: none;
 }
 
 .asetukset-dropdown-summary::-webkit-details-marker {
-  display: none;
+    display: none;
 }
 
 .asetukset-dropdown-summary::after {
-  content: "+";
-  flex-shrink: 0;
-  font-weight: 700;
+    content: "+";
+    flex-shrink: 0;
+    font-weight: 700;
 }
 
 .asetukset-dropdown[open] .asetukset-dropdown-summary::after {
-  content: "-";
+    content: "-";
 }
 
 .asetukset-dropdown-title {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 .asetukset-dropdown .count {
-  margin-left: auto;
-  padding-block: 0;
-  padding-right: var(--space-2);
+    margin-left: auto;
+    padding-block: 0;
+    padding-right: var(--space-2);
 }
 
 .asetukset-dropdown-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: 0 var(--space-4) var(--space-4);
-  border-top: 1px solid currentColor;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 0 var(--space-4) var(--space-4);
+    border-top: 1px solid currentColor;
 }
 
 .asetukset-pane--hidden {
-  padding: var(--space-4);
-  border: 1px dashed;
+    padding: var(--space-4);
+    border: 1px dashed;
 }
 
 .asetukset-pane-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-3);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
 }
 
 .asetukset-pane-label {
-  font-weight: 600;
-  font-size: 0.95em;
+    font-weight: 600;
+    font-size: 0.95em;
 }
 
 .asetukset-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
 .asetukset-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid transparent;
 }
 
 .asetukset-item:hover {
-  border-color: currentColor;
+    border-color: currentColor;
 }
 
 .asetukset-item-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
 }
 
 .asetukset-item-copy h4 {
-  font-size: 1em;
-  font-weight: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    font-size: 1em;
+    font-weight: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .tutkintonimike-action {
-  padding: 0;
-  flex-shrink: 0;
-  font-size: inherit;
+    padding: 0;
+    flex-shrink: 0;
+    font-size: inherit;
 }
 
 /* ------------------------------------------------------------
    18. Oma suunnitelma -sivu
    ------------------------------------------------------------ */
 .oma-suunnitelma-sivu {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
 }
 
 .oma-suunnitelma-hero {
-  padding: var(--space-5);
-  border: 1px solid currentColor;
-  background: var(--color-surface-soft);
+    padding: var(--space-5);
+    border: 1px solid currentColor;
+    background: var(--color-surface-soft);
 }
 
 .oma-suunnitelma-hero-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
 }
 
 .oma-suunnitelma-hero-copy h2 {
-  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
-  line-height: 0.95;
+    font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+    line-height: 0.95;
 }
 
 .oma-suunnitelma-palaute {
-  padding-inline: var(--space-1);
+    padding-inline: var(--space-1);
 }
 
 .oma-suunnitelma-osio {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
 }
 
 .oma-suunnitelma-asettelu {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
 .oma-suunnitelma-sivupalkki {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
 .oma-suunnitelma-listarivi {
-  list-style: none;
+    list-style: none;
 }
 
 .oma-suunnitelma-osio .count {
-  min-height: 1.8rem;
-  padding: 0.2rem 0.7rem;
-  font-size: 0.85rem;
+    min-height: 1.8rem;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.85rem;
 }
 
 .oma-suunnitelma-vaihtoehto-kortti {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  height: 100%;
-  padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    height: 100%;
+    padding: var(--space-4);
 }
 
 .oma-suunnitelma-kortti-meta {
-  font-size: 0.85rem;
-  line-height: 1.5;
-  opacity: 0.72;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    opacity: 0.72;
 }
 
 .oma-suunnitelma-tunnisteet {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
 }
 
 .oma-suunnitelma-tunniste {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.65rem;
-  border: 1px solid currentColor;
-  font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid currentColor;
+    font-size: 0.85rem;
 }
 
 .oma-suunnitelma-kortti-muistio,
 .oma-suunnitelma-kortti-seuraava-askel,
 .oma-suunnitelma-kortti-yhteenveto {
-  font-size: 0.95rem;
-  line-height: 1.65;
+    font-size: 0.95rem;
+    line-height: 1.65;
 }
 
 .oma-suunnitelma-kortti-seuraava-askel {
-  padding-top: var(--space-2);
-  border-top: 1px dashed currentColor;
+    padding-top: var(--space-2);
+    border-top: 1px dashed currentColor;
 }
 
 .oma-suunnitelma-kortti-yhteenveto {
-  opacity: 0.78;
+    opacity: 0.78;
 }
 
 .oma-suunnitelma-muistio-label {
-  font-weight: 600;
+    font-weight: 600;
 }
 
 .oma-suunnitelma-muistio-syote {
-  min-height: 10rem;
-  border: 1px solid currentColor;
+    min-height: 10rem;
+    border: 1px solid currentColor;
 }
 
 .oma-suunnitelma-korttiruudukko {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-4);
 }
 
-.oma-suunnitelma-korttiruudukko > .empty {
-  grid-column: 1 / -1;
-  max-width: 34rem;
+.oma-suunnitelma-korttiruudukko>.empty {
+    grid-column: 1 / -1;
+    max-width: 34rem;
 }
 
-.quiz-results-list > .empty {
-  width: 100%;
+.quiz-results-list>.empty {
+    width: 100%;
 }
 
 .oma-suunnitelma-sivupalkki .quiz-saved-result {
-  flex-direction: column;
-  align-items: stretch;
-  gap: var(--space-3);
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
 }
 
 .oma-suunnitelma-sivupalkki .tutkintonimike-link-action {
-  align-self: flex-start;
+    align-self: flex-start;
 }
 
 /* ------------------------------------------------------------
    19. Opintopolut-sivu
    ------------------------------------------------------------ */
 .opintopolut-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
 }
 
 .opintopolut-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
 }
 
 .opintopolut-detail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
 .opintopolku-card {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--color-card-bg);
-  box-shadow: 0 2px 8px var(--color-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--color-card-bg);
+    box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .opintopolku-card img {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  flex-shrink: 0;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    flex-shrink: 0;
 }
 
 .opintopolku-card-body {
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  flex: 1;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 1;
 }
 
 .opintopolku-list {
-  padding-left: var(--space-4);
-  list-style: disc;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+    padding-left: var(--space-4);
+    list-style: disc;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
 }
 
 /* ------------------------------------------------------------
@@ -1394,161 +1396,161 @@ input[type="text"],
 input[type="search"],
 select,
 textarea {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  font-family: inherit;
-  line-height: var(--line-height);
-  color: inherit;
-  border: 1px solid currentColor;
-  background: var(--color-card-bg);
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-family: inherit;
+    line-height: var(--line-height);
+    color: inherit;
+    border: 1px solid currentColor;
+    background: var(--color-card-bg);
 }
 
 textarea {
-  resize: vertical;
-  min-height: 6rem;
+    resize: vertical;
+    min-height: 6rem;
 }
 
 input[type="checkbox"],
 input[type="radio"] {
-  width: 1rem;
-  height: 1rem;
-  cursor: pointer;
-  flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
 .form-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    cursor: pointer;
 }
 
 .form-control {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
 }
 
 /* ------------------------------------------------------------
    21. Painikkeet
    ------------------------------------------------------------ */
 button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: var(--space-2);
-  padding: 0;
-  border: none;
-  background: none;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: inherit;
-  text-align: left;
-  text-decoration-color: currentColor;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.16em;
-  text-decoration-line: underline;
-  cursor: pointer;
-  white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--space-2);
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    text-align: left;
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.16em;
+    text-decoration-line: underline;
+    cursor: pointer;
+    white-space: nowrap;
 }
 
 button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-  text-decoration: none;
+    cursor: not-allowed;
+    opacity: 0.45;
+    text-decoration: none;
 }
 
 /* ------------------------------------------------------------
    22. Reagoiva asettelu – kapeat näytöt
    ------------------------------------------------------------ */
 @media (max-width: 860px) {
-  .app > .workspace {
-    overflow-y: auto;
-    height: auto;
-    padding-block: var(--space-6);
-  }
+    .app>.workspace {
+        overflow-y: auto;
+        height: auto;
+        padding-block: var(--space-6);
+    }
 
-  .workspace {
-    grid-template-columns: 1fr;
-    height: auto;
-    overflow: visible;
-  }
+    .workspace {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+    }
 
-  .panel-list,
-  .panel-detail {
-    height: auto;
-    overflow-y: visible;
-  }
+    .panel-list,
+    .panel-detail {
+        height: auto;
+        overflow-y: visible;
+    }
 
-  .asetukset-columns {
-    grid-template-columns: 1fr;
-  }
+    .asetukset-columns {
+        grid-template-columns: 1fr;
+    }
 
-  .saved-layout,
-  .oma-suunnitelma-asettelu {
-    grid-template-columns: 1fr;
-  }
+    .saved-ulkoasu,
+    .oma-suunnitelma-asettelu {
+        grid-template-columns: 1fr;
+    }
 
-  .saved-item-card,
-  .quiz-saved-result {
-    flex-direction: column;
-  }
+    .saved-item-card,
+    .quiz-saved-result {
+        flex-direction: column;
+    }
 
-  .saved-item-card {
-    grid-template-columns: 1fr;
-  }
+    .saved-item-card {
+        grid-template-columns: 1fr;
+    }
 
-  .saved-plan-grid {
-    grid-template-columns: 1fr;
-  }
+    .saved-plan-grid {
+        grid-template-columns: 1fr;
+    }
 
-  .saved-sidebar,
-  .oma-suunnitelma-sivupalkki {
-    position: static;
-  }
+    .saved-sidebar,
+    .oma-suunnitelma-sivupalkki {
+        position: static;
+    }
 
-  .quiz-cards {
-    grid-template-columns: 1fr;
-  }
+    .quiz-cards {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 600px) {
-  .app {
-    padding-inline: var(--space-3);
-  }
+    .app {
+        padding-inline: var(--space-3);
+    }
 
-  .site-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+    .site-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-  .site-nav {
-    margin-left: 0;
-  }
+    .site-nav {
+        margin-left: 0;
+    }
 
-  .page-hero {
-    padding: var(--space-4);
-  }
+    .page-hero {
+        padding: var(--space-4);
+    }
 
-  .page-hero-copy h2 {
-    font-size: 1.9rem;
-  }
+    .page-hero-copy h2 {
+        font-size: 1.9rem;
+    }
 
-  .saved-hero {
-    padding: var(--space-4);
-  }
+    .saved-hero {
+        padding: var(--space-4);
+    }
 
-  .saved-hero-copy h2 {
-    font-size: 1.9rem;
-  }
+    .saved-hero-copy h2 {
+        font-size: 1.9rem;
+    }
 
-  .oma-suunnitelma-hero {
-    padding: var(--space-4);
-  }
+    .oma-suunnitelma-hero {
+        padding: var(--space-4);
+    }
 
-  .oma-suunnitelma-hero-copy h2 {
-    font-size: 1.9rem;
-  }
+    .oma-suunnitelma-hero-copy h2 {
+        font-size: 1.9rem;
+    }
 
 }

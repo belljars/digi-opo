@@ -196,7 +196,7 @@ function renderFooter(): void {
 }
 
 // Alustaa jokaiselle sivulle yhteiset rakenneosat heti dokumentin valmistuttua
-function initLayout(): void {
+function initulkoasu(): void {
   initTheme();
   renderHeader();
   renderFooter();
@@ -206,7 +206,7 @@ function initLayout(): void {
 }
 
 if (document.readyState === "loading") {
-  window.addEventListener("DOMContentLoaded", initLayout, { once: true });
+  window.addEventListener("DOMContentLoaded", initulkoasu, { once: true });
 } else {
-  initLayout();
+  initulkoasu();
 }

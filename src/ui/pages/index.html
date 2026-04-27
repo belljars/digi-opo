@@ -1,46 +1,43 @@
 <!doctype html>
 <html lang="fi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>digi-opo - Digitaalinen tutkintopankki</title>
-    <script>
-      (() => {
-        const storageKey = "digi-opo.theme-mode";
-        const isThemeMode = (value) => value === "auto" || value === "light" || value === "dark";
-        let mode = "auto";
-        try {
-          const storedValue = window.localStorage.getItem(storageKey);
-          if (isThemeMode(storedValue)) {
-            mode = storedValue;
-          }
-        } catch {
-          mode = "auto";
-        }
-
-        const effectiveTheme = mode === "auto"
-          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-          : mode;
-
-        document.documentElement.dataset.themeMode = mode;
-        document.documentElement.dataset.theme = effectiveTheme;
-        document.documentElement.style.colorScheme = effectiveTheme;
-      })();
-    </script>
-    <link rel="stylesheet" href="../styles/styles.css" />
-  </head>
-  <body>
-    <a class="skip-link" href="#main-content">Siirry sisältöön</a>
-    <main class="app" id="main-content">
-      <div id="app-header"></div>
-
-      <section class="home-page">
-        <iframe src="home.html" title="Sisältö" class="iframe-content" id="iframe-content" name="iframe-content" style="height: 100%; width: 100%; border: none;"></iframe>
-      </section>
-
-      <footer id="app-footer" class="site-footer"></footer>
-    </main>
-
-    <script type="module" src="../scripts/layout.js"></script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>digi-opo - Digitaalinen tutkintopankki</title>
+        <script>
+            (() => {
+              const storageKey = "digi-opo.theme-mode";
+              const isThemeMode = (value) => value === "auto" || value === "light" || value === "dark";
+              let mode = "auto";
+              try {
+                const storedValue = window.localStorage.getItem(storageKey);
+                if (isThemeMode(storedValue)) {
+                  mode = storedValue;
+                }
+              } catch {
+                mode = "auto";
+              }
+            
+              const effectiveTheme = mode === "auto"
+                ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+                : mode;
+            
+              document.documentElement.dataset.themeMode = mode;
+              document.documentElement.dataset.theme = effectiveTheme;
+              document.documentElement.style.colorScheme = effectiveTheme;
+            })();
+        </script>
+        <link rel="stylesheet" href="../styles/styles.css" />
+    </head>
+    <body>
+        <a class="skip-link" href="#main-content">Siirry sisältöön</a>
+        <main class="app" id="main-content">
+            <div id="app-header"></div>
+            <section class="home-page">
+                <iframe src="home.html" title="Sisältö" class="iframe-content" id="iframe-content" name="iframe-content" style="height: 100%; width: 100%; border: none;"></iframe>
+            </section>
+            <footer id="app-footer" class="site-footer"></footer>
+        </main>
+        <script type="module" src="../scripts/ulkoasu.js"></script>
+    </body>
 </html>

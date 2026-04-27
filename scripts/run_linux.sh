@@ -85,12 +85,12 @@ build_frontend() {
   local -a expected_files=(
     "src/ui/scripts/pankki.js"
     "src/ui/scripts/quiz.js"
-    "src/ui/scripts/layout.js"
+    "src/ui/scripts/ulkoasu.js"
     "src/ui/scripts/opintopolut.js"
-    "src/ui/scripts/amis-quiz.js"
+    "src/ui/scripts/tutkinto-kysely.js"
     "src/ui/scripts/tallennetut.js"
     "src/ui/scripts/asetukset.js"
-    "src/ui/scripts/tutkintonimike-card.js"
+    "src/ui/scripts/tutkintonimike-kortti.js"
   )
   local file
 

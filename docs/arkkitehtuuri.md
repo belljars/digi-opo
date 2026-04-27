@@ -74,7 +74,7 @@ Käytännössä tämä tarkoittaa:
 
 Yhteinen alustusmalli on:
 
-1. HTML lataa `layout.js`:n ja mahdollisen sivukohtaisen skriptin.
+1. HTML lataa `ulkoasu.js`:n ja mahdollisen sivukohtaisen skriptin.
 2. Sivuskripti kutsuu `waitForPywebviewApi()` tai `createRetryingPageInit()`.
 3. Kun API on valmis, sivu hakee datan ja renderöi näkymän.
 
@@ -155,7 +155,7 @@ Sivukohtaiset skriptit ylläpitävät omat tilansa. Esimerkiksi:
 
 - `pankki.ts` hallitsee aktiivista tutkintoa, suodattimia ja detail-cachea
 - `quiz.ts` hallitsee kyselyn etenemistä ja vastauksia
-- `amis-quiz.ts` hallitsee koko pairwise ranking -session tilaa
+- `tutkinto-kysely.ts` hallitsee koko pairwise ranking -session tilaa
 - `suunitelma.ts` kokoaa useasta lähteestä johdetun näkymän
 
 ### Alustus kestää viiveen
@@ -172,5 +172,5 @@ Muutokset näissä vaikuttavat laajasti:
 - `src/app/backend/tietokanta.py`
 - `src/app/backend/tutkinnot.py`
 - `src/ui/scripts/pywebview-init.ts`
-- `src/ui/scripts/layout.ts`
-- `src/ui/scripts/tutkintonimike-card.ts`
+- `src/ui/scripts/ulkoasu.ts`
+- `src/ui/scripts/tutkintonimike-kortti.ts`

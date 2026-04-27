@@ -10,7 +10,7 @@ Tämä dokumentti kuvaa tärkeimmät käyttäjä- ja koodivirrat päästä pää
 4. Backend varmistaa tietokannan ja tuo `ammatit.json`-datan SQLiteen tarvittaessa.
 5. Paikallinen HTTP-palvelin käynnistyy.
 6. `pywebview` avaa `home.html`-sivun.
-7. Yhteinen layout renderöityy.
+7. Yhteinen ulkoasu renderöityy.
 8. Sivukohtainen skripti odottaa `window.pywebview.api`-rajapintaa.
 9. Sivu hakee datan backendiltä ja piirtää näkymän.
 
@@ -80,9 +80,9 @@ Keskeinen sääntö:
 
 ### Alustus
 
-1. `amis-quiz.ts` hakee kaikki näkyvät tutkintonimikkeet.
+1. `tutkinto-kysely.ts` hakee kaikki näkyvät tutkintonimikkeet.
 2. Sivu hakee myös tallennetut nimikkeet.
-3. Se yrittää palauttaa session metodilla `get_quiz_session("amis-quiz")`.
+3. Se yrittää palauttaa session metodilla `get_quiz_session("tutkinto-kysely")`.
 4. Jos sessiota ei ole tai se ei ole käyttökelpoinen, skripti luo uuden session.
 
 ### Session rakenne
@@ -106,9 +106,9 @@ Keskeinen sääntö:
 
 ### Tallennus ja valmistuminen
 
-- Session merkittävät muutokset tallennetaan `save_quiz_session("amis-quiz", session)`-kutsulla.
+- Session merkittävät muutokset tallennetaan `save_quiz_session("tutkinto-kysely", session)`-kutsulla.
 - Kirjoitukset ketjutetaan, jotta nopeat klikkaukset eivät riko tiedostoon tallennettua tilaa.
-- Kun ranking valmistuu, frontend tallentaa tuloksen `save_quiz_result("amis-quiz", payload)`-kutsulla ja poistaa keskeneräisen session.
+- Kun ranking valmistuu, frontend tallentaa tuloksen `save_quiz_result("tutkinto-kysely", payload)`-kutsulla ja poistaa keskeneräisen session.
 
 ## 6. Muistiinpanon tallennus
 
@@ -137,7 +137,7 @@ Se lukee rinnakkain:
 - tallennetut tutkintonimikkeet
 - muistiinpanot
 - quiz-tulokset
-- amis-quiz-session
+- tutkinto-kysely-session
 - opintopolku-session
 
 Tämän jälkeen sivu muodostaa:
@@ -163,6 +163,6 @@ Seuraavat muutokset heijastuvat helposti useaan paikkaan:
 - `src/data/ammatit.json`
 - `saved_tutkintonimikkeet`-taulun rakenne
 - `src/ui/scripts/pywebview-init.ts`
-- `src/ui/scripts/tutkintonimike-card.ts`
+- `src/ui/scripts/tutkintonimike-kortti.ts`
 - `src/app/backend/tutkinnot.py`
 - `src/app/backend/vienti.py`

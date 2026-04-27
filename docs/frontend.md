@@ -19,7 +19,7 @@ Useimmat sivut noudattavat samaa rakennetta:
 
 1. HTML lataa `../styles/styles.css`.
 2. HTML sisältää paikat yhteiselle headerille ja footerille.
-3. HTML lataa `layout.js`:n.
+3. HTML lataa `ulkoasu.js`:n.
 4. HTML lataa sivukohtaisen skriptin, jos sivulla on dynaamista logiikkaa.
 5. Skripti odottaa `pywebview`-API:a.
 6. Sivu hakee datan backendiltä.
@@ -27,9 +27,9 @@ Useimmat sivut noudattavat samaa rakennetta:
 
 ## Yhteiset skriptit
 
-### `src/ui/scripts/layout.ts`
+### `src/ui/scripts/ulkoasu.ts`
 
-Yhteinen layout- ja navigaatiokerros.
+Yhteinen ulkoasu- ja navigaatiokerros.
 
 Vastuut:
 
@@ -50,7 +50,7 @@ Tarjoaa:
 
 Sivuja ei pidä rakentaa olettamalla, että `window.pywebview.api` on käytettävissä heti.
 
-### `src/ui/scripts/tutkintonimike-card.ts`
+### `src/ui/scripts/tutkintonimike-kortti.ts`
 
 Jaettu korttikomponentti tutkintonimikkeille.
 
@@ -59,7 +59,7 @@ Sitä käyttävät muun muassa:
 - `pankki.ts`
 - `tallennetut.ts`
 - `asetukset.ts`
-- `amis-quiz.ts`
+- `tutkinto-kysely.ts`
 
 Kortti keskittää:
 
@@ -158,7 +158,7 @@ Keskeiset vastuut:
 - järjestää tulokset `tieBreakers`-sääntöjen avulla
 - tallentaa valmiin tuloksen
 
-### `amis-quiz.ts`
+### `tutkinto-kysely.ts`
 
 Frontendin monimutkaisin yksittäinen skripti.
 
@@ -187,7 +187,7 @@ Sovelluksen päätyylit ovat tiedostossa `src/ui/styles/styles.css`.
 
 Tiedosto sisältää:
 
-- yhteiset layout- ja navigaatiotyylit
+- yhteiset ulkoasu- ja navigaatiotyylit
 - kortti- ja listakomponenttien tyylit
 - sivukohtaiset näkymätyylit
 
@@ -211,6 +211,6 @@ Tällä vältetään tilanne, jossa sivu yrittää kutsua backendiä ennen kuin 
 
 ## Muutoksia tehdessä huomioi
 
-- Pidä yhteinen logiikka `layout.ts`, `pywebview-init.ts` tai `tutkintonimike-card.ts` -tiedostoissa, jos sama tarve toistuu usealla sivulla.
+- Pidä yhteinen logiikka `ulkoasu.ts`, `pywebview-init.ts` tai `tutkintonimike-kortti.ts` -tiedostoissa, jos sama tarve toistuu usealla sivulla.
 - Älä rakenna piilotus- tai validointisääntöjä vain frontendtiin.
 - Jos lisäät uuden sivun, varmista että siihen liittyvä `.js`-tiedosto syntyy buildissä ja että HTML viittaa oikeaan tiedostoon.

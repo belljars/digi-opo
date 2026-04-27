@@ -64,7 +64,7 @@ def _format_scalar(value) -> str:
 
 def _format_quiz_label(value: str | None) -> str:
     labels = {
-        "amis-quiz": "Amis-korttivertailu",
+        "tutkinto-kysely": "Amis-korttivertailu",
         "opintopolku": "Opintopolku-kysely",
     }
     normalized = str(value or "").strip()
@@ -244,7 +244,7 @@ def _render_quiz_result_body(item: dict) -> str:
             )
         return "".join(details)
 
-    if quiz_id == "amis-quiz":
+    if quiz_id == "tutkinto-kysely":
         details.append(
             f"<p><strong>Suosikki:</strong> {escape(str(result.get('topName') or '-'))}</p>"
         )

@@ -1,81 +1,78 @@
 <!doctype html>
 <html lang="fi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>digi-opo - Amis-korttivertailu</title>
-    <script>
-      (() => {
-        const storageKey = "digi-opo.theme-mode";
-        const isThemeMode = (value) => value === "auto" || value === "light" || value === "dark";
-        let mode = "auto";
-        try {
-          const storedValue = window.localStorage.getItem(storageKey);
-          if (isThemeMode(storedValue)) {
-            mode = storedValue;
-          }
-        } catch {
-          mode = "auto";
-        }
-
-        const effectiveTheme = mode === "auto"
-          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-          : mode;
-
-        document.documentElement.dataset.themeMode = mode;
-        document.documentElement.dataset.theme = effectiveTheme;
-        document.documentElement.style.colorScheme = effectiveTheme;
-      })();
-    </script>
-    <link rel="stylesheet" href="../styles/styles.css" />
-  </head>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>digi-opo - Amis-korttivertailu</title>
+        <script>
+            (() => {
+              const storageKey = "digi-opo.theme-mode";
+              const isThemeMode = (value) => value === "auto" || value === "light" || value === "dark";
+              let mode = "auto";
+              try {
+                const storedValue = window.localStorage.getItem(storageKey);
+                if (isThemeMode(storedValue)) {
+                  mode = storedValue;
+                }
+              } catch {
+                mode = "auto";
+              }
+            
+              const effectiveTheme = mode === "auto"
+                ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+                : mode;
+            
+              document.documentElement.dataset.themeMode = mode;
+              document.documentElement.dataset.theme = effectiveTheme;
+              document.documentElement.style.colorScheme = effectiveTheme;
+            })();
+        </script>
+        <link rel="stylesheet" href="../styles/styles.css" />
+    </head>
     <a class="skip-link" href="#main-content">Siirry sisältöön</a>
     <main class="app" id="main-content">
-      <div id="app-header"></div>
-
-      <section class="panel panel-quiz">
-        <header class="quiz-header">
-          <div>
-            <h2>Amis-korttivertailu</h2>
-            <p class="quiz-lead">Rakennetaan koko suosikkijärjestys yksi vertailu kerrallaan.</p>
-          </div>
-          <button id="quiz-restart" type="button">Aloita alusta</button>
-        </header>
-        <section class="quiz-overview" aria-label="Kyselyn tila">
-          <div class="quiz-meta">
-            <span id="quiz-count"></span>
-            <span id="quiz-stage"></span>
-          </div>
-          <p id="quiz-help" class="quiz-help">Valitse kiinnostavampi vaihtoehto. Nuolinäppäimet toimivat myös.</p>
-          <p id="quiz-feedback" class="saved-feedback" aria-live="polite" hidden></p>
+        <div id="app-header"></div>
+        <section class="panel panel-quiz">
+            <header class="quiz-header">
+                <div>
+                    <h2>Amis-korttivertailu</h2>
+                    <p class="quiz-lead">Rakennetaan koko suosikkijärjestys yksi vertailu kerrallaan.</p>
+                </div>
+                <button id="quiz-restart" type="button">Aloita alusta</button>
+            </header>
+            <section class="quiz-overview" aria-label="Kyselyn tila">
+                <div class="quiz-meta">
+                    <span id="quiz-count"></span>
+                    <span id="quiz-stage"></span>
+                </div>
+                <p id="quiz-help" class="quiz-help">Valitse kiinnostavampi vaihtoehto. Nuolinäppäimet toimivat myös.</p>
+                <p id="quiz-feedback" class="saved-feedback" aria-live="polite" hidden></p>
+            </section>
+            <section class="quiz-play" aria-label="Vertailu">
+                <div class="quiz-play-header">
+                    <h3 id="quiz-prompt">Kumpi kiinnostaa enemmän?</h3>
+                    <p class="quiz-shortcuts">Vasen/oikea nuoli toimii valintana.</p>
+                </div>
+                <div id="quiz-cards" class="quiz-cards">
+                    <div id="quiz-vasen" class="quiz-card-slot"></div>
+                    <div id="quiz-oikea" class="quiz-card-slot"></div>
+                </div>
+            </section>
+            <section id="quiz-valmis" class="quiz-results" hidden>
+                <h3>Valmis</h3>
+                <div id="quiz-summary" class="quiz-summary"></div>
+                <section class="quiz-ranking" aria-labelledby="quiz-top3-title">
+                    <h4 id="quiz-top3-title">Kolme kärjessä</h4>
+                    <div id="quiz-top3"></div>
+                </section>
+                <details class="quiz-ranking">
+                    <summary>Näytä koko järjestys</summary>
+                    <ol id="quiz-ranking-list" class="quiz-ranking-list"></ol>
+                </details>
+            </section>
         </section>
-        <section class="quiz-play" aria-label="Vertailu">
-          <div class="quiz-play-header">
-            <h3 id="quiz-prompt">Kumpi kiinnostaa enemmän?</h3>
-            <p class="quiz-shortcuts">Vasen/oikea nuoli toimii valintana.</p>
-          </div>
-          <div id="quiz-cards" class="quiz-cards">
-            <div id="quiz-vasen" class="quiz-card-slot"></div>
-            <div id="quiz-oikea" class="quiz-card-slot"></div>
-          </div>
-        </section>
-        <section id="quiz-valmis" class="quiz-results" hidden>
-          <h3>Valmis</h3>
-          <div id="quiz-summary" class="quiz-summary"></div>
-          <section class="quiz-ranking" aria-labelledby="quiz-top3-title">
-            <h4 id="quiz-top3-title">Kolme kärjessä</h4>
-            <div id="quiz-top3"></div>
-          </section>
-          <details class="quiz-ranking">
-            <summary>Näytä koko järjestys</summary>
-            <ol id="quiz-ranking-list" class="quiz-ranking-list"></ol>
-          </details>
-        </section>
-      </section>
-
     </main>
-
-    <script type="module" src="../scripts/layout.js"></script>
-    <script type="module" src="../scripts/amis-quiz.js"></script>
-  </body>
+    <script type="module" src="../scripts/ulkoasu.js"></script>
+    <script type="module" src="../scripts/tutkinto-kysely.js"></script>
+    </body>
 </html>

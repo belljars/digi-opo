@@ -51,7 +51,7 @@ type Rajapinta = {
 
 const SUUNNITELMA_MUISTIO_AVAIN = "digi-opo.suunitelma.note";
 const QUIZ_PAGES: Record<string, string> = {
-  "amis-quiz": "./tutkinto-kysely",
+  "tutkinto-kysely": "./tutkinto-kysely",
   opintopolku: "./opintopolku-kysely.html"
 };
 
@@ -125,7 +125,7 @@ function muotoileAikaleima(value: string): string {
 }
 
 function haeKyselynNimi(quizId: string): string {
-  if (quizId === "amis-quiz") {
+  if (quizId === "tutkinto-kysely") {
     return "Amis-korttivertailu";
   }
   if (quizId === "opintopolku") {
@@ -135,7 +135,7 @@ function haeKyselynNimi(quizId: string): string {
 }
 
 function haeTuloksenOtsikko(item: KyselyTulosTieto): string {
-  if (item.quizId === "amis-quiz") {
+  if (item.quizId === "tutkinto-kysely") {
     return String(item.result.topName ?? "Tallennettu ranking");
   }
   return String(item.result.topPathLabel ?? item.result.topPathId ?? "Tallennettu tulos");
@@ -210,7 +210,7 @@ function luoVaihtoehtokortti(item: TallennettuTutkintonimikeTieto, noteText: str
   const hasNextStep = Boolean((item.nextStep ?? "").trim().length > 0);
 
   const actions = document.createElement("div");
-  actions.className = "tutkintonimike-card-actions";
+  actions.className = "tutkintonimike-kortti-actions";
 
   const savedLink = document.createElement("a");
   savedLink.href = "./tallennetut.html";
@@ -368,7 +368,7 @@ async function piirraOmaSuunnitelma(): Promise<void> {
     api.list_saved_tutkintonimikkeet(),
     api.list_tutkintonimike_notes(),
     api.list_quiz_results(),
-    api.get_quiz_session("amis-quiz"),
+    api.get_quiz_session("tutkinto-kysely"),
     api.get_quiz_session("opintopolku")
   ]);
 
