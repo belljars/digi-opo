@@ -156,7 +156,7 @@ Sivukohtaiset skriptit ylläpitävät omat tilansa. Esimerkiksi:
 - `pankki.ts` hallitsee aktiivista tutkintoa, suodattimia ja detail-cachea
 - `quiz.ts` hallitsee kyselyn etenemistä ja vastauksia
 - `amis-quiz.ts` hallitsee koko pairwise ranking -session tilaa
-- `my-plan.ts` kokoaa useasta lähteestä johdetun näkymän
+- `suunitelma.ts` kokoaa useasta lähteestä johdetun näkymän
 
 ### Alustus kestää viiveen
 

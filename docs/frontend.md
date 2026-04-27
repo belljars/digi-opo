@@ -57,7 +57,7 @@ Jaettu korttikomponentti tutkintonimikkeille.
 Sitä käyttävät muun muassa:
 
 - `pankki.ts`
-- `saved-tutkintonimikkeet.ts`
+- `tallennetut.ts`
 - `asetukset.ts`
 - `amis-quiz.ts`
 
@@ -98,7 +98,7 @@ Keskeinen paikallinen tila:
 - `detailCache`
 - `filterState`
 
-### `saved-tutkintonimikkeet.ts`
+### `tallennetut.ts`
 
 Tallennettujen tutkintonimikkeiden koontisivu.
 
@@ -117,7 +117,7 @@ Sivu käyttää erillisiä in-flight -joukkoja rinnakkaisten muokkausten hallint
 - `noteDeleteInFlightIds`
 - `planSaveInFlightIds`
 
-### `my-plan.ts`
+### `suunitelma.ts`
 
 Oma suunnitelma -sivu muodostaa johdetun kokonaisnäkymän käyttäjän datasta.
 
@@ -131,9 +131,9 @@ Se yhdistää:
 
 Keskeisiä paikallisia avaimia:
 
-- `digi-opo.my-plan.note`
-- `digi-opo.my-plan.steps`
-- `digi-opo.my-plan.simple-mode`
+- `digi-opo.suunitelma.note`
+- `digi-opo.suunitelma.steps`
+- `digi-opo.suunitelma.simple-mode`
 
 Tärkeä logiikka:
 

@@ -108,8 +108,8 @@ if not exist "src\ui\scripts\amis-quiz.js" (
   exit /b 1
 )
 
-if not exist "src\ui\scripts\saved-tutkintonimikkeet.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\saved-tutkintonimikkeet.js
+if not exist "src\ui\scripts\tallennetut.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tallennetut.js
   exit /b 1
 )
 

@@ -1,4 +1,4 @@
-// saved-tutkintonimikkeet.ts on tallennettujen tutkintonimikkeiden hallintasivu, joka hakee tallennetut tutkintonimikkeet, niihin liittyvät muistiinpanot, kyselytulokset ja keskeneräiset kyselytilat taustalta pywebviewn kautta ja renderöi ne sivulle
+// tallennetut.ts on tallennettujen tutkintonimikkeiden hallintasivu, joka hakee tallennetut tutkintonimikkeet, niihin liittyvät muistiinpanot, kyselytulokset ja keskeneräiset kyselytilat taustalta pywebviewn kautta ja renderöi ne sivulle
 // Skripti sisältää myös tilanhallinnan, muistiinpanojen ja suunnitelmien tallennus- ja poistotoiminnot sekä kyselytulosten ja -tilojen hallinnan
 
 export {};

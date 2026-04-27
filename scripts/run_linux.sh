@@ -88,7 +88,7 @@ build_frontend() {
     "src/ui/scripts/layout.js"
     "src/ui/scripts/opintopolut.js"
     "src/ui/scripts/amis-quiz.js"
-    "src/ui/scripts/saved-tutkintonimikkeet.js"
+    "src/ui/scripts/tallennetut.js"
     "src/ui/scripts/asetukset.js"
     "src/ui/scripts/tutkintonimike-card.js"
   )

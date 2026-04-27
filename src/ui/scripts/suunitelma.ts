@@ -49,7 +49,7 @@ type Rajapinta = {
   get_quiz_session: (quizId: string) => Promise<KyselyIstuntoTieto | null>;
 };
 
-const SUUNNITELMA_MUISTIO_AVAIN = "digi-opo.my-plan.note";
+const SUUNNITELMA_MUISTIO_AVAIN = "digi-opo.suunitelma.note";
 const QUIZ_PAGES: Record<string, string> = {
   "amis-quiz": "./amis-quiz.html",
   opintopolku: "./quiz.html"
@@ -213,7 +213,7 @@ function luoVaihtoehtokortti(item: TallennettuTutkintonimikeTieto, noteText: str
   actions.className = "tutkintonimike-card-actions";
 
   const savedLink = document.createElement("a");
-  savedLink.href = "./saved-tutkintonimikkeet.html";
+  savedLink.href = "./tallennetut.html";
   savedLink.className = "tutkintonimike-link-action";
   savedLink.textContent = "Avaa tallennetut";
 
@@ -276,7 +276,7 @@ function luoJatkaKortti(item: KyselyIstuntoTieto): HTMLElement {
   copy.append(title, meta);
 
   const action = document.createElement("a");
-  action.href = QUIZ_PAGES[item.quizId] ?? "./saved-tutkintonimikkeet.html";
+  action.href = QUIZ_PAGES[item.quizId] ?? "./tallennetut.html";
   action.className = "tutkintonimike-link-action";
   action.textContent = "Jatka";
 
@@ -300,7 +300,7 @@ function luoTuloskortti(item: KyselyTulosTieto): HTMLElement {
   copy.append(title, meta);
 
   const action = document.createElement("a");
-  action.href = "./saved-tutkintonimikkeet.html";
+  action.href = "./tallennetut.html";
   action.className = "tutkintonimike-link-action";
   action.textContent = "Avaa tallennetut";
 
@@ -328,7 +328,7 @@ function luoMuistiinpanoKortti(item: TutkintonimikeMuistiinpanoTieto): HTMLEleme
   copy.append(title, meta, note);
 
   const action = document.createElement("a");
-  action.href = "./saved-tutkintonimikkeet.html";
+  action.href = "./tallennetut.html";
   action.className = "tutkintonimike-link-action";
   action.textContent = "Muokkaa";
 

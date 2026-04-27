@@ -112,10 +112,10 @@ Keskeinen sääntö:
 
 ## 6. Muistiinpanon tallennus
 
-1. Käyttäjä kirjoittaa muistiinpanon `saved-tutkintonimikkeet`-sivulla.
+1. Käyttäjä kirjoittaa muistiinpanon `tallennetut`-sivulla.
 2. Frontend kutsuu `save_tutkintonimike_note(id, noteText)`.
 3. Backend tallentaa tai päivittää rivin tauluun `tutkintonimike_notes`.
-4. Päivitetty muistiinpano näkyy sekä tallennettujen sivulla että `my-plan`-sivulla.
+4. Päivitetty muistiinpano näkyy sekä tallennettujen sivulla että `suunitelma`-sivulla.
 
 ## 7. Suunnitelman tallennus
 
@@ -130,7 +130,7 @@ Jos kaikki suunnitelmakentät ovat tyhjiä, backend tyhjentää suunnitelmatiedo
 
 ## 8. Oma suunnitelma -sivun muodostus
 
-`my-plan.ts` toimii koontinäkymänä.
+`suunitelma.ts` toimii koontinäkymänä.
 
 Se lukee rinnakkain:
 

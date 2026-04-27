@@ -46,7 +46,7 @@ class UiSmokeTests(unittest.TestCase):
         pages = [
             "home.html",
             "pankki.html",
-            "saved-tutkintonimikkeet.html",
+            "tallennetut.html",
             "opintopolut.html",
             "quiz.html",
             "amis-quiz.html",

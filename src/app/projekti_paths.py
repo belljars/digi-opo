@@ -64,7 +64,7 @@ class ProjectPaths:
         return cls(resource_root=resource_root, user_data_root=default_user_data_root())
 
     def ui_index_path(self) -> str:
-        return "/src/ui/pages/main.html"
+        return "/src/ui/pages/index.html"
 
     def tietokanta_path(self) -> Path:
         data_dir = self.user_data_root / "data"

@@ -10,8 +10,8 @@ Nykyiset näkymät hakemistossa `src/ui/pages/`:
 
 - `home.html`
 - `pankki.html`
-- `saved-tutkintonimikkeet.html`
-- `my-plan.html`
+- `tallennetut.html`
+- `suunitelma.html`
 - `opintopolut.html`
 - `quiz.html`
 - `amis-quiz.html`

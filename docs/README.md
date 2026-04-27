@@ -63,7 +63,7 @@ Jos haluat siirtyä dokumentaatiosta lähdekoodiin, aloita näistä:
 - `src/ui/scripts/pywebview-init.ts`
 - `src/ui/scripts/layout.ts`
 - `src/ui/scripts/pankki.ts`
-- `src/ui/scripts/saved-tutkintonimikkeet.ts`
-- `src/ui/scripts/my-plan.ts`
+- `src/ui/scripts/tallennetut.ts`
+- `src/ui/scripts/suunitelma.ts`
 - `src/ui/scripts/quiz.ts`
 - `src/ui/scripts/amis-quiz.ts`

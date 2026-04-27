@@ -210,7 +210,7 @@ Backend käyttää kolmea pysyvän datan tasoa:
 - `data/tutkinnot.db` sisältää ajonaikaisen relaatiodatan
 - `user/*.json` sisältää käyttäjäkohtaiset quiz-tallennukset
 
-Lisäksi `my-plan.ts` käyttää selaimen `localStorage`a käyttöliittymäkohtaisiin asetuksiin, mutta sitä ei hallita backendissä.
+Lisäksi `suunitelma.ts` käyttää selaimen `localStorage`a käyttöliittymäkohtaisiin asetuksiin, mutta sitä ei hallita backendissä.
 
 ## Esimerkkikutsut frontendistä
 
@@ -228,5 +228,5 @@ await api.save_tutkintonimike_plan(42, "ensisijainen", "vahva-vaihtoehto", "Kysy
 ## Muutoksia tehdessä huomioi
 
 - Lisää näkyvyys- ja validointisäännöt backendiin, ei vain frontendiin.
-- Jos muokkaat `saved_tutkintonimikkeet`-rakennetta, tarkista myös `saved-tutkintonimikkeet.ts`, `my-plan.ts` ja PDF-vienti.
+- Jos muokkaat `saved_tutkintonimikkeet`-rakennetta, tarkista myös `tallennetut.ts`, `suunitelma.ts` ja PDF-vienti.
 - Jos muokkaat `ammatit.json`-importtia, tarkista myös `tietokanta.py` ja backend-testit.

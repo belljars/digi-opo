@@ -34,8 +34,8 @@ type DeleteUserInfoApi = {
 const navItems: NavItem[] = [
   { id: "home", href: "./home.html", label: "Etusivu", target: "iframe-content" },
   { id: "index", href: "./pankki.html", label: "Tutkintopankki", target: "iframe-content" },
-  { id: "saved", href: "./saved-tutkintonimikkeet.html", label: "Tallennetut", target: "iframe-content" },
-  { id: "my-plan", href: "./my-plan.html", label: "Oma suunnitelma", target: "iframe-content" },
+  { id: "saved", href: "./tallennetut.html", label: "Tallennetut", target: "iframe-content" },
+  { id: "suunitelma", href: "./suunitelma.html", label: "Oma suunnitelma", target: "iframe-content" },
   { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut", target: "iframe-content" },
   { id: "asetukset", href: "./asetukset.html", label: "Asetukset", target: "iframe-content" }
 ];
