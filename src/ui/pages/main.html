@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Lue, miten digi-opo käsittelee tietoja paikallisesti ilman ulkoisia palveluja."
+      content="Digitaaline opo"
     />
     <title>digi-opo - Digitaalinen tutkintopankki</title>
     <script>
@@ -33,18 +33,16 @@
     </script>
     <link rel="stylesheet" href="../styles/styles.css" />
   </head>
+  <body>
     <a class="skip-link" href="#main-content">Siirry sisältöön</a>
     <main class="app" id="main-content">
+      <div id="app-header"></div>
 
-      <div>
-        <h2>digi-opon tietosuojakäytäntö</h2>
-        <h3>Käyttäjän tietojen käsittely</h3>
-        <ul>
-            <li><p>digi-opo <b>ei kerää, tallenna tai jaa käyttäjien henkilökohtaisia tietoja</b>. Kaikki sovelluksessa tapahtuva toiminta tapahtuu paikallisesti käyttäjän laitteella, eikä tietoja lähetetä ulkoisille palvelimille.</p></li>
-            <li><p>digi-opo <b>ei käytä nettiä</b>, joten sinun tiedot eivät koskaan poistu laitteeltasi. Sovellus toimii täysin offline-tilassa, mikä varmistaa, että tietosi pysyvät yksityisinä ja turvassa.</p></li>
-        </ul>
-      </div>
+      <section class="home-page">
+        <iframe src="home.html" title="Sisältö" class="iframe-content" id="iframe-content" name="iframe-content" style="height: 100%; width: 100%; border: none;"></iframe>
+      </section>
 
+      <footer id="app-footer" class="site-footer"></footer>
     </main>
 
     <script type="module" src="../scripts/layout.js"></script>

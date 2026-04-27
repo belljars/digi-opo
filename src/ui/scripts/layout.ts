@@ -16,6 +16,7 @@ type NavItem = {
   id: string;
   href: string;
   label: string;
+  target: string;
 };
 
 // Poistaa API-kutsuilla käyttäjän tiedot, eli user-kansion JSON-tiedostot ja data-kansion DB-tiedostot
@@ -30,12 +31,12 @@ type DeleteUserInfoApi = {
 };
 
 const navItems: NavItem[] = [
-  { id: "home", href: "./home.html", label: "Etusivu" },
-  { id: "index", href: "./pankki.html", label: "Tutkintopankki" },
-  { id: "saved", href: "./saved-tutkintonimikkeet.html", label: "Tallennetut" },
-  { id: "my-plan", href: "./my-plan.html", label: "Oma suunnitelma" },
-  { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut" },
-  { id: "asetukset", href: "./asetukset.html", label: "Asetukset" }
+  { id: "home", href: "./home.html", label: "Etusivu", target: "iframe-content" },
+  { id: "index", href: "./pankki.html", label: "Tutkintopankki", target: "iframe-content" },
+  { id: "saved", href: "./saved-tutkintonimikkeet.html", label: "Tallennetut", target: "iframe-content" },
+  { id: "my-plan", href: "./my-plan.html", label: "Oma suunnitelma", target: "iframe-content" },
+  { id: "opintopolut", href: "./opintopolut.html", label: "Opintopolut", target: "iframe-content" },
+  { id: "asetukset", href: "./asetukset.html", label: "Asetukset", target: "iframe-content" }
 ];
 
 function getThemeToggleLabel(effectiveTheme: EffectiveTheme): string {
@@ -131,7 +132,7 @@ function renderHeader(): void {
       const isActive = item.id === currentPage;
       const activeClass = isActive ? " active" : "";
       const ariaCurrent = isActive ? ' aria-current="page"' : "";
-      return `<a class="header-link${activeClass}" href="${item.href}"${ariaCurrent}>${item.label}</a>`;
+      return `<a class="header-link${activeClass}" href="${item.href}" target="${item.target}"${ariaCurrent}>${item.label}</a>`;
     })
     .join("");
 
