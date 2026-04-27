@@ -14,7 +14,20 @@ type InitRunner = () => Promise<InitAttemptResult>;
 
 // Palauttaa pywebviewn API-olion heti, jos se on jo saatavilla ikkunassa
 export function getPywebviewApi<T>(): T | null {
-  return (window.pywebview?.api as T | undefined) ?? null;
+  const currentApi = (window.pywebview?.api as T | undefined) ?? null;
+  if (currentApi) {
+    return currentApi;
+  }
+
+  try {
+    if (window.parent && window.parent !== window) {
+      return (window.parent.pywebview?.api as T | undefined) ?? null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }
 
 // Odottaa pywebviewn API:a annetun aikakatkaisun ajan ennen kuin luovuttaa

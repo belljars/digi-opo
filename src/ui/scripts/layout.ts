@@ -11,6 +11,7 @@ import {
   type ThemeMode,
   type EffectiveTheme
 } from "./theme.js";
+import { getPywebviewApi } from "./pywebview-init.js";
 
 type NavItem = {
   id: string;
@@ -87,7 +88,7 @@ function updateDeleteInfoButtonState(isDeleting: boolean): void {
 }
 
 async function handleDeleteInfo(): Promise<void> {
-  const api = (window.pywebview?.api as DeleteUserInfoApi | undefined) ?? null;
+  const api = getPywebviewApi<DeleteUserInfoApi>();
   if (!api?.delete_user_info) {
     window.alert("Tietojen poisto ei ole viela valmis.");
     return;

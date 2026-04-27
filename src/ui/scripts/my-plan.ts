@@ -2,6 +2,7 @@ export {};
 
 import {
   createRetryingPageInit,
+  getPywebviewApi,
   waitForPywebviewApi,
   type InitAttemptResult
 } from "./pywebview-init.js";
@@ -80,7 +81,7 @@ const muistioTilaEl = document.getElementById("oma-suunnitelma-muistio-tila");
 let muistioAlustettu = false;
 
 function haeRajapinta(): Rajapinta | null {
-  return (window.pywebview?.api as Rajapinta | undefined) ?? null;
+  return getPywebviewApi<Rajapinta>();
 }
 
 function naytaPalaute(message = ""): void {

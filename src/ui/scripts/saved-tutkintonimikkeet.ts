@@ -6,6 +6,7 @@ export {};
 import { createTutkintonimikeCard } from "./tutkintonimike-card.js";
 import {
   createRetryingPageInit,
+  getPywebviewApi,
   waitForPywebviewApi,
   type InitAttemptResult
 } from "./pywebview-init.js";
@@ -127,7 +128,7 @@ const percentFormatter = new Intl.NumberFormat("fi-FI", {
 });
 
 function getApi(): Api | null {
-  return (window.pywebview?.api as Api | undefined) ?? null;
+  return getPywebviewApi<Api>();
 }
 
 function setFeedback(message = ""): void {
