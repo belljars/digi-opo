@@ -8,14 +8,19 @@ from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import os
 from pathlib import Path
+import posixpath
 import sys
 import threading
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 
 def is_allowed_static_path(request_path: str) -> bool:
     # Staattinen palvelin tarjoilee vain kayttoliittyman tiedostoja.
-    return urlparse(request_path).path.startswith("/src/ui/")
+    raw_path = unquote(urlparse(request_path).path)
+    normalized_path = posixpath.normpath(raw_path)
+    if raw_path.endswith("/") and not normalized_path.endswith("/"):
+        normalized_path = f"{normalized_path}/"
+    return normalized_path == "/src/ui" or normalized_path.startswith("/src/ui/")
 
 
 def default_user_data_root() -> Path:
@@ -148,9 +153,15 @@ class ProjectPaths:
 
 
 def start_static_server(paths: ProjectPaths) -> tuple[ThreadingHTTPServer, int]:
+    allowed_root = (paths.resource_root / "src" / "ui").resolve()
+
     class UiOnlyRequestHandler(SimpleHTTPRequestHandler):
+        def _is_allowed_filesystem_target(self) -> bool:
+            resolved_target = Path(self.translate_path(self.path)).resolve()
+            return resolved_target == allowed_root or allowed_root in resolved_target.parents
+
         def send_head(self):
-            if not is_allowed_static_path(self.path):
+            if not is_allowed_static_path(self.path) or not self._is_allowed_filesystem_target():
                 self.send_error(404, "File not found")
                 return None
             return super().send_head()

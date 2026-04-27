@@ -11,6 +11,8 @@ import os
 import shutil
 import sys
 import types  # Rakentaa kevyen vale-olion webview-riippuvuuden korvaamiseen
+import urllib.error
+import urllib.request
 import unittest  # Tarjoaa testikehyksen ja testien ajotavan
 import uuid
 from pathlib import Path  # Käsittelee testien väliaikaisia tiedosto- ja kansiopolkuja
@@ -531,9 +533,31 @@ class BackendApiTests(unittest.TestCase):
         # Staattinen palvelin sallii vain käyttöliittymän tiedostopolut
         self.assertTrue(self.app.is_allowed_static_path("/src/ui/pages/home.html"))
         self.assertTrue(self.app.is_allowed_static_path("/src/ui/assets/ammatit/sahkoasentaja.png"))
+        self.assertFalse(self.app.is_allowed_static_path("/src/ui/../../src/data/ammatit.json"))
+        self.assertFalse(self.app.is_allowed_static_path("/src/ui/%2e%2e/%2e%2e/src/data/ammatit.json"))
         self.assertFalse(self.app.is_allowed_static_path("/src/data/ammatit.json"))
         self.assertFalse(self.app.is_allowed_static_path("/data/tutkinnot.db"))
         self.assertFalse(self.app.is_allowed_static_path("/user/quiz_results.json"))
+
+    def test_static_server_blocks_path_traversal_outside_ui_tree(self) -> None:
+        # Polun normalisointi ei saa sallia src/ui-kansion ulkopuolisia tiedostoja
+        paths = self.app.ProjectPaths(
+            resource_root=self.root,
+            user_data_root=self.user_data_root,
+        )
+        server, port = self.app.start_static_server(paths)
+        try:
+            for request_path in (
+                "/src/ui/../../src/data/ammatit.json",
+                "/src/ui/%2e%2e/%2e%2e/src/data/ammatit.json",
+            ):
+                with self.subTest(request_path=request_path):
+                    with self.assertRaises(urllib.error.HTTPError) as ctx:
+                        urllib.request.urlopen(f"http://127.0.0.1:{port}{request_path}")
+                    self.assertEqual(ctx.exception.code, 404)
+        finally:
+            server.shutdown()
+            server.server_close()
 
 
 if __name__ == "__main__":
