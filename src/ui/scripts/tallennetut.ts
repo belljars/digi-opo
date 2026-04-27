@@ -82,8 +82,8 @@ type Api = {
 };
 
 const QUIZ_PAGES: Record<string, string> = {
-  "amis-quiz": "./tutkinto-kysely",
-  opintopolku: "./quiz.html"
+  "tutkinto-kysely": "./tutkinto-kysely.html",
+  opintopolku: "./opintopolku-kysely.html"
 };
 
 const summaryEl = document.getElementById("saved-summary");
@@ -150,7 +150,7 @@ function formatTimestamp(value: string): string {
 }
 
 function getQuizLabel(quizId: string): string {
-  if (quizId === "amis-quiz") {
+  if (quizId === "tutkinto-kysely") {
     return "Amis-korttivertailu";
   }
   if (quizId === "opintopolku") {
@@ -559,13 +559,13 @@ function createResultCard(item: QuizResultEntry): HTMLElement {
 
   const title = document.createElement("strong");
   title.textContent =
-    item.quizId === "amis-quiz"
+    item.quizId === "tutkinto-kysely"
       ? String(item.result.topName ?? "Tallennettu ranking")
       : String(item.result.topPathLabel ?? item.result.topPathId ?? "Tallennettu tulos");
 
   const meta = document.createElement("p");
   const extra =
-    item.quizId === "amis-quiz"
+    item.quizId === "tutkinto-kysely"
       ? typeof item.result.comparisons === "number"
         ? `${item.result.comparisons} vertailua.`
         : ""

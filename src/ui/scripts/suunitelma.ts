@@ -51,7 +51,7 @@ type Rajapinta = {
 
 const SUUNNITELMA_MUISTIO_AVAIN = "digi-opo.suunitelma.note";
 const QUIZ_PAGES: Record<string, string> = {
-  "tutkinto-kysely": "./tutkinto-kysely",
+  "tutkinto-kysely": "./tutkinto-kysely.html",
   opintopolku: "./opintopolku-kysely.html"
 };
 
