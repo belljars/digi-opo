@@ -125,7 +125,6 @@ function renderHeader(): void {
   }
 
   const currentPage = document.body.dataset.page ?? "";
-  const subtitle = document.body.dataset.subtitle ?? "Digitaalinen opintoapu";
 
   const links = navItems
     .map((item) => {
@@ -140,7 +139,6 @@ function renderHeader(): void {
     <header class="header site-header">
       <div>
         <h1>digi-opo</h1>
-        <p>${subtitle}</p>
       </div>
       <nav class="header-actions site-nav" aria-label="Päävalikko">
         ${links}
