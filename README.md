@@ -13,8 +13,8 @@ Nykyiset näkymät hakemistossa `src/ui/pages/`:
 - `tallennetut.html`
 - `suunitelma.html`
 - `opintopolut.html`
-- `quiz.html`
-- `amis-quiz.html`
+- `opintopolku-kysely.html`
+- `tutkinto-kysely`
 - `asetukset.html`
 - `tietosuoja.html`
 

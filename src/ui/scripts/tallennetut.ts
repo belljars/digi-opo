@@ -82,8 +82,8 @@ type Api = {
 };
 
 const QUIZ_PAGES: Record<string, string> = {
-  "amis-quiz": "./amis-quiz.html",
-  opintopolku: "./quiz.html"
+  "amis-quiz": "./tutkinto-kysely",
+  opintopolku: "./opintopolku-kysely.html"
 };
 
 const summaryEl = document.getElementById("saved-summary");

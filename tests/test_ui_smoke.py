@@ -48,8 +48,8 @@ class UiSmokeTests(unittest.TestCase):
             "pankki.html",
             "tallennetut.html",
             "opintopolut.html",
-            "quiz.html",
-            "amis-quiz.html",
+            "opintopolku-kysely.html",
+            "tutkinto-kysely",
         ]
         for page in pages:
             with self.subTest(page=page):
