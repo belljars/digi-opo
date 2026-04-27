@@ -1,5 +1,5 @@
 {
-  description = "NixOS development environment for digi-opo";
+  description = "NixOS kehitysympäristö digi-opo sovellukselle";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
