@@ -61,6 +61,7 @@ type DeleteUserInfoResult = {
 
 type ExportUserDataPdfResult = {
   success: boolean;
+  cancelled: boolean;
   path: string;
   fileName: string;
   savedCount: number;

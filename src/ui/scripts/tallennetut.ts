@@ -372,13 +372,14 @@ function renderSavedState(): void {
 }
 
 function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLElement {
-  const { root, actions, body } = createTutkintonimikeCard({
+  const { root, actions, body, media } = createTutkintonimikeCard({
     nimi: item.nimi,
     linkki: item.linkki,
     img: item.img,
     tutkinto_nimi: item.tutkinto_nimi
   });
   root.classList.add("saved-item-card");
+  media.remove();
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";

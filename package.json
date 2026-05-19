@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --project tsconfig.json",
+    "build:exe:win": "scripts\\build_windows_exe.bat",
     "check": "tsc --noEmit --project tsconfig.json",
     "pretest:frontend-init": "npm run build",
     "test:frontend-init": "node tests/test_pywebview_init.mjs",

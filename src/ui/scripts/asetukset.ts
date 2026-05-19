@@ -34,6 +34,7 @@ type HiddenTutkintonimikeItem = TutkintonimikeItem & {
 
 type ExportUserDataPdfResult = {
   success: boolean;
+  cancelled: boolean;
   path: string;
   fileName: string;
   savedCount: number;
@@ -390,6 +391,10 @@ async function exportUserDataPdf(): Promise<void> {
 
   try {
     const result = await activeApi.export_user_data_pdf();
+    if (result.cancelled) {
+      setExportStatus("PDF-vienti peruttiin.");
+      return;
+    }
     setExportStatus(
       `PDF luotu: ${result.path} (${result.savedCount} tallennettua, ${result.noteCount} muistiinpanoa, ${result.quizResultCount} visatulosta).`
     );

@@ -28,6 +28,7 @@ def load_app_module():
         raise RuntimeError("Ei pystynyt lataamaan src/app/app.py")
 
     fake_webview = types.SimpleNamespace(
+        FileDialog=types.SimpleNamespace(SAVE=30),
         create_window=lambda *args, **kwargs: None,
         start=lambda *args, **kwargs: None,
     )
@@ -293,7 +294,6 @@ class BackendApiTests(unittest.TestCase):
         all_items = api.list_tutkintonimikkeet()
         sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
         kokki = next(item for item in all_items if item["nimi"] == "Kokki")
-
         api.save_tutkintonimike(sahkoasentaja["id"])
         api.save_tutkintonimike_note(sahkoasentaja["id"], "Kiinnostaa erityisesti.")
 
@@ -480,12 +480,16 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
         self.assertEqual(len(api.list_tutkinnot()), 2)
 
-    def test_export_user_data_pdf_collects_saved_data_and_writes_to_exports_directory(self) -> None:
+    def test_export_user_data_pdf_collects_saved_data_and_writes_to_user_selected_path(self) -> None:
         # PDF-vienti kokoaa käyttäjän tiedot yhdeksi raportiksi ja käyttää exports-kansiota
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
         sahkoasentaja = next(item for item in all_items if item["nimi"] == "Sahkoasentaja")
         kokki = next(item for item in all_items if item["nimi"] == "Kokki")
+        home_dir = self.root / "home"
+        documents_dir = home_dir / "Documents"
+        documents_dir.mkdir(parents=True, exist_ok=True)
+        selected_path = documents_dir / "oma-vienti.pdf"
 
         api.save_tutkintonimike(sahkoasentaja["id"])
         api.save_tutkintonimike_plan(
@@ -503,21 +507,31 @@ class BackendApiTests(unittest.TestCase):
         vienti_module = sys.modules.get("backend.vienti")
         self.assertIsNotNone(vienti_module)
         calls: list[tuple[str, Path]] = []
+        fake_window = mock.Mock()
+        fake_window.create_file_dialog.return_value = (str(selected_path),)
+        api.set_window(fake_window)
 
         def fake_render(html: str, output_path: Path) -> None:
             calls.append((html, output_path))
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_bytes(b"%PDF-test")
 
-        with mock.patch.object(vienti_module, "render_html_to_pdf", side_effect=fake_render):
+        with mock.patch.object(vienti_module, "render_html_to_pdf", side_effect=fake_render), mock.patch.object(
+            vienti_module.Path, "home", return_value=home_dir
+        ):
             result = api.export_user_data_pdf()
 
         self.assertTrue(result["success"])
+        self.assertFalse(result["cancelled"])
         self.assertTrue(str(result["path"]).endswith(".pdf"))
-        self.assertEqual(Path(result["path"]).parent, self.user_data_root / "exports")
+        self.assertEqual(Path(result["path"]), selected_path)
         self.assertEqual(len(calls), 1)
         html, output_path = calls[0]
         self.assertEqual(output_path, Path(result["path"]))
+        fake_window.create_file_dialog.assert_called_once()
+        _, kwargs = fake_window.create_file_dialog.call_args
+        self.assertEqual(kwargs["directory"], str(documents_dir))
+        self.assertTrue(kwargs["save_filename"].endswith(".pdf"))
         self.assertIn("Käyttäjätiedot", html)
         self.assertIn("Kysy opolta lisää sähköalasta.", html)
         self.assertIn("Kiinnostava vaihtoehto.", html)
@@ -528,6 +542,26 @@ class BackendApiTests(unittest.TestCase):
         self.assertTrue(output_path.exists())
         self.assertEqual(result["quizResultCount"], 1)
         self.assertEqual(result["quizSessionCount"], 1)
+
+    def test_export_user_data_pdf_returns_cancelled_when_save_dialog_is_closed(self) -> None:
+        # PDF-vienti ei kirjoita tiedostoa, jos käyttäjä sulkee tallennusvalintaikkunan
+        api = self.create_api()
+        all_items = api.list_tutkintonimikkeet()
+        api.save_tutkintonimike(all_items[0]["id"])
+        fake_window = mock.Mock()
+        fake_window.create_file_dialog.return_value = None
+        api.set_window(fake_window)
+
+        vienti_module = sys.modules.get("backend.vienti")
+        self.assertIsNotNone(vienti_module)
+
+        with mock.patch.object(vienti_module, "render_html_to_pdf") as render_mock:
+            result = api.export_user_data_pdf()
+
+        self.assertFalse(result["success"])
+        self.assertTrue(result["cancelled"])
+        self.assertEqual(result["path"], "")
+        render_mock.assert_not_called()
 
     def test_static_server_allows_only_ui_paths(self) -> None:
         # Staattinen palvelin sallii vain käyttöliittymän tiedostopolut

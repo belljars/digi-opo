@@ -8,6 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 import sqlite3
 import threading
+from typing import Any
 
 from backend_apu import (
     kirjoita_json_objekti,
@@ -30,6 +31,7 @@ class BackendBase:
     _conn: sqlite3.Connection
     _lock: threading.Lock
     _closed: bool
+    _window: Any | None
 
     def __init__(self, paths: ProjectPaths) -> None:
         # Avaa tietokannan ja varmistaa, etta sovelluksen data on kayttovalmista
@@ -37,8 +39,13 @@ class BackendBase:
         self._conn = connect_db(paths)
         self._lock = threading.Lock()
         self._closed = False
+        self._window = None
         ensure_data(self._conn, self._paths)
         migrate_saved_tutkintonimikkeet_from_json(self._conn, self._paths)
+
+    def set_window(self, window: Any) -> None:
+        # Tallentaa pywebview-ikkunan, jotta backend voi avata natiivivalintaikkunoita.
+        self._window = window
 
     def close(self) -> None:
         # Sulkee tietokantayhteyden hallitusti sovelluksen tai testin lopussa

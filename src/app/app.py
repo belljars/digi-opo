@@ -62,13 +62,15 @@ def main() -> None:
     api = Api()
     server, port = start_static_server(paths)
     try:
-        webview.create_window(
+        window = webview.create_window(
             "digi-opo",
             f"http://127.0.0.1:{port}{paths.ui_index_path()}",
             js_api=api,
             width=1024,
             height=768,
         )
+        if window is not None:
+            api.set_window(window)
         webview.start(gui="qt")
     finally:
         server.shutdown()

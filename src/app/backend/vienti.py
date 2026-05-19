@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from backend_apu import utc_now_iso
+import webview
 
 from .pdf_vienti import build_user_export_html, render_html_to_pdf
 
@@ -88,7 +91,7 @@ class VientiApiMixin:
             for row in rows
         ]
 
-    def _build_user_export_payload(self, output_path) -> dict:
+    def _build_user_export_payload(self, output_path: Path) -> dict:
         saved_items = self._list_all_saved_tutkintonimikkeet_for_export()
         notes = self._list_all_notes_for_export()
         hidden_tutkinnot = self.list_hidden_tutkinnot()
@@ -122,15 +125,58 @@ class VientiApiMixin:
             },
         }
 
-    def export_user_data_pdf(self) -> dict[str, str | int]:
-        # Luo käyttäjän tallennetuista tiedoista luettavan PDF-raportin exports-kansioon
-        output_path = self._paths.user_export_pdf_path()
+    def _default_pdf_export_filename(self) -> str:
+        timestamp = utc_now_iso().replace(":", "").replace("-", "").replace("T", "-").split(".")[0]
+        return f"digi-opo-kayttajatiedot-{timestamp}.pdf"
+
+    def _default_pdf_export_directory(self) -> Path:
+        documents_dir = Path.home() / "Documents"
+        if documents_dir.exists():
+            return documents_dir
+        return self._paths.user_data_root
+
+    def _prompt_user_export_pdf_path(self) -> Path | None:
+        if self._window is None:
+            return self._paths.user_export_pdf_path()
+
+        selected = self._window.create_file_dialog(
+            webview.FileDialog.SAVE,
+            directory=str(self._default_pdf_export_directory()),
+            save_filename=self._default_pdf_export_filename(),
+            file_types=("PDF files (*.pdf)",),
+        )
+        if not selected:
+            return None
+
+        output_path = Path(selected[0]).expanduser()
+        if output_path.suffix.lower() != ".pdf":
+            output_path = output_path.with_suffix(".pdf")
+        return output_path
+
+    def export_user_data_pdf(self) -> dict[str, str | int | bool]:
+        # Luo käyttäjän tallennetuista tiedoista luettavan PDF-raportin käyttäjän valitsemaan sijaintiin
+        output_path = self._prompt_user_export_pdf_path()
+        if output_path is None:
+            return {
+                "success": False,
+                "cancelled": True,
+                "path": "",
+                "fileName": "",
+                "savedCount": 0,
+                "noteCount": 0,
+                "hiddenTutkinnotCount": 0,
+                "hiddenTutkintonimikkeetCount": 0,
+                "quizResultCount": 0,
+                "quizSessionCount": 0,
+            }
+
         payload = self._build_user_export_payload(output_path)
         html = build_user_export_html(payload)
         render_html_to_pdf(html, output_path)
         summary = payload["summary"]
         return {
             "success": True,
+            "cancelled": False,
             "path": str(output_path),
             "fileName": output_path.name,
             "savedCount": summary["savedCount"],

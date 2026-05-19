@@ -110,7 +110,9 @@ Backend tallentaa quiz-datan hakemistoon `user/`:
 - `user/quiz_results.json`
 - `user/quiz_sessions.json`
 
-PDF-viennit kirjoitetaan hakemistoon `exports/`.
+PDF-viennissä käyttäjä valitsee tallennussijainnin itse. Tallennusikkuna avautuu oletuksena käyttäjän `Documents`-kansioon, jos se on saatavilla.
+
+Jos tallennussijaintia ei voida kysyä natiivilla tiedostovalitsimella, vienti käyttää varapolkuna sovelluksen kirjoitettavaa datahakemistoa `exports/`.
 
 ## Asennus
 
@@ -177,6 +179,41 @@ Skripti:
 - ajaa `npm run build`
 - tarkistaa odotetut `.js`-tulostiedostot
 - käynnistää `src\app\app.py`
+
+### Windows EXE
+
+Rakenna Windows-jakelukansio komennolla:
+
+```powershell
+.\scripts\build_windows_exe.bat
+```
+
+Tai npm:n kautta:
+
+```powershell
+npm run build:exe:win
+```
+
+Build-komento:
+
+- varmistaa tuetun Python-version (`3.11` tai `3.12`)
+- asentaa build-riippuvuudet tiedostosta `requirements-build.txt`
+- ajaa `npm install` ja `npm run build`
+- ajaa `PyInstaller`-buildin tiedostolla `digi-opo.spec`
+- tuottaa jakelun kansioon `dist/digi-opo/`
+
+Valmis käynnistettävä tiedosto on:
+
+```text
+dist/digi-opo/digi-opo.exe
+```
+
+Huomioita paketoinnista:
+
+- Tämä projekti rakentaa tällä hetkellä `onedir`-jakelun, ei yksittäistä `onefile`-exeä.
+- Pakattu sovellus lukee staattiset resurssit paketista, mutta kirjoittaa käyttäjädatan erilliseen kirjoitettavaan hakemistoon.
+- Windowsissa käyttäjädata tallennetaan pakatussa ajossa oletuksena polkuun `%LOCALAPPDATA%\digi-opo`.
+- `dist/digi-opo/` tulee jakaa kokonaisena kansiona, ei pelkkänä `.exe`-tiedostona.
 
 ### Nix
 
@@ -300,7 +337,7 @@ Flake asettaa tämän projektin tarvitsemat Qt-ympäristömuuttujat.
 digi-opo/
 ├── docs/                 # Projektin dokumentaatio
 ├── data/                 # Ajonaikainen SQLite-tietokanta
-├── exports/              # Luodut PDF-viennit
+├── exports/              # Varapolku PDF-vienneille ilman tallennusdialogia
 ├── scripts/              # Käynnistys- ja apuskriptit
 ├── src/
 │   ├── app/              # Pythonin käynnistyspiste, backend ja runtime-apurit
