@@ -144,10 +144,12 @@ body {
 /* Header ja footer pysyvät paikallaan */
 #app-header {
     flex-shrink: 0;
+    border-bottom: 1px solid currentColor;
 }
 
 #app-footer {
     flex-shrink: 0;
+    border-top: 1px solid currentColor;
 }
 
 /* Sisältöalue vieritetään headerin ja footerin välissä */
@@ -477,10 +479,12 @@ body {
     padding: var(--space-4);
 }
 
-.tutkintonimike-kortti-actions {
+.tutkintonimike-kortti-actions,
+.tutkintonimike-card-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    align-items: center;
+    gap: var(--space-3);
     margin-top: var(--space-2);
 }
 
@@ -1195,9 +1199,32 @@ body {
 }
 
 .tutkintonimike-action {
-    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid currentColor;
+    background: var(--color-surface-soft);
     flex-shrink: 0;
-    font-size: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.tutkintonimike-action:hover,
+.tutkintonimike-action:focus-visible {
+    background: var(--color-surface-muted);
+}
+
+.tutkintonimike-kortti-actions .tutkintonimike-link-action,
+.tutkintonimike-card-actions .tutkintonimike-link-action {
+    text-decoration-thickness: 1px;
+}
+
+.tutkintonimike-kortti-actions .tutkintonimike-action,
+.tutkintonimike-card-actions .tutkintonimike-action {
+    margin-left: 0;
 }
 
 /* ------------------------------------------------------------

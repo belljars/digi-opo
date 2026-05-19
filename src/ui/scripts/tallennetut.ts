@@ -328,7 +328,7 @@ function renderSavedItems(): void {
   const noteMap = new Map(savedNotes.map((note) => [note.id, note.noteText]));
 
   if (!savedItems.length) {
-    renderEmpty(listEl, "Et ole vielÃ¤ tallentanut tutkintonimikkeitÃ¤.");
+    renderEmpty(listEl, "Et ole vielä tallentanut tutkintonimikkeitä.");
     return;
   }
 
@@ -337,7 +337,7 @@ function renderSavedItems(): void {
 
 function renderQuizResults(): void {
   if (!quizResults.length) {
-    renderEmpty(resultsListEl, "Et ole vielÃ¤ tallentanut kyselytuloksia.");
+    renderEmpty(resultsListEl, "Et ole vielä tallentanut kyselytuloksia.");
     return;
   }
 
@@ -717,7 +717,7 @@ async function saveNote(id: number, nimi: string, noteText: string): Promise<voi
 
   const normalized = noteText.trim();
   if (!normalized) {
-    setFeedback(`Muistiinpano kohteelle "${nimi}" on tyhja.`);
+    setFeedback(`Muistiinpano kohteelle "${nimi}" on tyhjä.`);
     return;
   }
 
