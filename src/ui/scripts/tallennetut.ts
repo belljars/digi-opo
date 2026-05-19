@@ -346,7 +346,7 @@ function renderQuizResults(): void {
 
 function renderQuizSessions(): void {
   if (!quizSessions.length) {
-    renderEmpty(sessionsListEl, "Ei kesken jÃ¤Ã¤neitÃ¤ kyselyitÃ¤.");
+    renderEmpty(sessionsListEl, "Ei kesken jääneitä kyselyitä.");
     return;
   }
 
@@ -355,7 +355,7 @@ function renderQuizSessions(): void {
 
 function renderSavedNotes(): void {
   if (!savedNotes.length) {
-    renderEmpty(notesListEl, "Et ole vielÃ¤ kirjoittanut muistiinpanoja.");
+    renderEmpty(notesListEl, "Et ole vielä kirjoittanut muistiinpanoja.");
     return;
   }
 
