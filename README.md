@@ -2,21 +2,21 @@
 
 `digi-opo` on paikallinen työpöytäsovellus Luovin tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun. Se yhdistää Python-backendin, `pywebview`-ikkunan, TypeScript-käyttöliittymän, ajonaikaisen SQLite-tietokannan ja repoon versionhallittavan JSON-lähdedatan.
 
-Sovellus toimii kokonaan paikallisesti. Backend käynnistää HTTP-palvelimen osoitteeseen `127.0.0.1`, palvelee tiedostot hakemistosta `src/ui/` ja tarjoaa frontendille sovellusmetodit `window.pywebview.api`-rajapinnan kautta.
+Sovellus toimii kokonaan paikallisesti. Backend käynnistää HTTP-palvelimen osoitteeseen `127.0.0.1`, palvelee tiedostot hakemistosta `src/ui/` ja tarjoaa frontendille sovellusmetodit `window.pywebview.api` -rajapinnan kautta.
 
 ## Yleiskuva
 
 Nykyiset näkymät hakemistossa `src/ui/pages/`:
 
+- `index.html`
 - `home.html`
 - `pankki.html`
 - `tallennetut.html`
 - `suunitelma.html`
 - `opintopolut.html`
 - `opintopolku-kysely.html`
-- `tutkinto-kysely`
+- `tutkinto-kysely.html`
 - `asetukset.html`
-- `tietosuoja.html`
 
 Sovellus tukee esimerkiksi seuraavia työnkulkuja:
 
@@ -27,7 +27,7 @@ Sovellus tukee esimerkiksi seuraavia työnkulkuja:
 - oman suunnitelman ylläpito prioriteetin, tilan ja seuraavan askeleen avulla
 - opintopolkujen selaus
 - opintopolku-kyselyn tekeminen ja keskeneräisen session jatkaminen
-- tutkintonimikkeiden järjestäminen parivertailuun perustuvalla quizilla
+- tutkintonimikkeiden järjestäminen parivertailuun perustuvalla kyselyllä
 - tutkintojen ja tutkintonimikkeiden globaali piilotus
 - käyttäjädatan vienti PDF:ksi asetuksista
 
@@ -72,7 +72,8 @@ Keskeiset toteutusratkaisut:
 - `src/app/app.py` on sovelluksen käynnistyspiste.
 - `src/app/backend/api.py` kokoaa julkisen backend-API:n mixin-luokista.
 - `src/app/projekti_paths.py` määrittää ajonaikaiset polut ja käynnistää paikallisen staattisen palvelimen.
-- Frontend ei käytä REST-API:a, vaan kutsuu Python-metodeja `window.pywebview.api`-rajapinnan kautta.
+- Sovelluksen aloitussivu on `src/ui/pages/index.html`.
+- Frontend ei käytä REST-API:a, vaan kutsuu Python-metodeja `window.pywebview.api` -rajapinnan kautta.
 - Staattinen palvelin tarjoaa vain `/src/ui/`-polut. Raaka lähdedata ja käyttäjädata eivät ole suoraan selaimen luettavissa.
 
 ## Data ja tallennus
@@ -91,7 +92,7 @@ Hakemiston `src/data/` tiedostot määrittävät sovelluksen sisällön:
 
 ### Ajonaikainen tietokanta
 
-Backend luo ja ylläpitää tiedostoa `data/tutkinnot.db`.
+Backend luo ja ylläpitää tiedostoa `data/tutkinnot.db`, kun sovellusta ajetaan lähdekoodista. Pakatussa ajossa sama tietokanta luodaan kirjoitettavaan käyttäjädatahakemistoon.
 
 SQLite sisältää:
 
@@ -105,14 +106,18 @@ SQLite sisältää:
 
 ### Käyttäjäkohtaiset JSON-tiedostot
 
-Backend tallentaa quiz-datan hakemistoon `user/`:
+Backend tallentaa kyselydatan hakemistoon `user/`, kun sovellusta ajetaan lähdekoodista. Pakatussa ajossa vastaavat tiedostot tallennetaan käyttöjärjestelmän kirjoitettavaan käyttäjädatahakemistoon.
+
+Nykyiset käyttäjäkohtaiset JSON-tiedostot:
 
 - `user/quiz_results.json`
 - `user/quiz_sessions.json`
 
+Vanha `user/saved_tutkintonimikkeet.json` voidaan edelleen lukea migraatiota varten, mutta tallennetut tutkintonimikkeet säilytetään nykyisin SQLite-tietokannassa.
+
 PDF-viennissä käyttäjä valitsee tallennussijainnin itse. Tallennusikkuna avautuu oletuksena käyttäjän `Documents`-kansioon, jos se on saatavilla.
 
-Jos tallennussijaintia ei voida kysyä natiivilla tiedostovalitsimella, vienti käyttää varapolkuna sovelluksen kirjoitettavaa datahakemistoa `exports/`.
+Jos tallennussijaintia ei voida kysyä natiivilla tiedostovalitsimella, vienti käyttää varapolkuna sovelluksen kirjoitettavaa `exports/`-hakemistoa.
 
 ## Asennus
 
@@ -161,6 +166,7 @@ Skripti:
 - asentaa Python-riippuvuudet Nixin ulkopuolella
 - buildaa TypeScript-frontendin
 - tarkistaa odotetut `.js`-tulostiedostot
+- poistaa `user/*.json`- ja `data/*.db*`-tiedostot ennen käynnistystä
 - käynnistää `src/app/app.py`:n
 
 ### Windows
@@ -172,14 +178,23 @@ Käytä:
 .\scripts\windows\run_windows.bat
 ```
 
-Skripti:
+Skriptit:
 
-- etsii `py -3.12`- tai `py -3.11`-version
-- luo tai rakentaa `.venv`:n uudelleen tarvittaessa
-- asentaa Python-riippuvuudet
-- ajaa `npm run build`
-- tarkistaa odotetut `.js`-tulostiedostot
-- käynnistää `src\app\app.py`
+- `compile_windows.bat` ajaa `npm run build` ja tarkistaa odotetut `.js`-tulostiedostot
+- `run_windows.bat` etsii `py -3.12`- tai `py -3.11`-version
+- `run_windows.bat` luo tai rakentaa `.venv`:n uudelleen tarvittaessa
+- `run_windows.bat` asentaa Python-riippuvuudet
+- `run_windows.bat` tarkistaa, että frontend on jo buildattu
+- `run_windows.bat` poistaa `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä
+- `run_windows.bat` käynnistää `src\app\app.py`:n
+
+Jos riippuvuudet ja build ovat jo valmiina, voit käynnistää sovelluksen myös npm-helperillä:
+
+```powershell
+npm run run
+```
+
+Se ajaa `scripts\windows\run-app.mjs`-tiedoston, joka etsii sopivan Python-tulkin ja käynnistää `src\app\app.py`:n ilman `.venv`-rakennusta tai frontend-buildiä.
 
 ### Windows EXE
 
@@ -214,6 +229,7 @@ Huomioita paketoinnista:
 - Tämä projekti rakentaa tällä hetkellä `onedir`-jakelun, ei yksittäistä `onefile`-exeä.
 - Pakattu sovellus lukee staattiset resurssit paketista, mutta kirjoittaa käyttäjädatan erilliseen kirjoitettavaan hakemistoon.
 - Windowsissa käyttäjädata tallennetaan pakatussa ajossa oletuksena polkuun `%LOCALAPPDATA%\digi-opo`.
+- Pakattu ajo tyhjentää käyttäjäkohtaisen sovellusdatan käynnistyksen yhteydessä.
 - `dist/digi-opo/` tulee jakaa kokonaisena kansiona, ei pelkkänä `.exe`-tiedostona.
 
 ### Nix
@@ -231,12 +247,6 @@ Voit myös ajaa:
 nix run
 ```
 
-Asenna työpöytäkäynnistin komennolla:
-
-```bash
-./scripts/install_linux_launcher.sh
-```
-
 ### Manuaalinen käynnistys
 
 Manuaalinen käynnistys on käytännöllinen, kun haluat säilyttää ajonaikaisen datan käynnistysten välillä:
@@ -250,8 +260,9 @@ python src/app/app.py
 Huomio:
 
 - `npm run build` kääntää TypeScriptin suoraan hakemistoon `src/ui/scripts/`.
-- Erillistä `dist/`-hakemistoa ei ole.
-- `scripts/linux/run_linux.sh` ja `scripts/windows/run_windows.bat` poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä. Ne ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
+- Erillistä frontend-`dist/`-hakemistoa ei ole.
+- Lähdekoodista ajettaessa ajonaikainen data tallennetaan projektijuuren alle hakemistoihin `data/`, `user/` ja `exports/`.
+- `scripts/linux/run_linux.sh` ja `scripts/windows/run_windows.bat` ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
 
 ## Kehitystyö
 
@@ -289,6 +300,7 @@ npm run check
 npm run test:frontend-init
 python -m unittest tests.test_backend_api
 python -m unittest tests.test_ui_smoke
+python -m unittest tests.test_windows_launcher
 ```
 
 ### Päivitä tutkintojen lähdedata
@@ -305,7 +317,7 @@ Backend laskee import-signaturen uudelleen ja rakentaa tutkintotaulut SQLiteen u
 
 ### Sovellus käynnistyy tyhjällä käyttäjädatalla
 
-Jos käynnistät sovelluksen skripteillä `scripts/linux/run_linux.sh` tai `scripts/windows/run_windows.bat`, tämä on odotettu toiminta. Molemmat skriptit poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä.
+Jos käynnistät sovelluksen skripteillä `scripts/linux/run_linux.sh` tai `scripts/windows/run_windows.bat`, tämä on odotettu toiminta. Skriptit poistavat ajonaikaista dataa ennen käynnistystä.
 
 Käytä manuaalista käynnistystä, jos haluat säilyttää paikallisen ajonaikaisen datan käynnistysten välillä.
 
@@ -337,7 +349,7 @@ Flake asettaa tämän projektin tarvitsemat Qt-ympäristömuuttujat.
 ```text
 digi-opo/
 ├── docs/                 # Projektin dokumentaatio
-├── data/                 # Ajonaikainen SQLite-tietokanta
+├── data/                 # Ajonaikainen SQLite-tietokanta lähdekoodista ajettaessa
 ├── exports/              # Varapolku PDF-vienneille ilman tallennusdialogia
 ├── scripts/              # Käynnistys- ja apuskriptit
 ├── src/
@@ -349,7 +361,7 @@ digi-opo/
 │       ├── scripts/      # TypeScript-lähdekoodi ja käännetty JavaScript
 │       └── styles/       # CSS
 ├── tests/                # Backend- ja UI-testit
-└── user/                 # Käyttäjäkohtainen ajonaikainen data
+└── user/                 # Käyttäjäkohtainen ajonaikainen data lähdekoodista ajettaessa
 ```
 
 ## Lisälukeminen
