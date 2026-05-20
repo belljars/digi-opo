@@ -79,7 +79,6 @@ const hiddenTutkintonimikkeetCountEl = document.getElementById("asetukset-hidden
 const visibleTutkintonimikkeetEl = document.getElementById("asetukset-visible-tutkintonimikkeet");
 const hiddenTutkintonimikkeetEl = document.getElementById("asetukset-hidden-tutkintonimikkeet");
 
-// Sivu säilyttää viimeksi ladatun näkyvän ja piilotetun datan paikallisessa muistissa renderöintiä varten
 let activeApi: Api | null = null; // 
 let visibleTutkinnot: TutkintoListItem[] = [];
 let hiddenTutkinnot: HiddenTutkintoListItem[] = [];
@@ -93,7 +92,6 @@ let tutkintonimikeSearchTimeout: number | null = null;
 
 const searchDebounceMs = 200;
 
-// Päivittää asetussivun palautetekstin yhdestä paikasta
 function setFeedback(message = ""): void {
   if (feedbackEl) {
     feedbackEl.textContent = message;
@@ -161,8 +159,6 @@ function updateBulkUnhideButtonStates(): void {
   }
 }
 
-// Laskurit päivitetään erikseen, jotta listojen renderöinti voi keskittyä vain sisältöön
-// Piirtää tyhjän tilan viestin annettuun listakonttiin
 function renderEmpty(host: HTMLElement | null, message: string): void {
   if (!host) {
     return;
@@ -170,7 +166,6 @@ function renderEmpty(host: HTMLElement | null, message: string): void {
   host.innerHTML = `<p class="empty">${message}</p>`;
 }
 
-// Luo asetussivun toiminnoissa käytettävän yhtenäisen painikkeen
 function createActionButton(label: string, onClick: () => void): HTMLButtonElement {
   const button = document.createElement("button");
   button.type = "button";
@@ -180,14 +175,12 @@ function createActionButton(label: string, onClick: () => void): HTMLButtonEleme
   return button;
 }
 
-// Luo tutkintorivin näkyvien ja piilotettujen tutkintojen listoihin
 function createTutkintoRow(
   item: TutkintoListItem | HiddenTutkintoListItem,
   actionLabel: string,
   onAction: () => void,
   metaText?: string
 ): HTMLElement {
-  // Sama rivirakenne toimii sekä näkyville että piilotetuille tutkinnoille
   const row = document.createElement("article");
   row.className = "asetukset-item";
 
@@ -210,13 +203,11 @@ function createTutkintoRow(
   return row;
 }
 
-// Muodostaa tutkintonimikkeelle asetussivun kortin hyödyntäen yhteistä korttikomponenttia
 function createTutkintonimikeSettingsCard(
   item: TutkintonimikeItem | HiddenTutkintonimikeItem,
   actionLabel: string,
   onAction: () => void
 ): HTMLElement {
-  // Jaettu korttikomponentti pitää asetussivun ulkoasun linjassa muiden näkymien kanssa
   const { root, actions, body } = createTutkintonimikeCard({
     nimi: item.nimi,
     linkki: item.linkki,
@@ -231,7 +222,6 @@ function createTutkintonimikeSettingsCard(
   return root;
 }
 
-// Suodattaa ja piirtää näkyvien tutkintojen listan hakukentän perusteella
 function renderVisibleTutkinnot(): void {
   const query = tutkintoSearchEl?.value.trim().toLowerCase() ?? "";
   const items = query
@@ -253,7 +243,6 @@ function renderVisibleTutkinnot(): void {
   );
 }
 
-// Piirtää kaikki käyttäjän piilottamat tutkinnot palautustoimintoineen
 function renderHiddenTutkinnot(): void {
   setCount(hiddenTutkinnotCountEl, "piilotettu", hiddenTutkinnot.length);
   if (!hiddenTutkinnot.length) {
@@ -275,7 +264,6 @@ function renderHiddenTutkinnot(): void {
   );
 }
 
-// Suodattaa ja piirtää näkyvät tutkintonimikkeet korttein
 function renderVisibleTutkintonimikkeet(): void {
   const query = tutkintonimikeSearchEl?.value.trim().toLowerCase() ?? "";
   const items = query
@@ -304,7 +292,6 @@ function renderVisibleTutkintonimikkeet(): void {
   );
 }
 
-// Piirtää piilotetut tutkintonimikkeet palautuspainikkeineen
 function renderHiddenTutkintonimikkeet(): void {
   setCount(hiddenTutkintonimikkeetCountEl, "piilotettu", hiddenTutkintonimikkeet.length);
   if (!hiddenTutkintonimikkeet.length) {
@@ -321,7 +308,6 @@ function renderHiddenTutkintonimikkeet(): void {
   );
 }
 
-// Päivittää koko asetussivun kaikki listat nykyisen muistissa olevan datan perusteella
 function renderAll(): void {
   renderVisibleTutkinnot();
   renderHiddenTutkinnot();
@@ -330,7 +316,6 @@ function renderAll(): void {
   updateBulkUnhideButtonStates();
 }
 
-// Aikatauluttaa hakutulosten piirron niin, ettei jokainen näppäinpainallus rakenna listoja uudestaan
 function scheduleVisibleTutkinnotRender(): void {
   if (tutkintoSearchTimeout !== null) {
     window.clearTimeout(tutkintoSearchTimeout);
@@ -353,13 +338,11 @@ function scheduleVisibleTutkintonimikkeetRender(): void {
   }, searchDebounceMs);
 }
 
-// Hakee asetussivun tarvitseman datan backendistä yhdellä rinnakkaisella latauksella
 async function loadData(): Promise<void> {
   if (!activeApi) {
     return;
   }
 
-  // Näkyvät ja piilotetut listat haetaan yhdessä, jotta näkymä päivittyy yhtenäisenä kokonaisuutena
   const [nextVisibleTutkinnot, nextHiddenTutkinnot, nextVisibleTutkintonimikkeet, nextHiddenTutkintonimikkeet] =
     await Promise.all([
       activeApi.list_tutkinnot(),
@@ -374,7 +357,6 @@ async function loadData(): Promise<void> {
   hiddenTutkintonimikkeet = nextHiddenTutkintonimikkeet;
 }
 
-// Lataa datan uudelleen ja piirtää kaikki listat alusta asti
 async function reloadAll(): Promise<void> {
   await loadData();
   renderAll();
@@ -406,7 +388,6 @@ async function exportUserDataPdf(): Promise<void> {
   }
 }
 
-// Piilottaa tutkinnon koko sovelluksesta ja päivittää näkymän onnistumisen jälkeen
 async function hideTutkinto(item: TutkintoListItem): Promise<void> {
   if (!activeApi) {
     return;
@@ -433,7 +414,6 @@ async function hideTutkinto(item: TutkintoListItem): Promise<void> {
   }
 }
 
-// Palauttaa aiemmin piilotetun tutkinnon takaisin näkyviin
 async function unhideTutkinto(item: HiddenTutkintoListItem): Promise<void> {
   if (!activeApi) {
     return;
@@ -448,7 +428,6 @@ async function unhideTutkinto(item: HiddenTutkintoListItem): Promise<void> {
   }
 }
 
-// Palauttaa kaikki listassa olevat piilotetut tutkinnot kerralla
 async function unhideAllTutkinnot(): Promise<void> {
   if (!activeApi || unhideAllTutkinnotInFlight || hiddenTutkinnot.length === 0) {
     return;
@@ -471,7 +450,6 @@ async function unhideAllTutkinnot(): Promise<void> {
   }
 }
 
-// Piilottaa yksittäisen tutkintonimikkeen kaikista sitä käyttävistä näkymistä
 async function hideTutkintonimike(item: TutkintonimikeItem): Promise<void> {
   if (!activeApi) {
     return;
@@ -497,7 +475,6 @@ async function hideTutkintonimike(item: TutkintonimikeItem): Promise<void> {
   }
 }
 
-// Palauttaa aiemmin piilotetun tutkintonimikkeen takaisin listoille
 async function unhideTutkintonimike(item: HiddenTutkintonimikeItem): Promise<void> {
   if (!activeApi) {
     return;
@@ -527,7 +504,6 @@ async function unhideTutkintonimike(item: HiddenTutkintonimikeItem): Promise<voi
   }
 }
 
-// Palauttaa kaikki listassa olevat piilotetut tutkintonimikkeet kerralla
 async function unhideAllTutkintonimikkeet(): Promise<void> {
   if (!activeApi || unhideAllTutkintonimikkeetInFlight || hiddenTutkintonimikkeet.length === 0) {
     return;
@@ -566,7 +542,6 @@ async function unhideAllTutkintonimikkeet(): Promise<void> {
   }
 }
 
-// Alustaa asetussivun ja sitoo haku- sekä palautustoiminnot vasta backendin valmistuttua
 async function init(): Promise<InitAttemptResult> {
   setFeedback("");
   renderEmpty(visibleTutkinnotEl, "Ladataan...");
@@ -576,7 +551,6 @@ async function init(): Promise<InitAttemptResult> {
 
   const api = await waitForPywebviewApi<Api>();
   if (!api) {
-    // Virhetilassa jokaiselle listalle piirretään oma viesti, jotta sivu ei jää tyhjän oloiseksi
     setFeedback("Taustapalvelu ei ollut vielä valmis. Yritetään uudelleen...");
     renderEmpty(visibleTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
@@ -592,7 +566,6 @@ async function init(): Promise<InitAttemptResult> {
     await reloadAll();
     updateExportButtonState();
 
-    // Hakukentät suodattavat jo muistissa olevaa dataa ilman uusia backend-kutsuja
     tutkintoSearchEl?.addEventListener("input", () => {
       scheduleVisibleTutkinnotRender();
     });
@@ -623,7 +596,6 @@ async function init(): Promise<InitAttemptResult> {
 
 const initPage = createRetryingPageInit(init);
 
-// Sama alustus käynnistetään sekä DOM:n valmistuessa että pywebviewn ilmoittaessa valmiudesta
 window.addEventListener("pywebviewready", () => {
   initPage();
 });

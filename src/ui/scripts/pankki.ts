@@ -1,4 +1,4 @@
-export {}; // Pankki.ts on tutkintopankkisivun skripti, joka hakee tutkintojen ja tutkintonimikkeiden tiedot taustalta pywebviewn kautta ja renderöi ne sivulle. Skripti sisältää myös suodatuslogiikan, tallennus-toiminnallisuuden ja tilanhallinnan
+export {};
 
 import { createTutkintonimikeCard } from "./tutkintonimike-kortti.js";
 import {

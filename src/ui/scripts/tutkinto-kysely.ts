@@ -1,7 +1,5 @@
 export {};
 
-// tutkinto-kysely järjestää tutkintonimikkeet kiinnostavuusjärjestykseen parivertailujen avulla
-
 import {
   createTutkintonimikeCard,
   createTutkintonimikeLinkAction,
@@ -103,22 +101,16 @@ const quizSummaryEl = document.getElementById("quiz-summary");
 const quizTop3El = document.getElementById("quiz-top3");
 const quizRankingListEl = document.getElementById("quiz-ranking-list");
 
-// allItems sisältää kyselyn koko lähdeaineiston nykyistä istuntoa varten
 let allItems: TutkintonimikeItem[] = [];
-// itemMap mahdollistaa palautetun session id-listojen muuntamisen takaisin oikeiksi olioiksi
 let itemMap = new Map<number, TutkintonimikeItem>();
-// activeSession kuvaa meneillään olevan merge-vaiheen koko tilan
 let activeSession: QuizSession | null = null;
-// activePair kertoo, kumpi vaihtoehto on tällä hetkellä vasemmalla ja oikealla
 let activePair: ActivePair | null = null;
 let finalRanking: TutkintonimikeItem[] = [];
 let finishedAt: number | null = null;
 let lastSessionDurationMs: number | null = null;
 let activeApi: Api | null = null;
-// Tallennuspainikkeiden tila pidetään erikseen, jotta eri näkymät pysyvät synkassa
 let savedIds = new Set<number>();
 let saveInFlightIds = new Set<number>();
-// Session kirjoitukset ketjutetaan, jotta nopeat valinnat eivät kirjoita toistensa yli
 let sessionWriteChain: Promise<void> = Promise.resolve();
 
 function setFeedback(message = ""): void {
@@ -149,7 +141,6 @@ function setFinishedVisible(visible: boolean): void {
   }
 }
 
-// Rakentaa kortin rungon sekä vertailunäkymälle että valmiille tuloksille
 function createCardContent(
   item: TutkintonimikeCardItem,
   titleTag: "h3" | "h4" = "h3",
@@ -164,7 +155,6 @@ function createCardContent(
   }).root;
 }
 
-// Tallennuspainike osaa päivittää saman tutkintonimikkeen tilan kaikissa näkymissä
 function createSaveButton(item: TutkintonimikeItem): HTMLButtonElement {
   const saveButton = document.createElement("button");
   saveButton.type = "button";
@@ -178,7 +168,6 @@ function createSaveButton(item: TutkintonimikeItem): HTMLButtonElement {
   return saveButton;
 }
 
-// Piirtää yhden vertailupaikan joko valittavana korttina tai estettynä paikkana
 function renderChoiceSlot(slotEl: HTMLElement | null, item: TutkintonimikeItem | null, side: CardSide): void {
   if (!slotEl) {
     return;
@@ -217,7 +206,6 @@ function renderChoiceSlot(slotEl: HTMLElement | null, item: TutkintonimikeItem |
   slotEl.append(shell);
 }
 
-// Käytetään alku- ja välitiloissa, joissa tälle puolelle ei vielä ole vertailtavaa
 function renderInactiveSlot(slotEl: HTMLElement | null, message: string): void {
   if (!slotEl) {
     return;
@@ -232,7 +220,6 @@ function renderInactiveSlot(slotEl: HTMLElement | null, message: string): void {
   slotEl.append(shell);
 }
 
-// Muotoilee kyselyn kokonaiskeston yhteenvetoon helposti luettavaksi tekstiksi
 function formatDuration(startedAt: number, endedAt: number): string {
   const seconds = Math.max(Math.round((endedAt - startedAt) / 1000), 1);
   if (seconds < 60) {
@@ -244,7 +231,6 @@ function formatDuration(startedAt: number, endedAt: number): string {
   return `${minutes} min ${remainingSeconds} s`;
 }
 
-// Päivittää meta-alueen sen mukaan, ollaanko vertailuvaiheessa vai valmiissa rankingissa
 function updateMeta(): void {
   if (quizCountEl) {
     if (activeSession) {
@@ -269,7 +255,6 @@ function updateMeta(): void {
   }
 }
 
-// Alkusatunnaistus vähentää sitä, että lähdedatan järjestys vaikuttaisi liikaa lopputulokseen
 function shuffleItems(items: TutkintonimikeItem[]): TutkintonimikeItem[] {
   const shuffled = items.slice();
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
@@ -281,7 +266,6 @@ function shuffleItems(items: TutkintonimikeItem[]): TutkintonimikeItem[] {
   return shuffled;
 }
 
-// Arvio vertailujen määrästä antaa käyttäjälle käsityksen jäljellä olevasta työstä
 function estimateComparisons(lengths: number[]): number {
   const queue = lengths.slice();
   let total = 0;
@@ -299,7 +283,6 @@ function estimateComparisons(lengths: number[]): number {
   return total;
 }
 
-// Istunto mallinnetaan merge sort -jonona, jossa jokainen nimike alkaa omana ryhmänään
 function createSession(items: TutkintonimikeItem[]): QuizSession {
   const queue = shuffleItems(items).map((item) => [item]);
   return {
@@ -318,7 +301,6 @@ function createSession(items: TutkintonimikeItem[]): QuizSession {
   };
 }
 
-// Tallennettava sessio sisältää vain id:t, jotta JSON pysyy pienenä ja vakaana
 function serializeSession(session: QuizSession): SerializedQuizSession {
   return {
     queue: session.queue.map((group) => group.map((item) => item.id)),
@@ -336,7 +318,6 @@ function serializeSession(session: QuizSession): SerializedQuizSession {
   };
 }
 
-// Muuntaa palautetun sisäkkäisen id-listan takaisin tutkintonimikeolioiden ryhmiksi
 function mapIdGroups(groups: unknown): TutkintonimikeItem[][] | null {
   if (!Array.isArray(groups)) {
     return null;
@@ -364,7 +345,6 @@ function mapIdGroups(groups: unknown): TutkintonimikeItem[][] | null {
   return mappedGroups;
 }
 
-// Muuntaa yksittäisen id-listan takaisin olioiksi tai kertoo, jos rakenne on virheellinen
 function mapIdList(list: unknown): TutkintonimikeItem[] | null | undefined {
   if (list === null) {
     return null;
@@ -387,7 +367,6 @@ function mapIdList(list: unknown): TutkintonimikeItem[] | null | undefined {
   return mappedList;
 }
 
-// Hyväksyy vain sellaisen palautetun session, jonka kaikki viittaukset ja laskurit ovat käyttökelpoisia
 function parseRestoredSession(entry: QuizSessionEntry | null): QuizSession | null {
   if (!entry || !entry.session || typeof entry.session !== "object") {
     return null;
@@ -436,7 +415,6 @@ function parseRestoredSession(entry: QuizSessionEntry | null): QuizSession | nul
   };
 }
 
-// Kirjoitukset ketjutetaan jonoon, jotta nopeat peräkkäiset valinnat eivät sotke tallennusta
 function enqueueSessionWrite(task: () => Promise<void>): Promise<void> {
   sessionWriteChain = sessionWriteChain.then(task, task).catch(() => {
     setFeedback("Kyselyn tallennus epäonnistui.");
@@ -444,7 +422,6 @@ function enqueueSessionWrite(task: () => Promise<void>): Promise<void> {
   return sessionWriteChain;
 }
 
-// Nykyinen istunto tallennetaan taustalle aina merkittävän tilamuutoksen jälkeen
 function persistSession(): void {
   if (!activeApi || !activeSession) {
     return;
@@ -456,7 +433,6 @@ function persistSession(): void {
   });
 }
 
-// Tallennettu istunto poistetaan, kun ranking valmistuu tai käyttäjä aloittaa alusta
 function clearSession(): Promise<void> {
   if (!activeApi) {
     return Promise.resolve();
@@ -466,7 +442,6 @@ function clearSession(): Promise<void> {
   });
 }
 
-// Tuloskortit käyttävät samaa korttirunkoa kuin vertailunäkymä, mutta lisäävät sijoitusmerkinnän
 function createResultCard(item: TutkintonimikeItem, label: string): HTMLElement {
   const { root: card, body, actions } = createTutkintonimikeCard(item, {
     titleTag: "h3",
@@ -485,7 +460,6 @@ function createResultCard(item: TutkintonimikeItem, label: string): HTMLElement 
   return card;
 }
 
-// Huipulle nostetaan kolme parasta vaihtoehtoa erilliseen korostettuun näkymään
 function renderTop3(): void {
   if (!quizTop3El) {
     return;
@@ -499,7 +473,6 @@ function renderTop3(): void {
   });
 }
 
-// Koko ranking näytetään lisäksi yksinkertaisena listana jatkotoimintoja varten
 function renderRankingList(): void {
   if (!quizRankingListEl) {
     return;
@@ -526,7 +499,6 @@ function renderRankingList(): void {
   quizRankingListEl.replaceChildren(...rows);
 }
 
-// Yhteenveto tiivistää käyttäjän suosikin, vaihtoehtojen määrän ja keston yhteen viestiin
 function renderSummary(): void {
   if (!quizSummaryEl) {
     return;
@@ -550,7 +522,6 @@ function renderSummary(): void {
   quizSummaryEl.append(summary);
 }
 
-// Alku- ja virhetilat käyttävät samaa keskitettyä tyhjää näkymää molemmille puolille
 function renderInitialState(message: string): void {
   setFinishedVisible(false);
   setPrompt("Valmistellaan kyselyä");
@@ -559,7 +530,6 @@ function renderInitialState(message: string): void {
   updateMeta();
 }
 
-// currentOrientation arpoo, kumpi vaihtoehto näytetään vasemmalla, jotta puolisidonnaisuus vähenee
 function renderCurrentPair(): void {
   if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
     return;
@@ -602,7 +572,6 @@ function renderCurrentPair(): void {
   persistSession();
 }
 
-// Valmis ranking tallennetaan erilliseksi tulokseksi, jotta muut sivut voivat hyödyntää sitä
 async function saveFinishedResult(ranking: TutkintonimikeItem[], comparisons: number, durationMs: number | null): Promise<void> {
   if (!activeApi || ranking.length === 0) {
     return;
@@ -622,7 +591,6 @@ async function saveFinishedResult(ranking: TutkintonimikeItem[], comparisons: nu
   await clearSession();
 }
 
-// Valmistunut ranking siirtää sivun vertailutilasta yhteenveto- ja tulosnäkymään
 function finishQuiz(ranking: TutkintonimikeItem[]): void {
   const comparisons = activeSession?.completedComparisons ?? 0;
   const durationMs = activeSession ? Date.now() - activeSession.startedAt : null;
@@ -649,7 +617,6 @@ function finishQuiz(ranking: TutkintonimikeItem[]): void {
     });
 }
 
-// Kun kahden ryhmän vertailu on valmis, yhdistetty tulos palautuu jonon perälle odottamaan seuraavaa kierrosta
 function completeCurrentMerge(): void {
   if (!activeSession) {
     return;
@@ -699,7 +666,6 @@ function startNextMerge(): void {
   renderCurrentPair();
 }
 
-// Valinta tarkoittaa sitä, kumman jonon etummainen alkio lisätään yhdistettyyn tulokseen
 function chooseBucket(bucketSide: BucketSide): void {
   if (!activeSession || !activeSession.currentLeft || !activeSession.currentRight) {
     return;
@@ -739,7 +705,6 @@ function chooseBucket(bucketSide: BucketSide): void {
   renderCurrentPair();
 }
 
-// Näytetty puoli muunnetaan takaisin oikeaksi yhdistysjonon bucket-viitteeksi
 function chooseSide(side: CardSide): void {
   if (!activePair) {
     return;
@@ -749,7 +714,6 @@ function chooseSide(side: CardSide): void {
   chooseBucket(bucketSide);
 }
 
-// Tallennuspainike toimii sekä kesken kyselyn että valmiissa rankingnäkymässä
 async function toggleSavedTutkintonimike(item: TutkintonimikeItem): Promise<void> {
   if (!activeApi || saveInFlightIds.has(item.id)) {
     return;
@@ -783,7 +747,6 @@ async function toggleSavedTutkintonimike(item: TutkintonimikeItem): Promise<void
   }
 }
 
-// Uudelleenkäynnistys nollaa tulokset ja aloittaa kokonaan uuden vertailuketjun
 function restartQuiz(clearSavedSession = true): void {
   setFeedback("");
   finalRanking = [];
@@ -803,7 +766,6 @@ function restartQuiz(clearSavedSession = true): void {
   startNextMerge();
 }
 
-// Palautettu sessio jatkaa tarkasti siitä merge-vaiheesta, johon käyttäjä viimeksi jäi
 function restoreSession(session: QuizSession): boolean {
   if (allItems.length < 2) {
     return false;
@@ -820,7 +782,6 @@ function restoreSession(session: QuizSession): boolean {
   return true;
 }
 
-// Sivun alustus lataa datan, yrittää palauttaa aiemman istunnon ja aloittaa muuten uuden rankingin
 async function init(): Promise<InitAttemptResult> {
   setFeedback("");
   setHelp("Ladataan tutkintonimikkeitä...");
@@ -851,7 +812,6 @@ async function init(): Promise<InitAttemptResult> {
     }
 
     if (sessionEntry) {
-      // Rikkinäinen vanha sessio poistetaan, jotta uusi aloitus ei törmää samaan dataan
       setFeedback("Aiempi kyselytila ei ollut enää käytettävissä, joten aloitettiin alusta.");
       await clearSession();
     }
@@ -867,7 +827,6 @@ async function init(): Promise<InitAttemptResult> {
 
 const initPage = createRetryingPageInit(init);
 
-// Sama käynnistys sidotaan sekä pywebviewn omaan tapahtumaan että tavalliseen DOM-valmiuteen
 window.addEventListener("pywebviewready", () => {
   initPage();
 });
@@ -876,7 +835,6 @@ window.addEventListener("DOMContentLoaded", () => {
   initPage();
 });
 
-// Nuolinäppäimet tarjoavat hiiren rinnalle nopean tavan tehdä parivertailu
 window.addEventListener("keydown", (event) => {
   if (!activePair) {
     return;
@@ -891,7 +849,6 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-// Uudelleenkäynnistys käyttää samaa logiikkaa kuin automaattinen uuden session aloitus
 quizRestartEl?.addEventListener("click", () => {
   restartQuiz(true);
 });

@@ -1,7 +1,5 @@
 export {};
 
-// Sivupohjan yhteinen header ja footer
-
 import {
   THEME_CHANGE_EVENT,
   getEffectiveTheme,
@@ -20,7 +18,6 @@ type NavItem = {
   target: string;
 };
 
-// Poistaa API-kutsuilla käyttäjän tiedot, eli user-kansion JSON-tiedostot ja data-kansion DB-tiedostot
 type DeleteUserInfoResult = {
   success: boolean;
   deletedJsonFiles: string[];
@@ -123,7 +120,6 @@ async function handleDeleteInfo(): Promise<void> {
   }
 }
 
-// Rakentaa sivun ylareunan navigaation keskitetysta linkkilistasta
 function renderHeader(): void {
   const headerHost = document.getElementById("app-header");
   if (!headerHost) {
@@ -184,7 +180,6 @@ function renderHeader(): void {
   updateThemeToggleButton();
 }
 
-// Lisaa sivulle yhteisen alatunnisteen ja pysyvat linkit
 function renderFooter(): void {
   const footerHost = document.getElementById("app-footer");
   if (!footerHost) {
@@ -199,7 +194,6 @@ function renderFooter(): void {
   `;
 }
 
-// Alustaa jokaiselle sivulle yhteiset rakenneosat heti dokumentin valmistuttua
 function initulkoasu(): void {
   initTheme();
   renderHeader();

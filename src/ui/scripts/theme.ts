@@ -1,5 +1,3 @@
-// theme.ts on teeman hallintaan liittyvä skripti, joka määrittelee teematilan (auto, light, dark), hakee ja tallentaa käyttäjän teemapreferenssin paikalliseen tallennustilaan, soveltaa teemaa dokumenttiin ja kuuntelee järjestelmän teeman muutoksia sekä tallennustilan muutoksia muilta ikkunoilta. Skripti sisältää myös tapahtuman, joka ilmoittaa teeman muutoksista muille skripteille
-
 export type ThemeMode = "auto" | "light" | "dark";
 export type EffectiveTheme = "light" | "dark";
 
@@ -56,7 +54,6 @@ export function setThemeMode(mode: ThemeMode): void {
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, mode);
   } catch {
-    // Paikallinen tallennus ei ole kriittinen ominaisuuden toimivuudelle.
   }
 
   applyTheme(mode);

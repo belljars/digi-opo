@@ -23,7 +23,6 @@ type Api = {
 const statusEl = document.getElementById("opintopolut-status");
 const listEl = document.getElementById("opintopolut-list");
 
-// Päivittää sivun tilaviestialueen yhdestä paikasta
 function setStatus(message: string): void {
   if (statusEl) {
     statusEl.textContent = message;
@@ -31,7 +30,6 @@ function setStatus(message: string): void {
   }
 }
 
-// Muuntaa kenelle-kentän rivit puhtaaksi listaksi korttinäkymää varten
 function parseKenelleList(value: string): string[] {
   return value
     .split("\n")
@@ -40,7 +38,6 @@ function parseKenelleList(value: string): string[] {
     .map((line) => line.replace(/^-+\s*/, ""));
 }
 
-// Piirtää backendistä saadut opintopolut korteiksi sivun listaan
 function renderItems(items: OpiskeluSuunta[]): void {
   if (!listEl) {
     return;
@@ -96,7 +93,6 @@ function renderItems(items: OpiskeluSuunta[]): void {
   setStatus("");
 }
 
-// Hakee opintopolut backendistä ja pyytää uutta yritystä, jos pywebview ei ole vielä valmis
 async function init(): Promise<InitAttemptResult> {
   const api = await waitForPywebviewApi<Api>();
   if (!api) {
