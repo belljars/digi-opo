@@ -27,8 +27,8 @@ def format_plan_priority(value: str | None) -> str:
 
 def format_plan_status(value: str | None) -> str:
     labels = {
-        "en-tieda-viela": "En tieda viela",
-        "haluan-selvittaa-lisaa": "Haluan selvittaa lisaa",
+        "en-tieda-viela": "En tiedä vielä",
+        "haluan-selvittaa-lisaa": "Haluan selvittää lisää",
         "vahva-vaihtoehto": "Vahva vaihtoehto",
     }
     return labels.get(str(value or "").strip(), "-")
