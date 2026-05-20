@@ -25,6 +25,7 @@ type DeleteUserInfoResult = {
   success: boolean;
   deletedJsonFiles: string[];
   deletedDbFiles: string[];
+  deletedExportFiles: string[];
 };
 
 type DeleteUserInfoApi = {
@@ -95,7 +96,7 @@ async function handleDeleteInfo(): Promise<void> {
   }
 
   const confirmed = window.confirm(
-    "Poistetaanko kaikki user-kansion JSON-tiedostot ja data-kansion DB-tiedostot? Toimintoa ei voi kumota."
+    "Poistetaanko kaikki sovelluksen tallentamat kayttajatiedot, tietokantatiedostot ja viedyt PDF-tiedostot? Toimintoa ei voi kumota."
   );
   if (!confirmed) {
     return;
@@ -104,9 +105,12 @@ async function handleDeleteInfo(): Promise<void> {
   updateDeleteInfoButtonState(true);
   try {
     const result = await api.delete_user_info();
-    const shouldReload = result.deletedJsonFiles.length > 0 || result.deletedDbFiles.length > 0;
+    const shouldReload =
+      result.deletedJsonFiles.length > 0 ||
+      result.deletedDbFiles.length > 0 ||
+      result.deletedExportFiles.length > 0;
     const message = shouldReload
-      ? `Poistettiin ${result.deletedJsonFiles.length} JSON-tiedostoa ja ${result.deletedDbFiles.length} DB-tiedostoa.`
+      ? `Poistettiin ${result.deletedJsonFiles.length} JSON-tiedostoa, ${result.deletedDbFiles.length} DB-tiedostoa ja ${result.deletedExportFiles.length} PDF-tiedostoa.`
       : "Poistettavia JSON- tai DB-tiedostoja ei löytynyt.";
     window.alert(message);
     if (shouldReload) {

@@ -5,7 +5,6 @@ from pathlib import Path
 
 
 def format_iso_timestamp(value: str | None) -> str:
-    # Muuntaa ISO-aikaleiman käyttäjälle luettavampaan muotoon PDF-vientiä varten
     if not value:
         return "-"
 
@@ -363,7 +362,6 @@ def build_user_export_html(payload: dict) -> str:
 
 
 def render_html_to_pdf(html: str, output_path: Path) -> None:
-    # Luo PDF-tiedoston Qt:n omalla HTML-tulostuksella, jotta uusia riippuvuuksia ei tarvita
     from PyQt6.QtGui import QTextDocument
     from PyQt6.QtPrintSupport import QPrinter
 

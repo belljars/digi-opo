@@ -1,7 +1,3 @@
-# Työpöytäsovelluksen käynnistysmoduuli
-
-# Tämä tiedosto valmistelee ajonaikaisen ympäristön, kokoaa backend-rajapinnan ja avaa käyttöliittymän pywebview-ikkunaan
-
 from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
 
 import os  # Lukee ja asettaa ympäristömuuttujia alustakohtaista käynnistystä varten
@@ -9,16 +5,12 @@ from pathlib import Path  # Käsittelee tiedostopolkuja käyttöjärjestelmärii
 import sys  # Tarkistaa alustan ja täydentää Pythonin import-hakupolkua
 
 CURRENT_DIR = Path(__file__).resolve().parent
-# Lisätään moduulikansio import-polkuun, jotta paikalliset importit toimivat
-# myös silloin, kun tiedosto ajetaan suoraan komentoriviltä
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_DIR))
 
-# Linuxilla pywebview käyttää Qt-taustaa, joten asetetaan oletus-API valmiiksi
 if sys.platform.startswith("linux"):
     os.environ.setdefault("QT_API", "pyqt6")
 
-# Wayland-ympäristössä pakotetaan xcb-tausta, koska Qt toimii sillä vakaammin
 if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
@@ -32,7 +24,6 @@ import webview  # Avaa HTML-käyttöliittymän työpöytäsovelluksen ikkunaan
 
 
 def _project_root() -> Path:
-    # Palauttaa projektin juuren, josta muut sovelluksen polut johdetaan
     if getattr(sys, "frozen", False):
         bundled_root = getattr(sys, "_MEIPASS", None)
         if bundled_root:
@@ -49,7 +40,6 @@ def _project_paths() -> ProjectPaths:
 
 
 class Api(BackendApi):
-    # Ohut sovelluskohtainen julkisivu käyttöliittymän JS-rajapinnalle
 
     def __init__(self) -> None:
         # Alustaa backendin projektin juuren pohjalta
@@ -57,9 +47,12 @@ class Api(BackendApi):
 
 
 def main() -> None:
-    # Käynnistää paikallisen tiedostopalvelimen ja avaa käyttöliittymäikkunan
     paths = _project_paths()
     api = Api()
+    if getattr(sys, "frozen", False):
+        # Pakattu EXE kaynnistyy aina puhtaalta käyttäjatilalta
+
+        api.delete_user_info()
     server, port = start_static_server(paths)
     try:
         window = webview.create_window(

@@ -1,8 +1,5 @@
 # Backendin perusrakenne ja yhteiset tallennusapumetodit
 
-# Perusluokka avaa tietokantayhteyden, varmistaa lahdedatan saatavuuden ja tarjoaa
-# yhteiset metodit visatietojen tallentamiseen tiedostoihin
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -48,7 +45,6 @@ class BackendBase:
         self._window = window
 
     def close(self) -> None:
-        # Sulkee tietokantayhteyden hallitusti sovelluksen tai testin lopussa
         with self._lock:
             if self._closed:
                 return
@@ -56,20 +52,17 @@ class BackendBase:
             self._closed = True
 
     def _load_quiz_results(self) -> list[dict]:
-        # Lukee tallennetut visatulokset kayttajan JSON-tiedostosta
         data = lue_json_objekti(self._paths.quiz_vastaus_polku(), {"items": []})
         items = data.get("items", [])
         return items if isinstance(items, list) else []
 
     def _write_quiz_results(self, items: list[dict]) -> None:
-        # Kirjoittaa visatulokset levylle aikaleiman kanssa
         kirjoita_json_objekti(
             self._paths.quiz_vastaus_polku(),
             {"items": items, "updatedAt": utc_now_iso()},
         )
 
     def _load_quiz_sessions(self) -> list[dict]:
-        # Lukee keskeneraiset visaistunnot kayttajan JSON-tiedostosta
         data = lue_json_objekti(self._paths.quiz_tila_polku(), {"items": []})
         items = data.get("items", [])
         return items if isinstance(items, list) else []
@@ -82,13 +75,15 @@ class BackendBase:
         )
 
     def delete_user_info(self) -> dict[str, list[str] | bool]:
-        # Poistaa vain sovelluksen kirjoitettavan datajuuren JSON- ja DB-tiedostot
+        # Poistaa sovelluksen kirjoitettavan datajuuren kayttajatiedot ja tietokantatiedostot
         user_dir = self._paths.kayttaja_data_dir().resolve()
         data_dir = self._paths.tietokanta_path().resolve().parent
+        export_dir = self._paths.vienti_dir().resolve()
         writable_root = self._paths.user_data_root.resolve()
 
         deleted_json: list[str] = []
         deleted_db: list[str] = []
+        deleted_exports: list[str] = []
 
         def _delete_matching_files(base_dir: Path, pattern: str, deleted: list[str]) -> None:
             resolved_base = base_dir.resolve()
@@ -108,6 +103,8 @@ class BackendBase:
             _delete_matching_files(user_dir, "*.json", deleted_json)
             self._conn.close()
             _delete_matching_files(data_dir, "*.db", deleted_db)
+            _delete_matching_files(data_dir, "*.db-*", deleted_db)
+            _delete_matching_files(export_dir, "*.pdf", deleted_exports)
             self._conn = connect_db(self._paths)
             ensure_data(self._conn, self._paths)
             migrate_saved_tutkintonimikkeet_from_json(self._conn, self._paths)
@@ -116,4 +113,5 @@ class BackendBase:
             "success": True,
             "deletedJsonFiles": deleted_json,
             "deletedDbFiles": deleted_db,
+            "deletedExportFiles": deleted_exports,
         }

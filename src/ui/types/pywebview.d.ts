@@ -57,6 +57,7 @@ type DeleteUserInfoResult = {
   success: boolean;
   deletedJsonFiles: string[];
   deletedDbFiles: string[];
+  deletedExportFiles: string[];
 };
 
 type ExportUserDataPdfResult = {
