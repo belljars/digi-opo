@@ -42,7 +42,7 @@ Projektissa on kolme pääkerrosta:
 Ajonaikainen virta:
 
 ```text
-scripts/run_linux.sh tai scripts/run_windows.bat
+scripts/linux/run_linux.sh tai scripts/windows/run_windows.bat
         |
         v
 TypeScript build
@@ -150,7 +150,7 @@ npm run build
 Käynnistä sovellus skriptillä:
 
 ```bash
-./scripts/run_linux.sh
+./scripts/linux/run_linux.sh
 ```
 
 Skripti:
@@ -168,7 +168,8 @@ Skripti:
 Käytä:
 
 ```powershell
-.\scripts\run_windows.bat
+.\scripts\windows\compile_windows.bat
+.\scripts\windows\run_windows.bat
 ```
 
 Skripti:
@@ -185,7 +186,7 @@ Skripti:
 Rakenna Windows-jakelukansio komennolla:
 
 ```powershell
-.\scripts\build_windows_exe.bat
+.\scripts\windows\build_windows_exe.bat
 ```
 
 Tai npm:n kautta:
@@ -221,7 +222,7 @@ NixOS:ssa tai Linux-ympäristössä, jossa käytetään flakea:
 
 ```bash
 nix develop
-./scripts/run_linux.sh
+./scripts/linux/run_linux.sh
 ```
 
 Voit myös ajaa:
@@ -250,7 +251,7 @@ Huomio:
 
 - `npm run build` kääntää TypeScriptin suoraan hakemistoon `src/ui/scripts/`.
 - Erillistä `dist/`-hakemistoa ei ole.
-- `scripts/run_linux.sh` ja `scripts/run_windows.bat` poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä. Ne ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
+- `scripts/linux/run_linux.sh` ja `scripts/windows/run_windows.bat` poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä. Ne ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
 
 ## Kehitystyö
 
@@ -304,7 +305,7 @@ Backend laskee import-signaturen uudelleen ja rakentaa tutkintotaulut SQLiteen u
 
 ### Sovellus käynnistyy tyhjällä käyttäjädatalla
 
-Jos käynnistät sovelluksen skripteillä `scripts/run_linux.sh` tai `scripts/run_windows.bat`, tämä on odotettu toiminta. Molemmat skriptit poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä.
+Jos käynnistät sovelluksen skripteillä `scripts/linux/run_linux.sh` tai `scripts/windows/run_windows.bat`, tämä on odotettu toiminta. Molemmat skriptit poistavat `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä.
 
 Käytä manuaalista käynnistystä, jos haluat säilyttää paikallisen ajonaikaisen datan käynnistysten välillä.
 
@@ -326,7 +327,7 @@ Käytä flake-pohjaista ympäristöä:
 
 ```bash
 nix develop
-./scripts/run_linux.sh
+./scripts/linux/run_linux.sh
 ```
 
 Flake asettaa tämän projektin tarvitsemat Qt-ympäristömuuttujat.

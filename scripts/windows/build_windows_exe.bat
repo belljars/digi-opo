@@ -2,7 +2,7 @@
 setlocal
 
 set "SCRIPT_DIR=%~dp0"
-for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
+for %%I in ("%SCRIPT_DIR%..\..") do set "ROOT_DIR=%%~fI"
 cd /d "%ROOT_DIR%"
 
 echo [INFO] Aloitetaan digi-opo Windows EXE -build.

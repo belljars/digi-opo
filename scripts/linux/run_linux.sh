@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Lopettaa heti virheessa, estaa maarittelemattomien muuttujien kayton ja huomioi pipe-virheet oikein
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # Selvittaa skriptin oman hakemiston, projektijuuren ja vaihtaa siihen, jotta suhteelliset polut toimivat varmasti
 cd "$ROOT_DIR"
 

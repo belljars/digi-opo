@@ -4,7 +4,7 @@ setlocal
 
 rem Selvittää skriptin oman kansion ja projektijuuren, jotta kaikki polut toimivat scripts-kansiosta ajettaessa
 set "SCRIPT_DIR=%~dp0"
-for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
+for %%I in ("%SCRIPT_DIR%..\..") do set "ROOT_DIR=%%~fI"
 cd /d "%ROOT_DIR%"
 
 rem Poistaa vanhat käyttäjätiedot ja tietokannat, jotta sovellus alkaa puhtaalta pöydältä joka kerta
