@@ -1,21 +1,16 @@
-# Tutkintoihin, suosikkeihin ja käyttäjän omiin muistiinpanoihin liittyvä API
+'''Tutkintoihin, suosikkeihin ja käyttäjän omiin muistiinpanoihin liittyvä API'''
 
-# Tämä moduuli tarjoaa käyttöliittymälle näkymät varsinaiseen tutkintodataan ja käyttäjän tekemiin omiin valintoihin, kuten suosikkeihin ja suunnitelmiin
-
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-from backend_apu import utc_now_iso  # Luo yhtenäiset aikaleimat suosikeille, muistiinpanoille ja suunnitelmille
-
+from __future__ import annotations
+from backend_apu import utc_now_iso
 
 class TutkinnotApiMixin:
-    # Mixin, joka lisää backendiin tutkintojen luku- ja tallennusmetodit
+    '''Mixini, joka lisää backendiin tutkintojen luku- ja tallennusmetodit'''
 
-    # Käyttöliittymän suunnittelukentät hyväksyvät vain nämä tunnetut arvot, jotta tietokantaan ei tallennu epäyhtenäistä tilaa
     _ALLOWED_PLAN_PRIORITIES = {"", "ensisijainen", "selvitettava", "varavaihtoehto"}
     _ALLOWED_PLAN_STATUSES = {"", "en-tieda-viela", "haluan-selvittaa-lisaa", "vahva-vaihtoehto"}
 
     def _get_visible_tutkintonimike_row(self, nimike_id: int):
-        # Palauttaa näkyvän tutkintonimikkeen rivin tai `None`, jos sitä ei voi käyttää
+        '''Palauttaa näkyvän tutkintonimikkeen rivin tai `None`, jos sitä ei voi käyttää'''
 
         return self._conn.execute(
             """
@@ -30,7 +25,8 @@ class TutkinnotApiMixin:
         ).fetchone()
 
     def _serialize_saved_item(self, row, saved_at: str, plan_priority, plan_status, next_step, plan_updated_at) -> dict:
-        # Muotoilee tallennetun tutkintonimikkeen käyttöliittymän odottamaan JSON-muotoon
+        '''Muotoilee tallennetun tutkintonimikkeen käyttöliittymän odottamaan JSON-muotoon'''
+
         return {
             "id": row["id"],
             "nimi": row["nimi"],
@@ -46,7 +42,8 @@ class TutkinnotApiMixin:
         }
 
     def list_tutkinnot(self) -> list[dict[str, str | int]]:
-        # Palauttaa kaikki näkyvät tutkinnot listanäkymää varten
+        '''Palauttaa kaikki näkyvät tutkinnot listanäkymää varten'''
+
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -60,7 +57,8 @@ class TutkinnotApiMixin:
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
     def get_tutkinto(self, tutkinto_id: int) -> dict | None:
-        # Hakee yhden tutkinnon tiedot ja siihen kuuluvat näkyvät nimikkeet
+        '''Hakee yhden tutkinnon tiedot ja siihen kuuluvat näkyvät nimikkeet'''
+
         with self._lock:
             row = self._conn.execute(
                 """
@@ -75,7 +73,6 @@ class TutkinnotApiMixin:
             return None
 
         with self._lock:
-            # Nimikkeet haetaan erikseen vasta sen jälkeen, kun tutkinto on todettu näkyväksi
             nimikkeet = self._conn.execute(
                 """
                 SELECT n.id, n.nimi, n.linkki, n.img
@@ -102,7 +99,8 @@ class TutkinnotApiMixin:
         }
 
     def search_tutkinnot(self, query: str | None) -> list[dict[str, str | int]]:
-        # Hakee tutkintoja nimen, kuvauksen tai tutkintonimikkeen perusteella
+        '''Hakee tutkintoja nimen, kuvauksen tai tutkintonimikkeen perusteella'''
+
         if not query or not str(query).strip():
             return self.list_tutkinnot()
         term = f"%{str(query).strip()}%"
@@ -127,7 +125,8 @@ class TutkinnotApiMixin:
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
     def list_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
-        # Palauttaa kaikki näkyvät tutkintonimikkeet yhdessä listassa
+        '''Palauttaa kaikki näkyvät tutkintonimikkeet yhdessä listassa'''
+
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -153,7 +152,8 @@ class TutkinnotApiMixin:
         ]
 
     def list_saved_tutkintonimikkeet(self) -> list[dict]:
-        # Palauttaa käyttäjän tallentamat ja edelleen näkyvät suosikit
+        '''Palauttaa käyttäjän tallentamat ja edelleen näkyvät suosikit'''
+
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -196,7 +196,8 @@ class TutkinnotApiMixin:
         ]
 
     def save_tutkintonimike(self, tutkintonimike_id: int) -> dict:
-        # Tallentaa näkyvän tutkintonimikkeen käyttäjän suosikkeihin
+        '''Tallentaa näkyvän tutkintonimikkeen käyttäjän suosikkeihin'''
+
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -238,7 +239,8 @@ class TutkinnotApiMixin:
         )
 
     def remove_saved_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        # Poistaa tutkintonimikkeen käyttäjän suosikeista
+        '''Poistaa tutkintonimikkeen käyttäjän suosikeista'''
+
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -256,7 +258,8 @@ class TutkinnotApiMixin:
         return cursor.rowcount > 0
 
     def list_tutkintonimike_notes(self) -> list[dict]:
-        # Listaa näkyville tutkintonimikkeille tallennetut muistiinpanot
+        '''Listaa näkyville tutkintonimikkeille tallennetut muistiinpanot'''
+
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -285,7 +288,8 @@ class TutkinnotApiMixin:
         ]
 
     def save_tutkintonimike_note(self, tutkintonimike_id: int, note_text: str) -> dict:
-        # Tallentaa tai päivittää yhden tutkintonimikkeen muistiinpanon
+        '''Tallentaa tai päivittää yhden tutkintonimikkeen muistiinpanon'''
+
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -340,34 +344,28 @@ class TutkinnotApiMixin:
         status: str | None,
         next_step: str | None,
     ) -> dict:
-        # Tallentaa suosikkirivin yhteyteen käyttäjän suunnitelmatiedot
+        '''Tallentaa suosikkirivin yhteyteen käyttäjän suunnitelmatiedot'''
+        
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
             raise ValueError("Invalid tutkintonimike id") from exc
 
-        # Muuttaa prioriteetin turvallisesti siistityksi merkkijonoksi
         normalized_priority = str(priority or "").strip()
-        # Muuttaa tilan turvallisesti siistityksi merkkijonoksi
         normalized_status = str(status or "").strip()
-        # Siistii käyttäjän seuraavan askeleen tekstin tallennusta varten
         normalized_next_step = str(next_step or "").strip()
 
-        # Hyväksytään vain ennalta määritellyt prioriteettiarvot
         if normalized_priority not in self._ALLOWED_PLAN_PRIORITIES:
             raise ValueError("Invalid plan priority")
-        # Hyväksytään vain ennalta määritellyt tilaarvot
         if normalized_status not in self._ALLOWED_PLAN_STATUSES:
             raise ValueError("Invalid plan status")
 
-        # Aikaleima asetetaan vain, jos suunnitelmassa on sisältöä
         plan_updated_at = (
             utc_now_iso()
             if (normalized_priority or normalized_status or normalized_next_step)
             else None
         )
 
-        # Lukitsee tietokantavaiheen, jotta tarkistus ja tallennus pysyvät yhtenäisenä
         with self._lock:
             row = self._get_visible_tutkintonimike_row(nimike_id)
             if row is None:
@@ -422,7 +420,8 @@ class TutkinnotApiMixin:
         )
 
     def remove_tutkintonimike_note(self, tutkintonimike_id: int) -> bool:
-        # Poistaa tutkintonimikkeeseen tallennetun muistiinpanon
+        '''Poistaa tutkintonimikkeeseen tallennetun muistiinpanon'''
+        
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:

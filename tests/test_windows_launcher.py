@@ -1,3 +1,5 @@
+'''Testit Windows-lanuncherille'''
+
 from __future__ import annotations
 
 import importlib.util
@@ -9,6 +11,8 @@ from unittest import mock
 
 
 def load_launcher_module():
+    '''Lataa digi_opo_launcher.py-moduulin, jotta sen funktioita voidaan testata'''
+
     project_root = Path(__file__).resolve().parents[1]
     launcher_path = project_root / "digi_opo_launcher.py"
     spec = importlib.util.spec_from_file_location("digi_opo_launcher", launcher_path)
@@ -21,6 +25,8 @@ def load_launcher_module():
 
 
 class WindowsLauncherTests(unittest.TestCase):
+    '''Testaa Windows-launcherin funktioita, kuten buildin tarkistusta ja runtime-datan puhdistusta'''
+
     def setUp(self) -> None:
         self.launcher = load_launcher_module()
         self.temp_dir = Path(tempfile.mkdtemp(prefix="digi-opo-launcher-"))
@@ -29,6 +35,8 @@ class WindowsLauncherTests(unittest.TestCase):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_clear_runtime_data_removes_expected_files(self) -> None:
+        """Varmistaa, että runtime-data poistetaan ja muu data säilyy"""
+
         for relative_path in (
             Path("user") / "quiz_results.json",
             Path("user") / "quiz_sessions.json",
@@ -56,6 +64,8 @@ class WindowsLauncherTests(unittest.TestCase):
         self.assertTrue(keep_file.exists())
 
     def test_verify_frontend_outputs_accepts_complete_build(self) -> None:
+        '''Varmistaa, että buildin tarkistus hyväksyy täydellisen buildin'''
+
         for relative_path in self.launcher.REQUIRED_FRONTEND_OUTPUTS:
             target = self.temp_dir / relative_path
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -64,18 +74,24 @@ class WindowsLauncherTests(unittest.TestCase):
         self.launcher.verify_frontend_outputs(self.temp_dir)
 
     def test_verify_frontend_outputs_fails_when_build_output_is_missing(self) -> None:
+        '''Varmistaa, että buildin tarkistus epäonnistuu, kun jotain tulostiedostoa puuttuu'''
+
         with self.assertRaises(SystemExit) as ctx:
             self.launcher.verify_frontend_outputs(self.temp_dir)
 
         self.assertIn("Buildin tulostiedostoja puuttuu", str(ctx.exception))
 
     def test_resolve_executable_returns_full_path(self) -> None:
+        '''Varmistaa, että resolve_executable palauttaa suoran polun, kun ohjelma löytyy PATHista'''
+
         with mock.patch.object(self.launcher.shutil, "which", return_value=r"C:\nodejs\npm.cmd"):
             resolved = self.launcher.resolve_executable("npm")
 
         self.assertEqual(resolved, r"C:\nodejs\npm.cmd")
 
     def test_run_checked_uses_resolved_executable(self) -> None:
+        '''Varmistaa, että run_checked käyttää resolvoitua suoritettavaa'''
+        
         with mock.patch.object(
             self.launcher,
             "resolve_executable",

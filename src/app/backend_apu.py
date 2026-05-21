@@ -1,17 +1,16 @@
-# Yhteisiä apufunktioita backendin tiedostojen käsittelyyn
+'''Moduuli tarjoaa pieniä, uudelleenkäytettäviä utiliteetteja esimerkiksi JSON-datan lukemiseen, tiedostokirjoituksiin ja aikaleimoihin'''
 
-# Moduuli tarjoaa pieniä, uudelleenkäytettäviä utiliteetteja esimerkiksi JSON-datan lukemiseen, tiedostokirjoituksiin ja aikaleimoihin
+from __future__ import annotations
 
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-import hashlib  # Laskee tiivisteitä datan muutosten tunnistamiseen
-import json  # Lukee ja kirjoittaa JSON-rakenteita tiedostoista
-from datetime import datetime, timezone  # Muodostaa UTC-aikaleimat tallennuksia varten
-from pathlib import Path  # Käsittelee tiedostopolkuja turvallisesti
+import hashlib
+import json
+from datetime import datetime, timezone
+from pathlib import Path
 
 
 def parse_json_payload(raw_text: str, source_name: str) -> dict:
-    # Lukee JSON-olion ja sietää lähdedatan mahdollisen ylimääräisen hännän
+    '''Jäsentää JSON-tekstin Python-olioksi, varmistaa että juuritason olio on dict ja antaa informatiivisen virheen, jos jäsentäminen epäonnistuu'''
+
     try:
         data = json.loads(raw_text)
     except json.JSONDecodeError:
@@ -25,17 +24,20 @@ def parse_json_payload(raw_text: str, source_name: str) -> dict:
 
 
 def laske_sha256(text: str) -> str:
-    # Laskee annetulle merkkijonolle vakaan SHA-256-tiivisteen
+    '''Laskee annetulle merkkijonolle vakaan SHA-256-tiivisteen'''
+
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def utc_now_iso() -> str:
-    # Palauttaa nykyhetken UTC-aikana ISO 8601 -merkkijonona
+    '''Palauttaa nykyhetken UTC-aikana ISO 8601 -merkkijonona'''
+
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def lue_json_objekti(path: Path, default: dict) -> dict:
-    # Lukee tiedostosta JSON-olion tai palauttaa oletuksen, jos tiedosto puuttuu
+    '''Lukee tiedostosta JSON-olion tai palauttaa oletuksen, jos tiedosto puuttuu'''
+
     if not path.exists():
         return dict(default)
 
@@ -48,7 +50,8 @@ def lue_json_objekti(path: Path, default: dict) -> dict:
 
 
 def kirjoita_json_objekti(path: Path, payload: dict) -> None:
-    # Kirjoittaa JSONin turvallisesti väliaikaistiedoston kautta lopulliseen polkuun
+    '''Kirjoittaa JSONin turvallisesti väliaikaistiedoston kautta lopulliseen polkuun'''
+    
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_suffix(f"{path.suffix}.tmp")
     tmp_path.write_text(

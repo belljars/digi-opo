@@ -1,4 +1,4 @@
-# Backendin perusrakenne ja yhteiset tallennusapumetodit
+'''Backendin perusluokka, joka avaa tietokantayhteyden ja tarjoaa apumetodeja datan lukemiseen ja kirjoittamiseen'''
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from .tietokanta import (
 
 
 class BackendBase:
-    # Backendin kantaluokka, jonka paalle muut mixinit rakentuvat
+    '''Backendin kantaluokka, jonka paalle muut mixinit rakentuvat'''
 
     _paths: ProjectPaths
     _conn: sqlite3.Connection
@@ -31,7 +31,8 @@ class BackendBase:
     _window: Any | None
 
     def __init__(self, paths: ProjectPaths) -> None:
-        # Avaa tietokannan ja varmistaa, etta sovelluksen data on kayttovalmista
+        '''Alustaa backendin ja avaa tietokantayhteyden'''
+
         self._paths = paths
         self._conn = connect_db(paths)
         self._lock = threading.Lock()
@@ -41,10 +42,13 @@ class BackendBase:
         migrate_saved_tutkintonimikkeet_from_json(self._conn, self._paths)
 
     def set_window(self, window: Any) -> None:
-        # Tallentaa pywebview-ikkunan, jotta backend voi avata natiivivalintaikkunoita.
+        '''Tallentaa pywebview-ikkunan, jotta backend voi avata natiivivalintaikkunoita'''
+        
         self._window = window
 
     def close(self) -> None:
+        '''Sulkee tietokantayhteyden ja merkitsee backendin suljetuksi'''
+
         with self._lock:
             if self._closed:
                 return
@@ -68,14 +72,16 @@ class BackendBase:
         return items if isinstance(items, list) else []
 
     def _write_quiz_sessions(self, items: list[dict]) -> None:
-        # Kirjoittaa keskeneraiset visaistunnot levylle aikaleiman kanssa
+        '''Kirjoittaa keskeneraiset visaistunnot levylle aikaleiman kanssa'''
+
         kirjoita_json_objekti(
             self._paths.quiz_tila_polku(),
             {"items": items, "updatedAt": utc_now_iso()},
         )
 
     def delete_user_info(self) -> dict[str, list[str] | bool]:
-        # Poistaa sovelluksen kirjoitettavan datajuuren kayttajatiedot ja tietokantatiedostot
+        '''Poistaa sovelluksen kirjoitettavan datajuuren kayttajatiedot ja tietokantatiedostot'''
+
         user_dir = self._paths.kayttaja_data_dir().resolve()
         data_dir = self._paths.tietokanta_path().resolve().parent
         export_dir = self._paths.vienti_dir().resolve()
@@ -99,7 +105,7 @@ class BackendBase:
                 resolved_file.unlink()
                 deleted.append(resolved_file.name)
 
-        with self._lock: # Varmistetaan, etta tietokantayhteyden sulkeminen ja uudelleenavaaminen tapahtuu hallitusti
+        with self._lock:
             _delete_matching_files(user_dir, "*.json", deleted_json)
             self._conn.close()
             _delete_matching_files(data_dir, "*.db", deleted_db)

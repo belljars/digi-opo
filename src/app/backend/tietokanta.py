@@ -1,27 +1,20 @@
-# Tietokannan alustus, skeema ja datan tuonti
+from __future__ import annotations
+import sqlite3
 
-# Moduuli huolehtii SQLite-yhteyden avaamisesta, skeeman ylläpidosta ja siitä, että JSON-lähdedata on synkronoitu tietokantaan oikeassa muodossa
-
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-import sqlite3  # Avaa ja käsittelee sovelluksen SQLite-tietokantaa
-
-from backend_apu import (  # Tuo hashing-, JSON- ja aikaleima-apurit tietokantakerroksen käyttöön
-    laske_sha256,  # Laskee lähde-JSONille tunnisteen muutosten havaitsemiseen
-    lue_json_objekti,  # Lukee vanhan JSON-tallennuksen migraatiota varten
-    parse_json_payload,  # Parsii tutkintolähteen JSON-sisällön turvallisesti
-    utc_now_iso,  # Luo aikaleiman migroitaville tallennuksille
+from backend_apu import (
+    laske_sha256,
+    lue_json_objekti,
+    parse_json_payload,
+    utc_now_iso,
 )
-from projekti_paths import ProjectPaths  # Tarjoaa tietokantakerrokselle kaikki tarvittavat tiedostopolut
-
+from projekti_paths import ProjectPaths
 
 AMMATIT_IMPORT_VERSION = "4"
-# Versionumero mahdollistaa pakotetun uudelleenimportin myös silloin, kun lähde-JSON ei ole muuttunut mutta importtilogiikka tai skeema on muuttunut
 
 
 def connect_db(paths: ProjectPaths) -> sqlite3.Connection:
-    # Avaa yhteyden sovelluksen SQLite-tietokantaan ja säätää perusasetukset
-    # Sallii yhteyden käytön myös muista säikeistä, kun käyttö on lukittu
+    '''Avaa yhteyden sovelluksen SQLite-tietokantaan ja säätää perusasetukset'''
+
     conn = sqlite3.connect(paths.tietokanta_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
@@ -29,7 +22,8 @@ def connect_db(paths: ProjectPaths) -> sqlite3.Connection:
 
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
-    # Luo sovelluksen tarvitsemat taulut ja lisää puuttuvat migraatiosarakkeet
+    ''' Luo sovelluksen tarvitsemat taulut ja lisää puuttuvat migraatiosarakkeet'''
+
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS tutkinnot (
@@ -53,7 +47,6 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
         """
     )
 
-    # Vanhoihin tietokantoihin lisätään puuttuva kuvasarake ilman täyttä migraatiotyökalua
     columns = {
         row["name"]
         for row in conn.execute("PRAGMA table_info(tutkintonimikkeet);").fetchall()
@@ -88,7 +81,6 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
         """
     )
 
-    # Myös tallennettujen suosikkien lisäkentät syntyvät tarvittaessa jälkikäteen
     saved_columns = {
         row["name"]
         for row in conn.execute("PRAGMA table_info(saved_tutkintonimikkeet);").fetchall()
@@ -136,8 +128,8 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
 
 
 def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: list) -> None:
-    # Tuo tutkintodatan JSON-lähteestä SQLite-tietokannan riveiksi
-    # Käydään jokainen lähde-JSONin tutkinto läpi ja tuodaan se tietokantaan
+    '''Tuo tutkintodatan JSON-lähteestä SQLite-tietokannan riveiksi'''
+    
     for tutkinto in tutkinnot:
         nimi = str(tutkinto.get("nimi", "")).strip()
         desc = str(tutkinto.get("desc", "")).strip()
@@ -148,13 +140,11 @@ def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: l
             (nimi, desc),
         )
 
-        # Talteen otetaan juuri lisätyn tutkinnon id, jotta nimikkeet voidaan liittää siihen
         tutkinto_id = cursor.lastrowid
         nimikkeet = tutkinto.get("tutkintonimikkeet", []) or []
         if not isinstance(nimikkeet, list):
             nimikkeet = []
 
-        # Käydään tutkinnon kaikki nimikkeet läpi ja lisätään ne omiksi riveikseen
         for nimike in nimikkeet:
             nimike_nimi = str(nimike.get("nimi", "")).strip()
             linkki = str(nimike.get("linkki", "")).strip() or None
@@ -171,13 +161,15 @@ def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: l
 
 
 def get_meta(conn: sqlite3.Connection, key: str) -> str | None:
-    # Hakee sovelluksen metataulusta yhden arvon avaimella
+    '''Hakee sovelluksen metataulusta yhden arvon avaimella'''
+
     row = conn.execute("SELECT value FROM app_meta WHERE key = ?;", (key,)).fetchone()
     return row["value"] if row else None
 
 
 def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
-    # Tallentaa metatauluun avain-arvo-parin päälle kirjoittaen vanhan arvon
+    '''Tallentaa metatauluun avain-arvo-parin päälle kirjoittaen vanhan arvon'''
+
     conn.execute(
         """
         INSERT INTO app_meta (key, value)
@@ -189,7 +181,8 @@ def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
 
 
 def ensure_data(conn: sqlite3.Connection, paths: ProjectPaths) -> None:
-    # Varmistaa, että tietokanta vastaa nykyistä lähde-JSONia ja skeemaa
+    '''Varmistaa, että tietokanta vastaa nykyistä lähde-JSONia ja skeemaa'''
+
     ensure_schema(conn)
     source_path = paths.lahde_json_path()
     if not source_path.exists():
@@ -218,14 +211,12 @@ def ensure_data(conn: sqlite3.Connection, paths: ProjectPaths) -> None:
 def migrate_saved_tutkintonimikkeet_from_json(
     conn: sqlite3.Connection, paths: ProjectPaths
 ) -> None:
-    # Siirtää vanhat JSON-muotoiset suosikit kerran SQLite-tallennukseen
+    '''Siirtää vanhat JSON-muotoiset suosikit kerran SQLite-tallennukseen'''
     legacy_path = paths.saved_tutkintonimikkeet_path()
     if not legacy_path.exists():
         return
 
-    # Lukee vanhan suosikkitiedoston sisällön turvallisesti oletusrakenteella
     data = lue_json_objekti(legacy_path, {"items": []})
-    # Poimii migroitavat suosikkirivit, jos tiedosto sisältää niitä
     items = data.get("items", [])
     if not isinstance(items, list) or not items:
         return

@@ -1,17 +1,13 @@
-# Asetuksiin liittyvä backend-rajapinta
-
-# Tässä moduulissa hallitaan käyttäjän piilottamia tutkintoja ja tutkintonimikkeitä
-
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-from backend_apu import utc_now_iso  # Luo UTC-aikaleiman asetusten ja piilotusten päivityksille
-
+'''Sisältää backend-API:n toteutuksen, joka yhdistää useista osa-alueista peräisin olevat metodit yhdeksi luokaksi'''
+from __future__ import annotations
+from backend_apu import utc_now_iso
 
 class AsetuksetApiMixin:
-    # Mixin, joka lisää backendiin asetuksiin liittyvät metodit
+    '''Mixin, joka lisää backendiin asetuksiin liittyvät metodit'''
 
     def list_hidden_tutkinnot(self) -> list[dict[str, str | int]]:
-        # Listaa tutkinnot, jotka käyttäjä on piilottanut näkyvistä
+        '''Listaa tutkinnot, jotka käyttäjä on piilottanut näkyvistä'''
+
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -34,7 +30,8 @@ class AsetuksetApiMixin:
         ]
 
     def list_hidden_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
-        # Listaa yksittäiset tutkintonimikkeet, jotka on piilotettu näkyvistä
+        '''Listaa yksittäiset tutkintonimikkeet, jotka on piilotettu näkyvistä'''
+
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -61,7 +58,8 @@ class AsetuksetApiMixin:
         ]
 
     def hide_tutkinto(self, tutkinto_id: int) -> bool:
-        # Merkitsee tutkinnon piilotetuksi koko sovelluksessa
+        '''Merkitsee tutkinnon piilotetuksi koko sovelluksessa'''
+
         try:
             normalized_id = int(tutkinto_id)
         except (TypeError, ValueError) as exc:
@@ -86,7 +84,8 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_tutkinto(self, tutkinto_id: int) -> bool:
-        # Poistaa tutkinnon piilotuksen ja palauttaa sen jälleen näkyviin
+        '''Poistaa tutkinnon piilotuksen ja palauttaa sen jälleen näkyviin'''¨
+
         try:
             normalized_id = int(tutkinto_id)
         except (TypeError, ValueError) as exc:
@@ -104,7 +103,8 @@ class AsetuksetApiMixin:
         return cursor.rowcount > 0
 
     def hide_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        # Merkitsee yksittäisen tutkintonimikkeen piilotetuksi
+        '''Merkitsee yksittäisen tutkintonimikkeen piilotetuksi'''
+
         try:
             normalized_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -135,7 +135,8 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        # Poistaa tutkintonimikkeen piilotuksen
+        '''Poistaa tutkintonimikkeen piilotuksen'''
+        
         try:
             normalized_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:

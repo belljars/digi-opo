@@ -1,9 +1,7 @@
-# Yhteensopiva vientimoduuli backendin API-luokalle
+'''Tuo käyttöliittymän API-luokan ja tekee saatavilla olevan rajapinnan muille moduuleille'''
 
-# Tämän kautta muu sovellus voi importata `Api`-luokan yhdestä paikasta välittämättä backend-paketin sisäisestä rakenteesta
+from __future__ import annotations
 
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-from backend.api import Api  # Tuo backend-paketin yhdistetyn API-luokan tämän moduulin kautta vietäväksi
+from backend.api import Api
 
 __all__ = ["Api"]

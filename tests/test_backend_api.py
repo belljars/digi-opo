@@ -1,26 +1,23 @@
-# Backendin keskeisiä käyttäjäpolkuja suojaavat integraatiotestit
-#
-# Testit rakentavat tilapäisen projektirakenteen, lataavat oikean API:n ja
-# varmistavat, että data, asetukset ja tallennukset toimivat yhdessä
+'''Backendin keskeisiä käyttäjäpolkuja suojaavat integraatiotestit'''
 
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-import importlib.util  # Lataa sovelluksen moduulin tiedostopolusta ilman normaalia import-ketjua
-import json  # Rakentaa testidataa JSON-tiedostoiksi ja lukee tallennuksia takaisin
+from __future__ import annotations
+import importlib.util
+import json
 import os
 import shutil
 import sys
-import types  # Rakentaa kevyen vale-olion webview-riippuvuuden korvaamiseen
+import types
 import urllib.error
 import urllib.request
-import unittest  # Tarjoaa testikehyksen ja testien ajotavan
+import unittest
 import uuid
-from pathlib import Path  # Käsittelee testien väliaikaisia tiedosto- ja kansiopolkuja
-from unittest import mock  # Korvaa sovelluksen projektijuuren testin omalla hakemistolla
+from pathlib import Path
+from unittest import mock
 
 
-# Lataa sovelluksen käynnistysmoduulin testikäyttöön ilman oikean käyttöliittymäikkunan avaamista
 def load_app_module():
+    """Lataa sovelluksen käynnistysmoduuli testikäyttöön ilman oikean käyttöliittymäikkunan avaamista"""
+
     project_root = Path(__file__).resolve().parents[1]
     app_path = project_root / "src" / "app" / "app.py"
     spec = importlib.util.spec_from_file_location("digi_opo_app", app_path)
@@ -32,7 +29,6 @@ def load_app_module():
         create_window=lambda *args, **kwargs: None,
         start=lambda *args, **kwargs: None,
     )
-    # Mockataan webview, jotta testit eivät avaa oikeaa työpöytäikkunaa
     sys.modules.setdefault("webview", fake_webview)
 
     module = importlib.util.module_from_spec(spec)
@@ -41,10 +37,11 @@ def load_app_module():
 
 
 class BackendApiTests(unittest.TestCase):
-    # Varmistaa backendin tietokanta-, sisältö- ja asetustoimintojen toimivuuden
+    '''Varmistaa backendin tietokanta-, sisältö- ja asetustoimintojen toimivuuden'''
 
     def setUp(self) -> None:
-        # Rakentaa eristetyn testiprojektin datatiedostoineen jokaista testiä varten
+        '''Rakentaa eristetyn testiprojektin datatiedostoineen jokaista testiä varten'''
+
         self.app = load_app_module()
         self._apis = []
         self.test_work_dir = Path(__file__).resolve().parents[1] / ".test-work"
@@ -125,8 +122,9 @@ class BackendApiTests(unittest.TestCase):
             json.dumps(quiz_payload), encoding="utf-8"
         )
 
-    # Sulkee testin aikana luodut API-instanssit ja siivoaa väliaikaiset tiedostot
     def tearDown(self) -> None:
+        '''Sulkee testin aikana luodut API-instanssit ja siivoaa väliaikaiset tiedostot'''
+
         for api in self._apis:
             api.close()
         shutil.rmtree(self.root, ignore_errors=True)
@@ -135,8 +133,9 @@ class BackendApiTests(unittest.TestCase):
         except OSError:
             pass
 
-    # Luo API-instanssin käyttämään testin väliaikaista projektijuurta
     def create_api(self):
+        '''Luo API-instanssin käyttämään testin väliaikaista projektijuurta'''
+
         paths = self.app.ProjectPaths(
             resource_root=self.root,
             user_data_root=self.user_data_root,
@@ -190,8 +189,10 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(paths.resource_root, bundled_root.resolve())
         self.assertEqual(paths.user_data_root, appdata_root / "digi-opo")
 
-    # Lähdedata tuodaan tietokantaan ja haku palauttaa oikeat tutkintorivit
+    
     def test_api_imports_data_and_search_works(self) -> None:
+        '''Lähdedata tuodaan tietokantaan ja haku palauttaa oikeat tutkintorivit'''
+
         api = self.create_api()
         tutkinnot = api.list_tutkinnot()
         self.assertEqual(len(tutkinnot), 2)
@@ -217,21 +218,24 @@ class BackendApiTests(unittest.TestCase):
         )
 
     def test_opiskelu_suunnat_image_is_normalized_for_http(self) -> None:
-        # Opiskelusuuntien kuvat muunnetaan käyttöliittymälle sopiviksi HTTP-poluiksi
+        '''Opiskelusuuntien kuvat muunnetaan käyttöliittymälle sopiviksi HTTP-poluiksi'''
+
         api = self.create_api()
         items = api.list_opiskelu_suunnat()
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["img"], "/src/ui/assets/opiskeluSuunnat/lukio.jpg")
 
     def test_opintopolku_quiz_payload_is_available(self) -> None:
-        # Opintopolkuvisan koko JSON-rakenne on saatavilla backendin kautta
+        '''Opintopolkuvisan koko JSON-rakenne on saatavilla backendin kautta'''
+
         api = self.create_api()
         quiz = api.get_opintopolku_quiz()
         self.assertIn("questions", quiz)
         self.assertGreater(len(quiz["questions"]), 0)
 
     def test_saved_tutkintonimikkeet_are_persisted_in_sqlite(self) -> None:
-        # Suosikkeihin tallennettu tutkintonimike säilyy myös SQLite-tietokannassa
+        '''Suosikkeihin tallennettu tutkintonimike säilyy myös SQLite-tietokannassa'''
+
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
         saved = api.save_tutkintonimike(all_items[0]["id"])
@@ -544,7 +548,8 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(result["quizSessionCount"], 1)
 
     def test_export_user_data_pdf_returns_cancelled_when_save_dialog_is_closed(self) -> None:
-        # PDF-vienti ei kirjoita tiedostoa, jos käyttäjä sulkee tallennusvalintaikkunan
+        '''PDF-vienti ei kirjoita tiedostoa, jos käyttäjä sulkee tallennusvalintaikkunan'''
+
         api = self.create_api()
         all_items = api.list_tutkintonimikkeet()
         api.save_tutkintonimike(all_items[0]["id"])
@@ -564,7 +569,8 @@ class BackendApiTests(unittest.TestCase):
         render_mock.assert_not_called()
 
     def test_static_server_allows_only_ui_paths(self) -> None:
-        # Staattinen palvelin sallii vain käyttöliittymän tiedostopolut
+        '''Staattinen palvelin sallii vain käyttöliittymän tiedostopolut'''
+
         self.assertTrue(self.app.is_allowed_static_path("/src/ui/pages/home.html"))
         self.assertTrue(self.app.is_allowed_static_path("/src/ui/assets/ammatit/sahkoasentaja.png"))
         self.assertFalse(self.app.is_allowed_static_path("/src/ui/../../src/data/ammatit.json"))
@@ -574,7 +580,8 @@ class BackendApiTests(unittest.TestCase):
         self.assertFalse(self.app.is_allowed_static_path("/user/quiz_results.json"))
 
     def test_static_server_blocks_path_traversal_outside_ui_tree(self) -> None:
-        # Polun normalisointi ei saa sallia src/ui-kansion ulkopuolisia tiedostoja
+        '''Polun normalisointi ei saa sallia src/ui-kansion ulkopuolisia tiedostoja'''
+        
         paths = self.app.ProjectPaths(
             resource_root=self.root,
             user_data_root=self.user_data_root,

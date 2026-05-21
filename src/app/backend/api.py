@@ -1,16 +1,12 @@
-# Backend-API:n kokoaminen mixin-luokista
+'''Yhdistää eri vastuualueet omista mixin-luokistaan yhdeksi API-luokaksi, jonka käyttöliittymä näkee yhtenä kokonaisuutena'''
 
-# Tämä moduuli yhdistää eri vastuualueet omista mixin-luokistaan yhdeksi API-luokaksi, jonka käyttöliittymä näkee yhtenä kokonaisuutena
-
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-from .asetukset import AsetuksetApiMixin  # Lisää asetusten ja piilotusten hallintametodit
-from .perusta import BackendBase  # Tarjoaa tietokantayhteyden ja yhteiset tallennusapumetodit
-from .quizit import QuizitApiMixin  # Lisää visatulosten ja -istuntojen käsittelyn
-from .sisalto import SisaltoApiMixin  # Lisää staattisen sisältödatan lukemisen JSON-lähteistä
-from .tutkinnot import TutkinnotApiMixin  # Lisää tutkintojen, suosikkien ja muistiinpanojen hallinnan
-from .vienti import VientiApiMixin  # Lisää PDF-viennin käyttäjän tallentamille tiedoille
-
+from __future__ import annotations
+from .asetukset import AsetuksetApiMixin
+from .perusta import BackendBase
+from .quizit import QuizitApiMixin
+from .sisalto import SisaltoApiMixin
+from .tutkinnot import TutkinnotApiMixin
+from .vienti import VientiApiMixin
 
 class Api(
     BackendBase,
@@ -20,6 +16,5 @@ class Api(
     SisaltoApiMixin,
     VientiApiMixin,
 ):
-    # Sovelluksen varsinainen backend-API yhdistettynä useasta osa-alueesta
 
     pass

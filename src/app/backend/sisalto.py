@@ -1,15 +1,14 @@
-# Sisältödatan lukeminen JSON-lähteistä backendin käyttöön
+'''Sisältödatan lukeminen JSON-lähteistä backendin käyttöön'''
 
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
-
-from backend_apu import parse_json_payload  # Parsii sisältöä kuvaavat JSON-tiedostot turvallisesti sanakirjoiksi
-
+from __future__ import annotations
+from backend_apu import parse_json_payload
 
 class SisaltoApiMixin:
-    # Mixin, joka tarjoaa käyttöliittymälle staattisen sisältödatan
+    '''Mixin, joka tarjoaa käyttöliittymälle staattisen sisältödatan'''
 
     def list_opiskelu_suunnat(self) -> list[dict[str, str | int]]:
-        # Lukee opiskelusuunnat suoraan JSON-lähteestä käyttöliittymälle sopivassa muodossa
+        '''Lukee opiskelusuunnat suoraan JSON-lähteestä käyttöliittymälle sopivassa muodossa'''
+
         source_path = self._paths.opiskelu_suunnat_json_path()
         if not source_path.exists():
             raise FileNotFoundError(f"Missing source data: {source_path}")
@@ -18,14 +17,11 @@ class SisaltoApiMixin:
         data = parse_json_payload(raw_text, "opiskeluSuunnat.json")
 
         opiskelu_suunnat = data.get("opiskeluSuunnat", [])
-        # Varmistaa, että lähdedatan pääavain sisältää listan käsiteltäviä kohteita
         if not isinstance(opiskelu_suunnat, list):
             raise ValueError("opiskeluSuunnat.json missing 'opiskeluSuunnat' list")
 
-        # Kerää lopulliset, käyttöliittymälle siivotut opiskelusuuntaoliot tähän listaan
         items: list[dict[str, str | int]] = []
         for item in opiskelu_suunnat:
-            # Ohitetaan rikkinäiset rivit, jos listassa on jotain muuta kuin sanakirjoja
             if not isinstance(item, dict):
                 continue
             nimi = str(item.get("nimi", "")).strip()
@@ -50,7 +46,8 @@ class SisaltoApiMixin:
         return items
 
     def get_opintopolku_quiz(self) -> dict:
-        # Palauttaa opintopolkuvisan koko datan sellaisenaan JSON-tiedostosta
+        '''Palauttaa opintopolkuvisan koko datan sellaisenaan JSON-tiedostosta'''
+        
         source_path = self._paths.opintopolku_quiz_json_path()
         if not source_path.exists():
             raise FileNotFoundError(f"Missing source data: {source_path}")

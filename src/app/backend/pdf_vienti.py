@@ -1,3 +1,5 @@
+'''Vastaa käyttäjätietojen PDF-viennistä'''
+
 from __future__ import annotations
 
 from html import escape
@@ -5,6 +7,8 @@ from pathlib import Path
 
 
 def format_iso_timestamp(value: str | None) -> str:
+    '''Muuntaa ISO-aikaleiman luettavaksi tekstiksi'''
+
     if not value:
         return "-"
 
@@ -16,6 +20,8 @@ def format_iso_timestamp(value: str | None) -> str:
 
 
 def format_plan_priority(value: str | None) -> str:
+    '''Muuntaa suunnitelman tärkeyden koodiarvon luettavaksi tekstiksi'''
+
     labels = {
         "ensisijainen": "Ensisijainen",
         "selvitettava": "Selvitettava",
@@ -25,6 +31,8 @@ def format_plan_priority(value: str | None) -> str:
 
 
 def format_plan_status(value: str | None) -> str:
+    '''Muuntaa suunnitelman tilan koodiarvon luettavaksi tekstiksi'''
+
     labels = {
         "en-tieda-viela": "En tiedä vielä",
         "haluan-selvittaa-lisaa": "Haluan selvittää lisää",
@@ -281,6 +289,8 @@ def _render_quiz_entries(items: list[dict], title_timestamp_key: str) -> str:
 
 
 def build_user_export_html(payload: dict) -> str:
+    '''Rakentaa käyttäjätietojen PDF-viennin HTML-muodossa'''
+
     summary = payload["summary"]
     sections = payload["sections"]
     return f"""<!doctype html>
@@ -362,6 +372,8 @@ def build_user_export_html(payload: dict) -> str:
 
 
 def render_html_to_pdf(html: str, output_path: Path) -> None:
+    '''Renderöi HTML-koodi PDF-tiedostoksi käyttäen PyQt:n renderöintimoottoria'''
+
     from PyQt6.QtGui import QTextDocument
     from PyQt6.QtPrintSupport import QPrinter
 

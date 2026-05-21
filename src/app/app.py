@@ -1,8 +1,9 @@
-from __future__ import annotations  # Siirtää tyyppivihjeiden tulkinnan myöhemmäksi
+'''Päämoduuli, joka käynnistää käyttöliittymän ja paikallisen palvelimen'''
+from __future__ import annotations
 
-import os  # Lukee ja asettaa ympäristömuuttujia alustakohtaista käynnistystä varten
-from pathlib import Path  # Käsittelee tiedostopolkuja käyttöjärjestelmäriippumattomasti
-import sys  # Tarkistaa alustan ja täydentää Pythonin import-hakupolkua
+import os
+from pathlib import Path
+import sys
 
 CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
@@ -14,14 +15,12 @@ if sys.platform.startswith("linux"):
 if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
-from backend_rajapinta import Api as BackendApi  # Tuo backendin julkisen API-luokan käyttöliittymän käyttöön
-from projekti_paths import (  # Tuo polku- ja palvelinapurit käyttöliittymän käynnistystä varten
-    ProjectPaths,  # Kokoaa projektin tärkeät tiedostopolut yhteen olioon
-    is_allowed_static_path,  # Tarkistaa, mitä UI-polkuja staattinen palvelin saa tarjoilla
-    start_static_server,  # Käynnistää paikallisen HTTP-palvelimen pywebview-ikkunaa varten
+from backend_rajapinta import Api as BackendApi
+from projekti_paths import (
+    ProjectPaths,
+    start_static_server,
 )
-import webview  # Avaa HTML-käyttöliittymän työpöytäsovelluksen ikkunaan
-
+import webview
 
 def _project_root() -> Path:
     if getattr(sys, "frozen", False):
@@ -40,18 +39,17 @@ def _project_paths() -> ProjectPaths:
 
 
 class Api(BackendApi):
-
+    '''Käyttöliittymän API-luokka, joka perii backendin API:n ja tarjoaa käyttöliittymään liittyviä toimintoja'''
     def __init__(self) -> None:
         # Alustaa backendin projektin juuren pohjalta
         super().__init__(_project_paths())
 
 
 def main() -> None:
+    '''Sovelluksen pääfunktio, joka käynnistää käyttöliittymän ja paikallisen palvelimen'''
     paths = _project_paths()
     api = Api()
     if getattr(sys, "frozen", False):
-        # Pakattu EXE kaynnistyy aina puhtaalta käyttäjatilalta
-
         api.delete_user_info()
     server, port = start_static_server(paths)
     try:

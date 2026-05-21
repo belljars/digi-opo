@@ -1,4 +1,4 @@
-# Projektin polkujen ja staattisten resurssien hallinta
+'''Määrittelee projektin tiedostopolut ja paikallisen HTTP-palvelimen käynnistämisen varten'''
 
 from __future__ import annotations
 
@@ -15,7 +15,8 @@ from urllib.parse import unquote, urlparse
 
 
 def is_allowed_static_path(request_path: str) -> bool:
-    # Staattinen palvelin tarjoilee vain kayttoliittyman tiedostoja.
+    '''Staattinen palvelin tarjoilee vain kayttoliittyman tiedostoja'''
+
     raw_path = unquote(urlparse(request_path).path)
     normalized_path = posixpath.normpath(raw_path)
     if raw_path.endswith("/") and not normalized_path.endswith("/"):
@@ -24,7 +25,8 @@ def is_allowed_static_path(request_path: str) -> bool:
 
 
 def default_user_data_root() -> Path:
-    # Kirjoitettava sovellusdata pidetaan erillaan pakatuista resursseista.
+    '''Palauttaa oletusarvoisen käyttäjätiedostojen juurikansion'''
+
     if sys.platform.startswith("win"):
         base = os.environ.get("LOCALAPPDATA")
         if base:
@@ -42,8 +44,7 @@ def default_user_data_root() -> Path:
 
 @dataclass(frozen=True)
 class ProjectPaths:
-    # resource_root sisältää sovelluksen mukana tulevat tiedostot.
-    # user_data_root sisältää ajossa syntyvät kirjoitettavat tiedostot.
+    '''Määrittelee projektin tiedostopolut'''
 
     resource_root: Path
     user_data_root: Path | None = None
@@ -56,7 +57,8 @@ class ProjectPaths:
 
     @property
     def project_root(self) -> Path:
-        # Vanha nimi pidetaan lukuyhteensopivana nykyiselle koodille.
+        '''Palauttaa projektin juurikansion'''
+
         return self.resource_root
 
     @classmethod
@@ -141,6 +143,8 @@ class ProjectPaths:
         return None
 
     def normalize_ui_asset_ref(self, raw_path: str) -> str:
+        '''Normalisoi käyttöliittymän staattisten resurssien polku, jotta ne voidaan tarjota paikallisesta HTTP-palvelimesta'''
+        
         resolved = self.resolve_local_ui_path(raw_path)
         if not resolved:
             return raw_path
