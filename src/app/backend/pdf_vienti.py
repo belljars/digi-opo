@@ -374,8 +374,8 @@ def build_user_export_html(payload: dict) -> str:
 def render_html_to_pdf(html: str, output_path: Path) -> None:
     '''Renderöi HTML-koodi PDF-tiedostoksi käyttäen PyQt:n renderöintimoottoria'''
 
-    from PyQt6.QtGui import QTextDocument
-    from PyQt6.QtPrintSupport import QPrinter
+    from PyQt6.QtGui import QTextDocument  # pylint: disable=no-name-in-module
+    from PyQt6.QtPrintSupport import QPrinter  # pylint: disable=no-name-in-module
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     document = QTextDocument()

@@ -85,7 +85,10 @@ class BackendBase:
         user_dir = self._paths.kayttaja_data_dir().resolve()
         data_dir = self._paths.tietokanta_path().resolve().parent
         export_dir = self._paths.vienti_dir().resolve()
-        writable_root = self._paths.user_data_root.resolve()
+        writable_root = self._paths.user_data_root
+        if writable_root is None:
+            raise ValueError("User data root is not configured")
+        writable_root = writable_root.resolve()
 
         deleted_json: list[str] = []
         deleted_db: list[str] = []

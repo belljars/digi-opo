@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from backend_apu import utc_now_iso
 import webview
@@ -12,6 +13,11 @@ from .pdf_vienti import build_user_export_html, render_html_to_pdf
 
 class VientiApiMixin:
     '''Mixin, joka kokoaa käyttäjän tallennetut tiedot yhteen PDF-vientiä varten'''
+
+    _lock: Any
+    _conn: Any
+    _paths: Any
+    _window: Any
 
     def _list_all_saved_tutkintonimikkeet_for_export(self) -> list[dict]:
         with self._lock:
@@ -127,6 +133,18 @@ class VientiApiMixin:
             },
         }
 
+    def list_hidden_tutkinnot(self) -> list[dict]:
+        raise NotImplementedError
+
+    def list_hidden_tutkintonimikkeet(self) -> list[dict]:
+        raise NotImplementedError
+
+    def list_quiz_results(self) -> list[dict]:
+        raise NotImplementedError
+
+    def _load_quiz_sessions(self) -> list[dict]:
+        raise NotImplementedError
+
     def _default_pdf_export_filename(self) -> str:
         timestamp = utc_now_iso().replace(":", "").replace("-", "").replace("T", "-").split(".")[0]
         return f"digi-opo-kayttajatiedot-{timestamp}.pdf"
@@ -157,7 +175,7 @@ class VientiApiMixin:
 
     def export_user_data_pdf(self) -> dict[str, str | int | bool]:
         '''Luo käyttäjän tallennetuista tiedoista luettavan PDF-raportin käyttäjän valitsemaan sijaintiin'''
-        
+
         output_path = self._prompt_user_export_pdf_path()
         if output_path is None:
             return {

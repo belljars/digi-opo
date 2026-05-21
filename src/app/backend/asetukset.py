@@ -1,9 +1,13 @@
 '''Sisältää backend-API:n toteutuksen, joka yhdistää useista osa-alueista peräisin olevat metodit yhdeksi luokaksi'''
 from __future__ import annotations
+from typing import Any
 from backend_apu import utc_now_iso
 
 class AsetuksetApiMixin:
     '''Mixin, joka lisää backendiin asetuksiin liittyvät metodit'''
+
+    _lock: Any
+    _conn: Any
 
     def list_hidden_tutkinnot(self) -> list[dict[str, str | int]]:
         '''Listaa tutkinnot, jotka käyttäjä on piilottanut näkyvistä'''
@@ -84,7 +88,7 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_tutkinto(self, tutkinto_id: int) -> bool:
-        '''Poistaa tutkinnon piilotuksen ja palauttaa sen jälleen näkyviin'''¨
+        '''Poistaa tutkinnon piilotuksen ja palauttaa sen jälleen näkyviin'''
 
         try:
             normalized_id = int(tutkinto_id)
@@ -136,7 +140,7 @@ class AsetuksetApiMixin:
 
     def unhide_tutkintonimike(self, tutkintonimike_id: int) -> bool:
         '''Poistaa tutkintonimikkeen piilotuksen'''
-        
+
         try:
             normalized_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:

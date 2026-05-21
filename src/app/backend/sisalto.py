@@ -1,9 +1,11 @@
 '''Sisältödatan lukeminen JSON-lähteistä backendin käyttöön'''
 
 from __future__ import annotations
+from typing import Any
 from backend_apu import parse_json_payload
 
 class SisaltoApiMixin:
+    _paths: Any
     '''Mixin, joka tarjoaa käyttöliittymälle staattisen sisältödatan'''
 
     def list_opiskelu_suunnat(self) -> list[dict[str, str | int]]:
@@ -47,7 +49,7 @@ class SisaltoApiMixin:
 
     def get_opintopolku_quiz(self) -> dict:
         '''Palauttaa opintopolkuvisan koko datan sellaisenaan JSON-tiedostosta'''
-        
+
         source_path = self._paths.opintopolku_quiz_json_path()
         if not source_path.exists():
             raise FileNotFoundError(f"Missing source data: {source_path}")

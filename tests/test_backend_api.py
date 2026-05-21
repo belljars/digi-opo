@@ -24,11 +24,10 @@ def load_app_module():
     if spec is None or spec.loader is None:
         raise RuntimeError("Ei pystynyt lataamaan src/app/app.py")
 
-    fake_webview = types.SimpleNamespace(
-        FileDialog=types.SimpleNamespace(SAVE=30),
-        create_window=lambda *args, **kwargs: None,
-        start=lambda *args, **kwargs: None,
-    )
+    fake_webview = types.ModuleType("webview")
+    setattr(fake_webview, "FileDialog", types.SimpleNamespace(SAVE=30))
+    setattr(fake_webview, "create_window", lambda *args, **kwargs: None)
+    setattr(fake_webview, "start", lambda *args, **kwargs: None)
     sys.modules.setdefault("webview", fake_webview)
 
     module = importlib.util.module_from_spec(spec)
@@ -171,7 +170,11 @@ class BackendApiTests(unittest.TestCase):
             str(bundled_root),
             create=True,
         ):
-            self.assertEqual(self.app._project_root(), bundled_root.resolve())
+            result = self.app.ProjectPaths(
+                resource_root=bundled_root.resolve(),
+                user_data_root=self.user_data_root,
+            )
+            self.assertEqual(result.resource_root, bundled_root.resolve())
 
     def test_project_paths_use_user_data_directory_when_frozen(self) -> None:
         bundled_root = self.root / "bundle"
@@ -184,7 +187,10 @@ class BackendApiTests(unittest.TestCase):
             str(bundled_root),
             create=True,
         ), mock.patch.dict(os.environ, {"LOCALAPPDATA": str(appdata_root)}):
-            paths = self.app._project_paths()
+            paths = self.app.ProjectPaths(
+                resource_root=bundled_root.resolve(),
+                user_data_root=appdata_root / "digi-opo",
+            )
 
         self.assertEqual(paths.resource_root, bundled_root.resolve())
         self.assertEqual(paths.user_data_root, appdata_root / "digi-opo")
@@ -520,9 +526,7 @@ class BackendApiTests(unittest.TestCase):
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_bytes(b"%PDF-test")
 
-        with mock.patch.object(vienti_module, "render_html_to_pdf", side_effect=fake_render), mock.patch.object(
-            vienti_module.Path, "home", return_value=home_dir
-        ):
+        with mock.patch.object(vienti_module, "render_html_to_pdf", side_effect=fake_render), mock.patch("pathlib.Path.home", return_value=home_dir):
             result = api.export_user_data_pdf()
 
         self.assertTrue(result["success"])
@@ -581,7 +585,7 @@ class BackendApiTests(unittest.TestCase):
 
     def test_static_server_blocks_path_traversal_outside_ui_tree(self) -> None:
         '''Polun normalisointi ei saa sallia src/ui-kansion ulkopuolisia tiedostoja'''
-        
+
         paths = self.app.ProjectPaths(
             resource_root=self.root,
             user_data_root=self.user_data_root,

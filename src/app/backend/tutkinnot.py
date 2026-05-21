@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 from backend_apu import utc_now_iso
+from typing import Any
 
 class TutkinnotApiMixin:
     '''Mixini, joka lisää backendiin tutkintojen luku- ja tallennusmetodit'''
+
+    _conn: Any
+    _lock: Any
 
     _ALLOWED_PLAN_PRIORITIES = {"", "ensisijainen", "selvitettava", "varavaihtoehto"}
     _ALLOWED_PLAN_STATUSES = {"", "en-tieda-viela", "haluan-selvittaa-lisaa", "vahva-vaihtoehto"}

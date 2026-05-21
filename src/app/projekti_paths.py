@@ -51,7 +51,7 @@ class ProjectPaths:
 
     def __post_init__(self) -> None:
         resource_root = Path(self.resource_root)
-        user_data_root = Path(self.user_data_root) if self.user_data_root else resource_root
+        user_data_root = Path(self.user_data_root) if self.user_data_root else default_user_data_root()
         object.__setattr__(self, "resource_root", resource_root)
         object.__setattr__(self, "user_data_root", user_data_root)
 
@@ -69,17 +69,20 @@ class ProjectPaths:
         return "/src/ui/pages/index.html"
 
     def tietokanta_path(self) -> Path:
-        data_dir = self.user_data_root / "data"
+        user_data_root = self.user_data_root or default_user_data_root()
+        data_dir = user_data_root / "data"
         data_dir.mkdir(parents=True, exist_ok=True)
         return data_dir / "tutkinnot.db"
 
     def kayttaja_data_dir(self) -> Path:
-        user_dir = self.user_data_root / "user"
+        user_data_root = self.user_data_root or default_user_data_root()
+        user_dir = user_data_root / "user"
         user_dir.mkdir(parents=True, exist_ok=True)
         return user_dir
 
     def vienti_dir(self) -> Path:
-        export_dir = self.user_data_root / "exports"
+        user_data_root = self.user_data_root or default_user_data_root()
+        export_dir = user_data_root / "exports"
         export_dir.mkdir(parents=True, exist_ok=True)
         return export_dir
 
@@ -144,7 +147,7 @@ class ProjectPaths:
 
     def normalize_ui_asset_ref(self, raw_path: str) -> str:
         '''Normalisoi käyttöliittymän staattisten resurssien polku, jotta ne voidaan tarjota paikallisesta HTTP-palvelimesta'''
-        
+
         resolved = self.resolve_local_ui_path(raw_path)
         if not resolved:
             return raw_path

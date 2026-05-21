@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import json
+from threading import Lock
 
 from backend_apu import (
     laske_sha256,
@@ -11,6 +12,20 @@ from backend_apu import (
 
 class QuizitApiMixin:
     '''Mixin, joka lisää backendiin visatulosten ja -istuntojen hallinnan'''
+
+    _lock: Lock
+
+    def _load_quiz_results(self) -> list[dict]:
+        raise NotImplementedError
+
+    def _write_quiz_results(self, items: list[dict]) -> None:
+        raise NotImplementedError
+
+    def _load_quiz_sessions(self) -> list[dict]:
+        raise NotImplementedError
+
+    def _write_quiz_sessions(self, items: list[dict]) -> None:
+        raise NotImplementedError
 
     def list_quiz_results(self, quiz_id: str | None = None) -> list[dict]:
         '''Palauttaa tallennetut visatulokset, haluttaessa yhden visan perusteella suodatettuna'''
@@ -107,7 +122,7 @@ class QuizitApiMixin:
 
     def clear_quiz_session(self, quiz_id: str) -> bool:
         '''Poistaa tallennetun keskeneräisen visaistunnon'''
-        
+
         normalized_quiz_id = str(quiz_id or "").strip()
         if not normalized_quiz_id:
             raise ValueError("quiz_id is required")
