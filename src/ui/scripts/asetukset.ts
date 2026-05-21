@@ -1,12 +1,10 @@
 export {};
 
-// Asetussivun tutkintojen ja tutkintonimikkeiden piilotusten hallinta
-
 import { createTutkintonimikeCard } from "./tutkintonimike-kortti.js"; 
 import {
-  createRetryingPageInit, // Yleinen apufunktio, joka yrittää ajaa alustustoiminnon uudestaan, jos pywebviewn API ei ole vielä valmis
+  createRetryingPageInit,
   waitForPywebviewApi,
-  type InitAttemptResult // Alustustoiminnon paluuarvo, joka kertoo onnistuiko alustus ja kuinka kauan odottaa ennen uudelleenyritystä
+  type InitAttemptResult
 } from "./pywebview-init.js";
 
 type TutkintoListItem = {
