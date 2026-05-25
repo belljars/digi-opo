@@ -9,6 +9,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import os
 from pathlib import Path
 import posixpath
+import shutil
 import sys
 import threading
 from urllib.parse import unquote, urlparse
@@ -40,6 +41,35 @@ def default_user_data_root() -> Path:
     if base:
         return Path(base) / "digi-opo"
     return Path.home() / ".local" / "share" / "digi-opo"
+
+
+def clear_user_data_root(user_data_root: Path) -> list[Path]:
+    '''Poistaa koko kirjoitettavan datajuuren sisallon turvallisesti'''
+
+    root = Path(user_data_root).resolve()
+    if not root.exists():
+        return []
+
+    if root.parent == root:
+        raise ValueError("Refusing to clear filesystem root")
+
+    deleted: list[Path] = []
+    for child in list(root.iterdir()):
+        if child.is_dir() and not child.is_symlink():
+            nested_paths = sorted(
+                (
+                    path.relative_to(root)
+                    for path in child.rglob("*")
+                    if path.is_file() or path.is_symlink()
+                ),
+                key=lambda path: path.as_posix(),
+            )
+            deleted.extend(nested_paths)
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+            deleted.append(child.relative_to(root))
+    return deleted
 
 
 @dataclass(frozen=True)

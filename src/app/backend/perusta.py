@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import sqlite3
 import threading
 from typing import Any
@@ -12,7 +11,7 @@ from backend_apu import (
     lue_json_objekti,
     utc_now_iso,
 )
-from projekti_paths import ProjectPaths
+from projekti_paths import ProjectPaths, clear_user_data_root
 
 from .tietokanta import (
     connect_db,
@@ -82,9 +81,6 @@ class BackendBase:
     def delete_user_info(self) -> dict[str, list[str] | bool]:
         '''Poistaa sovelluksen kirjoitettavan datajuuren kayttajatiedot ja tietokantatiedostot'''
 
-        user_dir = self._paths.kayttaja_data_dir().resolve()
-        data_dir = self._paths.tietokanta_path().resolve().parent
-        export_dir = self._paths.vienti_dir().resolve()
         writable_root = self._paths.user_data_root
         if writable_root is None:
             raise ValueError("User data root is not configured")
@@ -93,34 +89,29 @@ class BackendBase:
         deleted_json: list[str] = []
         deleted_db: list[str] = []
         deleted_exports: list[str] = []
-
-        def _delete_matching_files(base_dir: Path, pattern: str, deleted: list[str]) -> None:
-            resolved_base = base_dir.resolve()
-            if writable_root not in resolved_base.parents and resolved_base != writable_root:
-                raise ValueError("Delete target is outside writable data root")
-            if not resolved_base.exists():
-                return
-
-            for file_path in resolved_base.glob(pattern):
-                resolved_file = file_path.resolve()
-                if resolved_file.parent != resolved_base or not resolved_file.is_file():
-                    continue
-                resolved_file.unlink()
-                deleted.append(resolved_file.name)
+        deleted_other: list[str] = []
 
         with self._lock:
-            _delete_matching_files(user_dir, "*.json", deleted_json)
             self._conn.close()
-            _delete_matching_files(data_dir, "*.db", deleted_db)
-            _delete_matching_files(data_dir, "*.db-*", deleted_db)
-            _delete_matching_files(export_dir, "*.pdf", deleted_exports)
+            deleted_entries = clear_user_data_root(writable_root)
+            for relative_path in deleted_entries:
+                relative_text = relative_path.as_posix()
+                file_name = relative_path.name
+                if file_name.endswith(".db") or ".db-" in file_name:
+                    deleted_db.append(relative_text)
+                elif relative_path.suffix == ".json":
+                    deleted_json.append(relative_text)
+                elif relative_path.suffix == ".pdf":
+                    deleted_exports.append(relative_text)
+                elif relative_text:
+                    deleted_other.append(relative_text)
             self._conn = connect_db(self._paths)
             ensure_data(self._conn, self._paths)
-            migrate_saved_tutkintonimikkeet_from_json(self._conn, self._paths)
 
         return {
             "success": True,
             "deletedJsonFiles": deleted_json,
             "deletedDbFiles": deleted_db,
             "deletedExportFiles": deleted_exports,
+            "deletedOtherFiles": deleted_other,
         }

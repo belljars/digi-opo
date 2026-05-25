@@ -195,6 +195,41 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(paths.resource_root, bundled_root.resolve())
         self.assertEqual(paths.user_data_root, appdata_root / "digi-opo")
 
+    def test_clear_user_data_root_removes_everything_under_runtime_root(self) -> None:
+        runtime_root = self.user_data_root
+        (runtime_root / "user").mkdir(parents=True, exist_ok=True)
+        (runtime_root / "data").mkdir(parents=True, exist_ok=True)
+        (runtime_root / "exports").mkdir(parents=True, exist_ok=True)
+        (runtime_root / "cache").mkdir(parents=True, exist_ok=True)
+
+        (runtime_root / "user" / "quiz_results.json").write_text("{}", encoding="utf-8")
+        (runtime_root / "data" / "tutkinnot.db").write_text("db", encoding="utf-8")
+        (runtime_root / "exports" / "oma-vienti.pdf").write_bytes(b"%PDF-test")
+        (runtime_root / "cache" / "temp.bin").write_bytes(b"temp")
+
+        deleted = self.app.clear_user_data_root(runtime_root)
+
+        deleted_paths = [path.as_posix() for path in deleted]
+        self.assertIn("user/quiz_results.json", deleted_paths)
+        self.assertIn("data/tutkinnot.db", deleted_paths)
+        self.assertIn("exports/oma-vienti.pdf", deleted_paths)
+        self.assertIn("cache/temp.bin", deleted_paths)
+        self.assertEqual(list(runtime_root.iterdir()), [])
+
+    def test_frozen_startup_wipe_prevents_legacy_saved_items_from_reappearing(self) -> None:
+        legacy_saved_path = self.user_data_root / "user" / "saved_tutkintonimikkeet.json"
+        legacy_saved_path.parent.mkdir(parents=True, exist_ok=True)
+        legacy_saved_path.write_text(
+            json.dumps({"items": [{"id": 1, "savedAt": "2026-05-25T09:00:00Z"}]}),
+            encoding="utf-8",
+        )
+
+        self.app.clear_user_data_root(self.user_data_root)
+        api = self.create_api()
+
+        self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
+        self.assertFalse(legacy_saved_path.exists())
+
     
     def test_api_imports_data_and_search_works(self) -> None:
         '''Lähdedata tuodaan tietokantaan ja haku palauttaa oikeat tutkintorivit'''
@@ -476,12 +511,14 @@ class BackendApiTests(unittest.TestCase):
         self.assertCountEqual(
             results["deletedJsonFiles"],
             [
-                "quiz_results.json",
-                "quiz_sessions.json",
-                "saved_tutkintonimikkeet.json",
+                "user/quiz_results.json",
+                "user/quiz_sessions.json",
+                "user/saved_tutkintonimikkeet.json",
             ],
         )
-        self.assertEqual(results["deletedDbFiles"], ["tutkinnot.db"])
+        self.assertEqual(results["deletedDbFiles"], ["data/tutkinnot.db"])
+        self.assertEqual(results["deletedExportFiles"], [])
+        self.assertEqual(results["deletedOtherFiles"], [])
 
         self.assertFalse((self.user_data_root / "user" / "quiz_results.json").exists())
         self.assertFalse((self.user_data_root / "user" / "quiz_sessions.json").exists())
@@ -489,6 +526,17 @@ class BackendApiTests(unittest.TestCase):
         self.assertTrue((self.user_data_root / "data" / "tutkinnot.db").exists())
         self.assertEqual(api.list_saved_tutkintonimikkeet(), [])
         self.assertEqual(len(api.list_tutkinnot()), 2)
+
+    def test_delete_user_info_removes_extra_runtime_files_too(self) -> None:
+        api = self.create_api()
+        extra_file = self.user_data_root / "cache" / "temp.bin"
+        extra_file.parent.mkdir(parents=True, exist_ok=True)
+        extra_file.write_bytes(b"temp")
+
+        results = api.delete_user_info()
+
+        self.assertIn("cache/temp.bin", results["deletedOtherFiles"])
+        self.assertFalse(extra_file.exists())
 
     def test_export_user_data_pdf_collects_saved_data_and_writes_to_user_selected_path(self) -> None:
         # PDF-vienti kokoaa käyttäjän tiedot yhdeksi raportiksi ja käyttää exports-kansiota

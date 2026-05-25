@@ -18,6 +18,8 @@ if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
 from backend_rajapinta import Api as BackendApi
 from projekti_paths import (
     ProjectPaths,
+    clear_user_data_root,
+    is_allowed_static_path,
     start_static_server,
 )
 import webview
@@ -40,17 +42,17 @@ def _project_paths() -> ProjectPaths:
 
 class Api(BackendApi):
     '''Käyttöliittymän API-luokka, joka perii backendin API:n ja tarjoaa käyttöliittymään liittyviä toimintoja'''
-    def __init__(self) -> None:
+    def __init__(self, paths: ProjectPaths | None = None) -> None:
         # Alustaa backendin projektin juuren pohjalta
-        super().__init__(_project_paths())
+        super().__init__(paths or _project_paths())
 
 
 def main() -> None:
     '''Sovelluksen pääfunktio, joka käynnistää käyttöliittymän ja paikallisen palvelimen'''
     paths = _project_paths()
-    api = Api()
     if getattr(sys, "frozen", False):
-        api.delete_user_info()
+        clear_user_data_root(paths.user_data_root)
+    api = Api(paths)
     server, port = start_static_server(paths)
     try:
         window = webview.create_window(
