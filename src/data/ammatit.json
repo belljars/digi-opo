@@ -7,12 +7,14 @@
         {
           "nimi": "Automekaanikko",
           "linkki": "https://luovi.fi/koulutukset/automekaanikko/",
-          "img": "assets/ammatit/automekaanikko.png"
+          "img": "assets/ammatit/automekaanikko.png",
+          "paikkakunta": ["Joensuu", "Lappeenranta", "Muhos", "Seinäjoki"]
         },
         {
           "nimi": "Pienkonemekaanikko",
           "linkki": "https://luovi.fi/koulutukset/pienkonemekaanikko/",
-          "img": "assets/ammatit/pienkonemekaanikko.png"
+          "img": "assets/ammatit/pienkonemekaanikko.png",
+          "paikkakunta": ["Muhos"]
         }
       ]
     },
@@ -23,20 +25,36 @@
         {
           "nimi": "Elintarvikkeiden valmistaja",
           "linkki": "https://luovi.fi/koulutukset/elintarvikkeiden-valmistaja/",
-          "img": "assets/ammatit/elintarvikkeiden-valmistaja.png"
+          "img": "assets/ammatit/elintarvikkeiden-valmistaja.png",
+          "paikkakunta": ["Helsinki", "Kokkola", "Seinäjoki"]
         },
         {
           "nimi": "Leipuri-kondiittori",
           "linkki": "https://luovi.fi/koulutukset/leipuri-kondiittori/",
-          "img": "assets/ammatit/leipuri-kondiittori.png"
+          "img": "assets/ammatit/leipuri-kondiittori.png",
+          "paikkakunta": ["Kokkola", "Oulu", "Seinäjoki"]
         },
         {
           "nimi": "Lihatuotteiden valmistaja",
           "linkki": "https://luovi.fi/koulutukset/lihatuotteiden-valmistaja/",
-          "img": "assets/ammatit/lihatuotteiden-valmistaja.png"
+          "img": "assets/ammatit/lihatuotteiden-valmistaja.png",
+          "paikkakunta": ["Kokkola"]
         }
       ]
     },
+    {
+      "nimi": "Kasvatus- ja ohjausalan perustutkinto",
+      "desc": "Kasvatus- ja ohjausalan perustutkinnon suorittanut osaa toimia kasvatus- ja ohjausalan tehtävissä, kuten päiväkodissa, koulussa ja muissa kasvatus- ja ohjauspalveluissa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan kasvatus- ja ohjausalaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Varhaiskasvatuksen avustaja",
+          "linkki": "https://luovi.fi/koulutukset/varhaiskasvatuksen-avustaja/",
+          "img": "assets/ammatit/varhaiskasvatuksen-avustaja.png",
+          "paikkakunta": ["Seinäjoki"]
+        }
+      ]
+    }
+    ,
     {
       "nimi": "Kone- ja tuotantotekniikan perustutkinto",
       "desc": "Kone- ja tuotantotekniikan perustutkinnon suorittanut osaa toimia kone- ja tuotantotekniikan tehtävissä, kuten konepajoissa, teollisuudessa ja valmistavassa teollisuudessa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan kone- ja tuotantotekniikkaan osaamisalansa mukaisesti.",
@@ -44,12 +62,14 @@
         {
           "nimi": "Koneistaja",
           "linkki": "https://luovi.fi/koulutukset/koneistaja/",
-          "img": "assets/ammatit/koneistaja.png"
+          "img": "assets/ammatit/koneistaja.png",
+          "paikkakunta": ["Joensuu", "Lappeenranta", "Oulu"]
         },
         {
           "nimi": "Levyseppähitsaaja",
           "linkki": "https://luovi.fi/koulutukset/levyseppahitsaaja/",
-          "img": "assets/ammatit/levyseppahitsaaja.png"
+          "img": "assets/ammatit/levyseppahitsaaja.png",
+          "paikkakunta": ["Joensuu", "Kokkola", "Lappeenranta", "Oulu", "Pori", "Tampere", "Ylivieska"]
         }
       ]
     },
@@ -60,7 +80,8 @@
         {
           "nimi": "Merkonomi",
           "linkki": "https://luovi.fi/koulutukset/merkonomi/",
-          "img": "assets/ammatit/merkonomi.png"
+          "img": "assets/ammatit/merkonomi.png",
+          "paikkakunta": ["Helsinki", "Joensuu", "Kokkola", "Kuopio", "Oulu", "Pori", "Rovaniemi", "Tampere", "Tornio"]
         }
       ]
     },
@@ -71,17 +92,20 @@
         {
           "nimi": "Kuorma-autonkuljettaja",
           "linkki": "https://luovi.fi/koulutukset/kuorma-autonkuljettaja/",
-          "img": "assets/ammatit/kuorma-autonkuljettaja.png"
+          "img": "assets/ammatit/kuorma-autonkuljettaja.png",
+          "paikkakunta": ["Joensuu", "Muhos"]
         },
         {
           "nimi": "Palvelulogistiikkatyöntekijä",
           "linkki": "https://luovi.fi/koulutukset/palvelulogistiikkatyontekija/",
-          "img": "assets/ammatit/palvelulogistiikka-tyontekija.png"
+          "img": "assets/ammatit/palvelulogistiikka-tyontekija.png",
+          "paikkakunta": ["Helsinki", "Joensuu", "Kuopio", "Muhos", "Seinäjoki", "Tampere"]
         },
         {
           "nimi": "Yhdistelmäajoneuvonkuljettaja",
           "linkki": "https://luovi.fi/koulutukset/yhdistelmaajoneuvonkuljettaja/",
-          "img": "assets/ammatit/yhdistelma-ajoneuvonkuljettaja.png"
+          "img": "assets/ammatit/yhdistelma-ajoneuvonkuljettaja.png",
+          "paikkakunta": ["Muhos"]
         }
       ]
     },
@@ -92,12 +116,14 @@
         {
           "nimi": "Ympäristönhoitaja",
           "linkki": "https://luovi.fi/koulutukset/ymparistonhoitaja",
-          "img": "assets/ammatit/ymparistonhoitaja.png"
+          "img": "assets/ammatit/ymparistonhoitaja.png",
+          "paikkakunta": ["Alavus", "Muhos"]
         },
         {
           "nimi": "Ympäristönhuoltaja",
           "linkki": "https://luovi.fi/koulutukset/ymparistonhuoltaja/",
-          "img": "assets/ammatit/ymparistonhuoltaja.png"
+          "img": "assets/ammatit/ymparistonhuoltaja.png",
+          "paikkakunta": ["Muhos", "Oulu"]
         }
       ]
     },
@@ -108,12 +134,14 @@
         {
           "nimi": "Eläintenhoitaja",
           "linkki": "https://luovi.fi/koulutukset/elaintenhoitaja/",
-          "img": "assets/ammatit/elaintenhoitaja.png"
+          "img": "assets/ammatit/elaintenhoitaja.png",
+          "paikkakunta": ["Muhos"]
         },
         {
           "nimi": "Maaseutuyrittäjä",
           "linkki": "https://luovi.fi/koulutukset/maaseutuyrittaja/",
-          "img": "assets/ammatit/maaseutuyrittaja.png"
+          "img": "assets/ammatit/maaseutuyrittaja.png",
+          "paikkakunta": ["Muhos"]
         }
       ]
     },
@@ -124,7 +152,8 @@
         {
           "nimi": "Mediapalvelujen toteuttaja",
           "linkki": "https://luovi.fi/koulutukset/mediapalvelujen-toteuttaja/",
-          "img": "assets/ammatit/mediapalvelujen-toteuttaja.png"
+          "img": "assets/ammatit/mediapalvelujen-toteuttaja.png",
+          "paikkakunta": ["Helsinki", "Oulu", "Tampere"]
         }
       ]
     },
@@ -135,12 +164,14 @@
         {
           "nimi": "Maalari",
           "linkki": "https://luovi.fi/koulutukset/maalari/",
-          "img": "assets/ammatit/maalari.png"
+          "img": "assets/ammatit/maalari.png",
+          "paikkakunta": ["Joensuu", "Kokkola", "Lappeenranta", "Muhos", "Pori", "Tampere"]
         },
         {
           "nimi": "Pintakäsittelijä",
           "linkki": "https://luovi.fi/koulutukset/pintakasittelija/",
-          "img": "assets/ammatit/pintakasittelija.png"
+          "img": "assets/ammatit/pintakasittelija.png",
+          "paikkakunta": ["Tampere"]
         }
       ]
     },
@@ -151,17 +182,20 @@
         {
           "nimi": "Kiinteistönhoitaja",
           "linkki": "https://luovi.fi/koulutukset/kiinteistonhoitaja/",
-          "img": "assets/ammatit/kiinteistonhoitaja.png"
+          "img": "assets/ammatit/kiinteistonhoitaja.png",
+          "paikkakunta": ["Alavus", "Joensuu", "Kuopio", "Lappeenranta", "Muhos", "Oulu", "Pori", "Rovaniemi", "Seinäjoki", "Tampere", "Tornio"]
         },
         {
           "nimi": "Kodinhuoltaja",
           "linkki": "https://luovi.fi/koulutukset/kodinhuoltaja/",
-          "img": "assets/ammatit/kodinhuoltaja.png"
+          "img": "assets/ammatit/kodinhuoltaja.png",
+          "paikkakunta": ["Alavus", "Joensuu", "Muhos", "Oulu", "Pori", "Rovaniemi", "Seinäjoki", "Tampere", "Tornio"]
         },
         {
           "nimi": "Toimitilahuoltaja",
           "linkki": "https://luovi.fi/koulutukset/toimitilahuoltaja/",
-          "img": "assets/ammatit/toimitilahuoltaja.png"
+          "img": "assets/ammatit/toimitilahuoltaja.png",
+          "paikkakunta": ["Joensuu", "Kokkola", "Lappeenranta", "Muhos", "Oulu", "Pori", "Rovaniemi", "Seinäjoki", "Tampere", "Tornio"]
         }
       ]
     },
@@ -172,7 +206,8 @@
         {
           "nimi": "Puutarhuri",
           "linkki": "https://luovi.fi/koulutukset/puutarhuri/",
-          "img": "assets/ammatit/puutarhuri.png"
+          "img": "assets/ammatit/puutarhuri.png",
+          "paikkakunta": ["Oulu"]
         }
       ]
     },
@@ -183,7 +218,8 @@
         {
           "nimi": "Puuseppä",
           "linkki": "https://luovi.fi/koulutukset/puuseppa/",
-          "img": "assets/ammatit/puuseppa.png"
+          "img": "assets/ammatit/puuseppa.png",
+          "paikkakunta": ["Kokkola", "Ylivieska"]
         }
       ]
     },
@@ -194,7 +230,8 @@
         {
           "nimi": "Talonrakentaja",
           "linkki": "https://luovi.fi/koulutukset/talonrakentaja/",
-          "img": "assets/ammatit/talonrakentaja.png"
+          "img": "assets/ammatit/talonrakentaja.png",
+          "paikkakunta": ["Joensuu", "Kokkola", "Muhos", "Pori", "Tampere"]
         }
       ]
     },
@@ -205,15 +242,30 @@
         {
           "nimi": "Kokki",
           "linkki": "https://luovi.fi/koulutukset/kokki/",
-          "img": "assets/ammatit/kokki.png"
+          "img": "assets/ammatit/kokki.png",
+          "paikkakunta": ["Alavus", "Helsinki", "Imatra", "Joensuu", "Kokkola", "Oulu", "Rovaniemi", "Seinäjoki", "Tampere"]
         },
         {
           "nimi": "Tarjoilija",
           "linkki": "https://luovi.fi/koulutukset/tarjoilija/",
-          "img": ""
+          "img": "",
+          "paikkakunta": ["Kokkola"]
         }
       ]
     },
+    {
+      "nimi": "Sosiaali- ja terveysalan perustutkinto",
+      "desc": "Sosiaali- ja terveysalan perustutkinnon suorittanut osaa toimia sosiaali- ja terveysalan tehtävissä, kuten hoivatyössä, sairaanhoidossa ja sosiaalipalveluissa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan sosiaali- ja terveysalaan osaamisalansa mukaisesti.",
+      "tutkintonimikkeet": [
+        {
+          "nimi": "Hoiva-avustaja",
+          "linkki": "https://luovi.fi/koulutukset/hoiva-avustaja/",
+          "img": "assets/ammatit/hoiva-avustaja.png",
+          "paikkakunta": ["Seinäjoki"]
+        }
+      ]
+    }
+    ,
     {
       "nimi": "Taideteollisuusalan perustutkinto",
       "desc": "Taideteollisuusalan perustutkinnon suorittanut osaa toimia taideteollisuusalan tehtävissä, kuten taideteollisuudessa, käsityöalalla ja muotoilussa. Tutkinnon suorittanut voi suunnata ammatillista osaamistaan taideteollisuusalaan osaamisalansa mukaisesti.",
@@ -221,7 +273,8 @@
         {
           "nimi": "Artesaani",
           "linkki": "https://luovi.fi/koulutukset/artesaani/",
-          "img": "assets/ammatit/artesaani.png"
+          "img": "assets/ammatit/artesaani.png",
+          "paikkakunta": ["Alavus", "Oulu"]
         }
       ]
     },
@@ -232,17 +285,20 @@
         {
           "nimi": "Elektroniikka-asentaja",
           "linkki": "https://luovi.fi/koulutukset/elektroniikka-asentaja/",
-          "img": "assets/ammatit/elektroniikka-asentaja.png"
+          "img": "assets/ammatit/elektroniikka-asentaja.png",
+          "paikkakunta": ["Oulu"]
         },
         {
           "nimi": "IT-tukihenkilä",
           "linkki": "https://luovi.fi/koulutukset/it-tukihenkilo/",
-          "img": "assets/ammatit/it-tukihenkilo.png"
+          "img": "assets/ammatit/it-tukihenkilo.png",
+          "paikkakunta": ["Oulu"]
         },
         {
           "nimi": "Ohjelmistokehittäjä",
           "linkki": "https://luovi.fi/koulutukset/ohjelmistokehittaja/",
-          "img": "assets/ammatit/ohjelmistokehittaja.png"
+          "img": "assets/ammatit/ohjelmistokehittaja.png",
+          "paikkakunta": ["Oulu"]
         }
       ]
     },
@@ -253,7 +309,8 @@
         {
           "nimi": "Tutkintokoulutukseen valmentava koulutus (TUVA)",
           "linkki": "https://luovi.fi/koulutukset/tutkintokoulutukseen-valmentava-koulutus-tuva/",
-          "img": "assets/ammatit/tuva.png"
+          "img": "assets/ammatit/tuva.png",
+          "paikkakunta": ["Helsinki", "Imatra", "Joensuu", "Kajaani", "Kittilä", "Kokkola", "Kuopio", "Lappeenranta", "Muhos", "Oulu", "Pori", "Rovaniemi", "Seinäjoki", "Tampere", "Tornio", "Vaasa", "Ylivieska"]
         }
       ]
     },
@@ -264,7 +321,8 @@
         {
           "nimi": "Työhön ja itsenäiseen elämään valmentava koulutus (TELMA)",
           "linkki": "https://luovi.fi/koulutukset/tyohon-ja-itsenaiseen-elamaan-valmentava-koulutus-telma/",
-          "img": "assets/ammatit/telma.png"
+          "img": "assets/ammatit/telma.png",
+          "paikkakunta": ["Alavus", "Helsinki", "Imatra", "Joensuu", "Kajaani", "Kittilä", "Kokkola", "Lappeenranta", "Muhos", "Oulu", "Pori", "Raahe", "Rovaniemi", "Seinäjoki", "Tampere", "Tornio", "Vaasa", "Ylivieska"]
         }
       ]
     }
