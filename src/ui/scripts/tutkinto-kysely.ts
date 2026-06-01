@@ -12,6 +12,10 @@ import {
 } from "./pywebview-init.js";
 
 const QUIZ_ID = "tutkinto-kysely";
+const EXCLUDED_TUTKINTO_NAMES = new Set([
+  "Tutkintokoulutukseen valmentava koulutus (TUVA)",
+  "Työhön ja itsenäiseen elämään valmentava koulutus (TELMA)"
+]);
 
 type TutkintonimikeItem = {
   id: number;
@@ -100,6 +104,8 @@ const quizFinishedEl = document.getElementById("quiz-valmis");
 const quizSummaryEl = document.getElementById("quiz-summary");
 const quizTop3El = document.getElementById("quiz-top3");
 const quizRankingListEl = document.getElementById("quiz-ranking-list");
+const quizStartPopupEl = document.getElementById("quiz-start-popup");
+const quizStartPopupCloseEl = document.getElementById("quiz-start-popup-close") as HTMLButtonElement | null;
 
 let allItems: TutkintonimikeItem[] = [];
 let itemMap = new Map<number, TutkintonimikeItem>();
@@ -112,6 +118,7 @@ let activeApi: Api | null = null;
 let savedIds = new Set<number>();
 let saveInFlightIds = new Set<number>();
 let sessionWriteChain: Promise<void> = Promise.resolve();
+let isStartPopupOpen = true;
 
 function setFeedback(message = ""): void {
   if (quizFeedbackEl) {
@@ -139,6 +146,20 @@ function setFinishedVisible(visible: boolean): void {
   if (quizCardsEl) {
     quizCardsEl.hidden = visible;
   }
+}
+
+function syncStartPopupVisibility(): void {
+  if (!quizStartPopupEl) {
+    isStartPopupOpen = false;
+    return;
+  }
+
+  quizStartPopupEl.toggleAttribute("hidden", !isStartPopupOpen);
+}
+
+function closeStartPopup(): void {
+  isStartPopupOpen = false;
+  syncStartPopupVisibility();
 }
 
 function createCardContent(
@@ -444,7 +465,7 @@ function clearSession(): Promise<void> {
 
 function createResultCard(item: TutkintonimikeItem, label: string): HTMLElement {
   const { root: card, body, actions } = createTutkintonimikeCard(item, {
-    titleTag: "h3",
+    titleTag: "h4",
     allowLink: true,
     rootTag: "div",
     showLinkAction: true
@@ -786,6 +807,7 @@ async function init(): Promise<InitAttemptResult> {
   setFeedback("");
   setHelp("Ladataan tutkintonimikkeitä...");
   renderInitialState("Ladataan...");
+  syncStartPopupVisibility();
 
   try {
     const api = await waitForPywebviewApi<Api>();
@@ -803,6 +825,7 @@ async function init(): Promise<InitAttemptResult> {
     ]);
 
     allItems = items;
+    allItems = items.filter((item) => !EXCLUDED_TUTKINTO_NAMES.has(item.tutkinto_nimi));
     itemMap = new Map(allItems.map((item) => [item.id, item]));
     savedIds = new Set(savedItems.map((item) => item.id));
 
@@ -833,9 +856,18 @@ window.addEventListener("pywebviewready", () => {
 
 window.addEventListener("DOMContentLoaded", () => {
   initPage();
+  quizStartPopupCloseEl?.focus();
 });
 
 window.addEventListener("keydown", (event) => {
+  if (isStartPopupOpen) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeStartPopup();
+    }
+    return;
+  }
+
   if (!activePair) {
     return;
   }
@@ -851,4 +883,8 @@ window.addEventListener("keydown", (event) => {
 
 quizRestartEl?.addEventListener("click", () => {
   restartQuiz(true);
+});
+
+quizStartPopupCloseEl?.addEventListener("click", () => {
+  closeStartPopup();
 });

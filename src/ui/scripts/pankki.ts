@@ -320,7 +320,8 @@ function renderDetail(detail: TutkintoDetail): void {
     if (nimike.paikkakunta.length > 0) {
       const paikkakuntaMeta = document.createElement("p");
       paikkakuntaMeta.className = "tutkintonimike-meta";
-      paikkakuntaMeta.textContent = `Paikkakunnat: ${nimike.paikkakunta.join(", ")}`;
+      paikkakuntaMeta.style.fontStyle = "italic";
+      paikkakuntaMeta.textContent = `${nimike.paikkakunta.join(", ")}`;
       body.insertBefore(paikkakuntaMeta, actions);
     }
     actions.append(button);
