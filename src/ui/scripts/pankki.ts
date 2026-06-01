@@ -54,7 +54,8 @@ const countEl = document.getElementById("count");
 const feedbackEl = document.getElementById("detail-feedback");
 const searchInput = document.getElementById("tutkinto-search") as HTMLInputElement | null;
 const tutkintoFilterEl = document.getElementById("tutkinto-filter") as HTMLSelectElement | null;
-const paikkaFilterEl = document.getElementById("paikkakunta-filter") as HTMLSelectElement | null;
+const paikkaFilterEl = document.getElementById("paikkakunta-filter") as HTMLDivElement | null;
+const paikkaFilterSummaryEl = document.getElementById("paikkakunta-filter-trigger");
 const savedOnlyFilterEl = document.getElementById("saved-only-filter") as HTMLInputElement | null;
 
 let activeId: number | null = null;
@@ -133,11 +134,7 @@ function populatePaikkakuntaFilter(items: TutkintonimikeItem[]): void {
     return;
   }
 
-  const previousValues = new Set(
-    Array.from(paikkaFilterEl.selectedOptions)
-      .map((option) => option.value.trim())
-      .filter((value) => value.length > 0)
-  );
+  const previousValues = new Set(filterState.paikkakunnat);
 
   const paikkakunnat = Array.from(
     new Set(items.flatMap((item) => item.paikkakunta).filter((paikkakunta) => paikkakunta.length > 0))
@@ -146,12 +143,58 @@ function populatePaikkakuntaFilter(items: TutkintonimikeItem[]): void {
   paikkaFilterEl.replaceChildren();
 
   paikkakunnat.forEach((paikkakunta) => {
-    const option = document.createElement("option");
-    option.value = paikkakunta;
-    option.textContent = paikkakunta;
-    option.selected = previousValues.has(paikkakunta);
-    paikkaFilterEl.append(option);
+    const label = document.createElement("label");
+    label.className = "filter-dropdown-option";
+
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = paikkakunta;
+    input.checked = previousValues.has(paikkakunta);
+    input.addEventListener("change", () => {
+      updatePaikkakuntaSelection();
+      void applyFilters();
+    });
+
+    const text = document.createElement("span");
+    text.textContent = paikkakunta;
+
+    label.append(input, text);
+    paikkaFilterEl.append(label);
   });
+
+  updatePaikkakuntaSummary();
+}
+
+function updatePaikkakuntaSelection(): void {
+  if (!paikkaFilterEl) {
+    return;
+  }
+
+  filterState.paikkakunnat = Array.from(
+    paikkaFilterEl.querySelectorAll<HTMLInputElement>('input[type="checkbox"]:checked')
+  )
+    .map((input) => input.value.trim())
+    .filter((value) => value.length > 0);
+
+  updatePaikkakuntaSummary();
+}
+
+function updatePaikkakuntaSummary(): void {
+  if (!paikkaFilterSummaryEl) {
+    return;
+  }
+
+  if (filterState.paikkakunnat.length === 0) {
+    paikkaFilterSummaryEl.textContent = "Kaikki paikkakunnat";
+    return;
+  }
+
+  if (filterState.paikkakunnat.length === 1) {
+    paikkaFilterSummaryEl.textContent = filterState.paikkakunnat[0];
+    return;
+  }
+
+  paikkaFilterSummaryEl.textContent = `${filterState.paikkakunnat.length} paikkakuntaa valittu`;
 }
 
 function renderList(items: TutkintoListItem[]): void {
@@ -420,15 +463,6 @@ function bindEvents(): void {
   if (savedOnlyFilterEl) {
     savedOnlyFilterEl.addEventListener("change", () => {
       filterState.savedOnly = savedOnlyFilterEl.checked;
-      void applyFilters();
-    });
-  }
-
-  if (paikkaFilterEl) {
-    paikkaFilterEl.addEventListener("change", () => {
-      filterState.paikkakunnat = Array.from(paikkaFilterEl.selectedOptions)
-        .map((option) => option.value.trim())
-        .filter((value) => value.length > 0);
       void applyFilters();
     });
   }

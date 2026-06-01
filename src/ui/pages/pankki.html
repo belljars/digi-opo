@@ -49,16 +49,22 @@
                             <select id="tutkinto-filter">
                                 <option value="">Kaikki tutkinnot</option>
                             </select>
-                            <label for="paikkakunta-filter">Paikkakunta</label>
-                            <select
-                                id="paikkakunta-filter"
-                                multiple
-                                size="8"
-                                aria-describedby="paikkakunta-filter-help"
-                            ></select>
-                            <small id="paikkakunta-filter-help">
-                                Voit valita useita paikkakuntia pitämällä Ctrl- tai Cmd-näppäintä pohjassa.
-                            </small>
+                            <span id="paikkakunta-filter-label">Paikkakunta</span>
+                            <details class="filter-dropdown" id="paikkakunta-filter-dropdown">
+                                <summary
+                                    id="paikkakunta-filter-trigger"
+                                    class="filter-dropdown-trigger"
+                                    aria-describedby="paikkakunta-filter-help"
+                                >
+                                    Kaikki paikkakunnat
+                                </summary>
+                                <div
+                                    id="paikkakunta-filter"
+                                    class="filter-dropdown-panel"
+                                    role="group"
+                                    aria-labelledby="paikkakunta-filter-label"
+                                ></div>
+                            </details>
                         </div>
                         <label class="filter-toggle" for="saved-only-filter">
                             <input id="saved-only-filter" type="checkbox" />

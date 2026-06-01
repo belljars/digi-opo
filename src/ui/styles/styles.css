@@ -363,6 +363,95 @@ body {
     text-align: left;
 }
 
+.filter-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.filter-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid currentColor;
+    background: var(--color-card-bg);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: var(--line-height);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    list-style: none;
+}
+
+.filter-dropdown-trigger::-webkit-details-marker {
+    display: none;
+}
+
+.filter-dropdown-trigger::after {
+    content: "+";
+    flex-shrink: 0;
+    font-weight: 700;
+}
+
+.filter-dropdown[open] .filter-dropdown-trigger::after {
+    content: "-";
+}
+
+.filter-dropdown-panel {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    max-height: 16rem;
+    padding: var(--space-2);
+    overflow-y: auto;
+    border: 1px solid currentColor;
+    background: var(--color-card-bg);
+}
+
+.filter-dropdown-option {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: var(--space-2);
+    cursor: pointer;
+}
+
+.filter-dropdown-option input[type="checkbox"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.filter-dropdown-option span {
+    font-size: inherit;
+    line-height: var(--line-height);
+}
+
+.filter-dropdown-option:hover {
+    background: var(--color-surface-soft);
+}
+
+.filter-dropdown-option:has(input:checked) {
+    background: var(--color-surface-soft);
+    font-weight: 600;
+}
+
 .filter-toggle {
     display: flex;
     align-items: center;
@@ -1535,6 +1624,11 @@ button:disabled {
 
     .quiz-cards {
         grid-template-columns: 1fr;
+    }
+
+    .filter-dropdown-panel {
+        position: static;
+        margin-top: var(--space-1);
     }
 }
 
