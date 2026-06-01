@@ -17,11 +17,11 @@
               } catch {
                 mode = "auto";
               }
-            
+
               const effectiveTheme = mode === "auto"
                 ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
                 : mode;
-            
+
               document.documentElement.dataset.themeMode = mode;
               document.documentElement.dataset.theme = effectiveTheme;
               document.documentElement.style.colorScheme = effectiveTheme;
@@ -29,41 +29,52 @@
         </script>
         <link rel="stylesheet" href="../styles/styles.css" />
     </head>
-    <a class="skip-link" href="#main-content">Siirry sisältöön</a>
-    <main class="app" id="main-content">
-        <section class="workspace">
-            <aside class="panel panel-list">
-                <div class="pankki-filters">
-                    <div class="search">
-                        <label for="tutkinto-search">Haku</label>
-                        <input
-                            id="tutkinto-search"
-                            type="search"
-                            placeholder="Hae tutkinnon nimellä tai nimikkeellä"
-                            autocomplete="off"
+    <body>
+        <a class="skip-link" href="#main-content">Siirry sisältöön</a>
+        <main class="app" id="main-content">
+            <section class="workspace">
+                <aside class="panel panel-list">
+                    <div class="pankki-filters">
+                        <div class="search">
+                            <label for="tutkinto-search">Haku</label>
+                            <input
+                                id="tutkinto-search"
+                                type="search"
+                                placeholder="Hae tutkinnon nimellä tai nimikkeellä"
+                                autocomplete="off"
                             />
+                        </div>
+                        <div class="search">
+                            <label for="tutkinto-filter">Tutkinto</label>
+                            <select id="tutkinto-filter">
+                                <option value="">Kaikki tutkinnot</option>
+                            </select>
+                            <label for="paikkakunta-filter">Paikkakunta</label>
+                            <select
+                                id="paikkakunta-filter"
+                                multiple
+                                size="8"
+                                aria-describedby="paikkakunta-filter-help"
+                            ></select>
+                            <small id="paikkakunta-filter-help">
+                                Voit valita useita paikkakuntia pitämällä Ctrl- tai Cmd-näppäintä pohjassa.
+                            </small>
+                        </div>
+                        <label class="filter-toggle" for="saved-only-filter">
+                            <input id="saved-only-filter" type="checkbox" />
+                            <span>Vain tallennetut tutkintonimikkeet</span>
+                        </label>
                     </div>
-                    <div class="search">
-                        <label for="tutkinto-filter">Tutkinto</label>
-                        <select id="tutkinto-filter">
-                            <option value="">Kaikki tutkinnot</option>
-                        </select>
-                    </div>
-                    <label class="filter-toggle" for="saved-only-filter">
-                    <input id="saved-only-filter" type="checkbox" />
-                    <span>Vain tallennetut tutkintonimikkeet</span>
-                    </label>
-                </div>
-                <div id="count" class="count"></div>
-                <ul id="tutkinto-list" class="list"></ul>
-            </aside>
-            <section class="panel panel-detail">
-                <div id="detail-feedback" class="saved-feedback" aria-live="polite"></div>
-                <div id="detail" class="detail"></div>
+                    <div id="count" class="count"></div>
+                    <ul id="tutkinto-list" class="list"></ul>
+                </aside>
+                <section class="panel panel-detail">
+                    <div id="detail-feedback" class="saved-feedback" aria-live="polite"></div>
+                    <div id="detail" class="detail"></div>
+                </section>
             </section>
-        </section>
-    </main>
-    <script type="module" src="../scripts/ulkoasu.js"></script>
-    <script type="module" src="../scripts/pankki.js"></script>
+        </main>
+        <script type="module" src="../scripts/ulkoasu.js"></script>
+        <script type="module" src="../scripts/pankki.js"></script>
     </body>
 </html>

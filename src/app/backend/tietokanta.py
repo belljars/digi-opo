@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 import sqlite3
 
 from backend_apu import (
@@ -9,7 +10,7 @@ from backend_apu import (
 )
 from projekti_paths import ProjectPaths
 
-AMMATIT_IMPORT_VERSION = "4"
+AMMATIT_IMPORT_VERSION = "5"
 
 
 def connect_db(paths: ProjectPaths) -> sqlite3.Connection:
@@ -41,6 +42,7 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             tutkinto_id INTEGER NOT NULL,
             nimi TEXT NOT NULL,
             linkki TEXT,
+            paikkakunta TEXT NOT NULL DEFAULT '[]',
             img TEXT,
             FOREIGN KEY (tutkinto_id) REFERENCES tutkinnot(id) ON DELETE CASCADE
         );
@@ -54,6 +56,8 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
 
     if "img" not in columns:
         conn.execute("ALTER TABLE tutkintonimikkeet ADD COLUMN img TEXT;")
+    if "paikkakunta" not in columns:
+        conn.execute("ALTER TABLE tutkintonimikkeet ADD COLUMN paikkakunta TEXT NOT NULL DEFAULT '[]';")
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS app_meta (
@@ -149,14 +153,22 @@ def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: l
             nimike_nimi = str(nimike.get("nimi", "")).strip()
             linkki = str(nimike.get("linkki", "")).strip() or None
             img = paths.normalize_ui_asset_ref(str(nimike.get("img", "")).strip()) or None
+            raw_paikkakunnat = nimike.get("paikkakunta", []) or []
+            if not isinstance(raw_paikkakunnat, list):
+                raw_paikkakunnat = []
+            paikkakunnat = [
+                str(paikkakunta).strip()
+                for paikkakunta in raw_paikkakunnat
+                if str(paikkakunta).strip()
+            ]
             if not nimike_nimi:
                 continue
             conn.execute(
                 """
-                INSERT INTO tutkintonimikkeet (tutkinto_id, nimi, linkki, img)
-                VALUES (?, ?, ?, ?);
+                INSERT INTO tutkintonimikkeet (tutkinto_id, nimi, linkki, paikkakunta, img)
+                VALUES (?, ?, ?, ?, ?);
                 """,
-                (tutkinto_id, nimike_nimi, linkki, img),
+                (tutkinto_id, nimike_nimi, linkki, json.dumps(paikkakunnat, ensure_ascii=False), img),
             )
 
 

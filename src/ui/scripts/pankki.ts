@@ -17,6 +17,7 @@ type Tutkintonimike = {
   nimi: string;
   linkki: string | null;
   img: string | null;
+  paikkakunta: string[];
 };
 
 type TutkintonimikeItem = Tutkintonimike & {
@@ -43,6 +44,7 @@ type Api = {
 type FilterState = {
   query: string;
   tutkintoId: number | null;
+  paikkakunnat: string[];
   savedOnly: boolean;
 };
 
@@ -52,6 +54,7 @@ const countEl = document.getElementById("count");
 const feedbackEl = document.getElementById("detail-feedback");
 const searchInput = document.getElementById("tutkinto-search") as HTMLInputElement | null;
 const tutkintoFilterEl = document.getElementById("tutkinto-filter") as HTMLSelectElement | null;
+const paikkaFilterEl = document.getElementById("paikkakunta-filter") as HTMLSelectElement | null;
 const savedOnlyFilterEl = document.getElementById("saved-only-filter") as HTMLInputElement | null;
 
 let activeId: number | null = null;
@@ -67,6 +70,7 @@ let searchTimeout: number | null = null;
 const filterState: FilterState = {
   query: "",
   tutkintoId: null,
+  paikkakunnat: [],
   savedOnly: false
 };
 
@@ -124,6 +128,32 @@ function populateTutkintoFilter(items: TutkintoListItem[]): void {
   tutkintoFilterEl.value = items.some((item) => String(item.id) === previousValue) ? previousValue : "";
 }
 
+function populatePaikkakuntaFilter(items: TutkintonimikeItem[]): void {
+  if (!paikkaFilterEl) {
+    return;
+  }
+
+  const previousValues = new Set(
+    Array.from(paikkaFilterEl.selectedOptions)
+      .map((option) => option.value.trim())
+      .filter((value) => value.length > 0)
+  );
+
+  const paikkakunnat = Array.from(
+    new Set(items.flatMap((item) => item.paikkakunta).filter((paikkakunta) => paikkakunta.length > 0))
+  ).sort((left, right) => left.localeCompare(right, "fi"));
+
+  paikkaFilterEl.replaceChildren();
+
+  paikkakunnat.forEach((paikkakunta) => {
+    const option = document.createElement("option");
+    option.value = paikkakunta;
+    option.textContent = paikkakunta;
+    option.selected = previousValues.has(paikkakunta);
+    paikkaFilterEl.append(option);
+  });
+}
+
 function renderList(items: TutkintoListItem[]): void {
   if (!listEl) {
     return;
@@ -155,9 +185,17 @@ function renderEmpty(message: string): void {
 
 function getFilteredTutkintonimikkeet(): TutkintonimikeItem[] {
   const query = normalizeValue(filterState.query);
+  const selectedPaikkakunnat = new Set(filterState.paikkakunnat.map((value) => normalizeValue(value)));
 
   return allTutkintonimikkeet.filter((item) => {
     if (filterState.tutkintoId !== null && item.tutkinto_id !== filterState.tutkintoId) {
+      return false;
+    }
+
+    if (
+      selectedPaikkakunnat.size > 0 &&
+      !item.paikkakunta.some((paikkakunta) => selectedPaikkakunnat.has(normalizeValue(paikkakunta)))
+    ) {
       return false;
     }
 
@@ -235,6 +273,12 @@ function renderDetail(detail: TutkintoDetail): void {
 
     if (!body.contains(actions)) {
       body.append(actions);
+    }
+    if (nimike.paikkakunta.length > 0) {
+      const paikkakuntaMeta = document.createElement("p");
+      paikkakuntaMeta.className = "tutkintonimike-meta";
+      paikkakuntaMeta.textContent = `Paikkakunnat: ${nimike.paikkakunta.join(", ")}`;
+      body.insertBefore(paikkakuntaMeta, actions);
     }
     actions.append(button);
     grid.append(root);
@@ -353,6 +397,7 @@ async function loadInitial(api: Api): Promise<void> {
   allTutkinnot = tutkinnot;
   allTutkintonimikkeet = tutkintonimikkeet;
   populateTutkintoFilter(tutkinnot);
+  populatePaikkakuntaFilter(tutkintonimikkeet);
   await applyFilters();
 }
 
@@ -375,6 +420,15 @@ function bindEvents(): void {
   if (savedOnlyFilterEl) {
     savedOnlyFilterEl.addEventListener("change", () => {
       filterState.savedOnly = savedOnlyFilterEl.checked;
+      void applyFilters();
+    });
+  }
+
+  if (paikkaFilterEl) {
+    paikkaFilterEl.addEventListener("change", () => {
+      filterState.paikkakunnat = Array.from(paikkaFilterEl.selectedOptions)
+        .map((option) => option.value.trim())
+        .filter((value) => value.length > 0);
       void applyFilters();
     });
   }

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from backend_apu import utc_now_iso
+import json
 from typing import Any
 
 class TutkinnotApiMixin:
@@ -13,12 +14,25 @@ class TutkinnotApiMixin:
     _ALLOWED_PLAN_PRIORITIES = {"", "ensisijainen", "selvitettava", "varavaihtoehto"}
     _ALLOWED_PLAN_STATUSES = {"", "en-tieda-viela", "haluan-selvittaa-lisaa", "vahva-vaihtoehto"}
 
+    def _parse_paikkakunnat(self, raw_value: Any) -> list[str]:
+        '''Muuntaa tietokannassa JSON-merkkijonona olevan paikkakuntalistan käyttöliittymälle'''
+
+        if not raw_value:
+            return []
+        try:
+            parsed = json.loads(str(raw_value))
+        except (TypeError, ValueError, json.JSONDecodeError):
+            return []
+        if not isinstance(parsed, list):
+            return []
+        return [str(item).strip() for item in parsed if str(item).strip()]
+
     def _get_visible_tutkintonimike_row(self, nimike_id: int):
         '''Palauttaa näkyvän tutkintonimikkeen rivin tai `None`, jos sitä ei voi käyttää'''
 
         return self._conn.execute(
             """
-            SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
+            SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta, n.tutkinto_id, t.nimi AS tutkinto_nimi
             FROM tutkintonimikkeet n
             JOIN tutkinnot t ON t.id = n.tutkinto_id
             LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
@@ -36,6 +50,7 @@ class TutkinnotApiMixin:
             "nimi": row["nimi"],
             "linkki": row["linkki"],
             "img": row["img"],
+            "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
             "tutkinto_id": row["tutkinto_id"],
             "tutkinto_nimi": row["tutkinto_nimi"],
             "savedAt": saved_at,
@@ -79,7 +94,7 @@ class TutkinnotApiMixin:
         with self._lock:
             nimikkeet = self._conn.execute(
                 """
-                SELECT n.id, n.nimi, n.linkki, n.img
+                SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta
                 FROM tutkintonimikkeet n
                 LEFT JOIN hidden_tutkintonimikkeet h ON h.tutkintonimike_id = n.id
                 WHERE n.tutkinto_id = ? AND h.tutkintonimike_id IS NULL
@@ -97,6 +112,7 @@ class TutkinnotApiMixin:
                     "nimi": nimike["nimi"],
                     "linkki": nimike["linkki"],
                     "img": nimike["img"],
+                    "paikkakunta": self._parse_paikkakunnat(nimike["paikkakunta"]),
                 }
                 for nimike in nimikkeet
             ],
@@ -134,7 +150,7 @@ class TutkinnotApiMixin:
         with self._lock:
             rows = self._conn.execute(
                 """
-                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
+                SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta, n.tutkinto_id, t.nimi AS tutkinto_nimi
                 FROM tutkintonimikkeet n
                 JOIN tutkinnot t ON t.id = n.tutkinto_id
                 LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
@@ -149,6 +165,7 @@ class TutkinnotApiMixin:
                 "nimi": row["nimi"],
                 "linkki": row["linkki"],
                 "img": row["img"],
+                "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
             }
@@ -166,6 +183,7 @@ class TutkinnotApiMixin:
                     n.nimi,
                     n.linkki,
                     n.img,
+                    n.paikkakunta,
                     n.tutkinto_id,
                     t.nimi AS tutkinto_nimi,
                     s.saved_at,
@@ -188,6 +206,7 @@ class TutkinnotApiMixin:
                 "nimi": row["nimi"],
                 "linkki": row["linkki"],
                 "img": row["img"],
+                "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
                 "savedAt": row["saved_at"],
@@ -267,7 +286,7 @@ class TutkinnotApiMixin:
         with self._lock:
             rows = self._conn.execute(
                 """
-                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi, notes.note_text, notes.updated_at
+                SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta, n.tutkinto_id, t.nimi AS tutkinto_nimi, notes.note_text, notes.updated_at
                 FROM tutkintonimike_notes notes
                 JOIN tutkintonimikkeet n ON n.id = notes.tutkintonimike_id
                 JOIN tutkinnot t ON t.id = n.tutkinto_id
@@ -283,6 +302,7 @@ class TutkinnotApiMixin:
                 "nimi": row["nimi"],
                 "linkki": row["linkki"],
                 "img": row["img"],
+                "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
                 "noteText": row["note_text"],
@@ -306,7 +326,7 @@ class TutkinnotApiMixin:
         with self._lock:
             row = self._conn.execute(
                 """
-                SELECT n.id, n.nimi, n.linkki, n.img, n.tutkinto_id, t.nimi AS tutkinto_nimi
+                SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta, n.tutkinto_id, t.nimi AS tutkinto_nimi
                 FROM tutkintonimikkeet n
                 JOIN tutkinnot t ON t.id = n.tutkinto_id
                 LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
@@ -335,6 +355,7 @@ class TutkinnotApiMixin:
             "nimi": row["nimi"],
             "linkki": row["linkki"],
             "img": row["img"],
+            "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
             "tutkinto_id": row["tutkinto_id"],
             "tutkinto_nimi": row["tutkinto_nimi"],
             "noteText": normalized_note,
