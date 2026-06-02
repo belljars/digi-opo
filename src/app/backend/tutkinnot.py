@@ -170,7 +170,7 @@ class TutkinnotApiMixin:
                 "tutkinto_nimi": row["tutkinto_nimi"],
             }
             for row in rows
-        ]
+        ] # type: ignore
 
     def list_saved_tutkintonimikkeet(self) -> list[dict]:
         '''Palauttaa käyttäjän tallentamat ja edelleen näkyvät suosikit'''
