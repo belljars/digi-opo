@@ -318,12 +318,47 @@ function renderDetail(detail: TutkintoDetail): void {
       body.append(actions);
     }
     if (nimike.paikkakunta.length > 0) {
+      const selectedPaikkakunnat = new Set(filterState.paikkakunnat.map((value) => normalizeValue(value)));
       const paikkakuntaMeta = document.createElement("p");
       paikkakuntaMeta.className = "tutkintonimike-meta";
       paikkakuntaMeta.style.fontStyle = "italic";
-      paikkakuntaMeta.textContent = `${nimike.paikkakunta.join(", ")}`;
+
+      const markIds = [
+        "mark-one",
+        "mark-two",
+        "mark-three",
+        "mark-four",
+        "mark-five",
+        "mark-six",
+        "mark-seven",
+        "mark-eight"
+      ];
+      const paikkakuntaMarkIds = new Map<string, string>();
+
+      nimike.paikkakunta.forEach((paikkakunta, index) => {
+        const normalizedPaikkakunta = normalizeValue(paikkakunta);
+        const textNode = document.createTextNode(paikkakunta);
+        if (selectedPaikkakunnat.has(normalizedPaikkakunta)) {
+          const mark = document.createElement("mark");
+          const markId = paikkakuntaMarkIds.get(normalizedPaikkakunta) ?? markIds[paikkakuntaMarkIds.size % markIds.length];
+          if (!paikkakuntaMarkIds.has(normalizedPaikkakunta)) {
+            paikkakuntaMarkIds.set(normalizedPaikkakunta, markId);
+          }
+          mark.id = markId;
+          mark.append(textNode);
+          paikkakuntaMeta.append(mark);
+        } else {
+          paikkakuntaMeta.append(textNode);
+        }
+
+        if (index < nimike.paikkakunta.length - 1) {
+          paikkakuntaMeta.append(document.createTextNode(", "));
+        }
+      });
+
       body.insertBefore(paikkakuntaMeta, actions);
     }
+
     actions.append(button);
     grid.append(root);
   });
