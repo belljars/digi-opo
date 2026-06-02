@@ -54,6 +54,7 @@ if errorlevel 1 exit /b %errorlevel%
 echo [INFO] Siivotaan vanha build-kansio...
 if exist "build" rmdir /s /q "build"
 if exist "dist\digi-opo" rmdir /s /q "dist\digi-opo"
+if exist "dist\digi-opo.exe" del /q "dist\digi-opo.exe"
 
 echo [INFO] Rakennetaan PyInstaller-paketti...
 "%VENV_PY%" -m PyInstaller --noconfirm --clean digi-opo.spec

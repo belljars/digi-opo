@@ -21,8 +21,18 @@ hiddenimports = [
     "PyQt6.QtWebEngineCore",
     "PyQt6.QtWebEngineWidgets",
 ]
+excludes = [
+    "qtpy.tests",
+    "webview.platforms.android",
+    "webview.platforms.cef",
+    "webview.platforms.cocoa",
+    "webview.platforms.edgechromium",
+    "webview.platforms.gtk",
+    "webview.platforms.mshtml",
+    "webview.platforms.winforms",
+]
 
-for package_name in ("webview", "PyQt6", "qtpy"):
+for package_name in ("webview", "PyQt6"):
     extend_collection(package_name, datas, binaries, hiddenimports)
 
 
@@ -35,7 +45,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=excludes,
     noarchive=False,
     optimize=0,
 )
@@ -52,6 +62,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
+    icon="assets/icon/luovi.ico",
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
