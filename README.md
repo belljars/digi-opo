@@ -216,12 +216,12 @@ Build-komento:
 - asentaa build-riippuvuudet tiedostosta `requirements-build.txt`
 - ajaa `npm install` ja `npm run build`
 - ajaa `PyInstaller`-buildin tiedostolla `digi-opo.spec`
-- tuottaa jakelun kansioon `dist/digi-opo/`
+- tuottaa yksittaisen Windows-exen polkuun `dist/digi-opo.exe`
 
 Valmis käynnistettävä tiedosto on:
 
 ```text
-dist/digi-opo/digi-opo.exe
+dist/digi-opo.exe
 ```
 
 Huomioita paketoinnista:

@@ -60,11 +60,10 @@ echo [INFO] Rakennetaan PyInstaller-paketti...
 "%VENV_PY%" -m PyInstaller --noconfirm --clean digi-opo.spec
 if errorlevel 1 exit /b %errorlevel%
 
-if not exist "dist\digi-opo\digi-opo.exe" (
-  echo [VIRHE] EXE puuttuu: dist\digi-opo\digi-opo.exe
+if not exist "dist\digi-opo.exe" (
+  echo [VIRHE] EXE puuttuu: dist\digi-opo.exe
   exit /b 1
 )
 
 echo [INFO] EXE-build valmistui.
-echo [INFO] Kaynnistettava tiedosto: dist\digi-opo\digi-opo.exe
-echo [INFO] Jakelukansio: dist\digi-opo
+echo [INFO] Kaynnistettava tiedosto: dist\digi-opo.exe
