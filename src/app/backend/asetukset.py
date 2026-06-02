@@ -99,7 +99,18 @@ class AsetuksetApiMixin:
         with self._lock:
             rows = self._conn.execute(
                 """
-                SELECT hp.paikkakunta, hp.hidden_at, COUNT(n.id) AS tutkintonimike_count
+                SELECT
+                    hp.paikkakunta,
+                    hp.hidden_at,
+                    SUM(
+                        CASE
+                            WHEN n.id IS NOT NULL
+                              AND ht.tutkinto_id IS NULL
+                              AND hn.tutkintonimike_id IS NULL
+                            THEN 1
+                            ELSE 0
+                        END
+                    ) AS tutkintonimike_count
                 FROM hidden_paikkakunnat hp
                 LEFT JOIN tutkintonimikkeet n
                   ON EXISTS (
@@ -110,7 +121,6 @@ class AsetuksetApiMixin:
                 LEFT JOIN tutkinnot t ON t.id = n.tutkinto_id
                 LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
                 LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
-                WHERE n.id IS NULL OR (ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL)
                 GROUP BY hp.paikkakunta, hp.hidden_at
                 ORDER BY hp.paikkakunta;
                 """

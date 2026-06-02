@@ -56,7 +56,9 @@ const searchInput = document.getElementById("tutkinto-search") as HTMLInputEleme
 const tutkintoFilterEl = document.getElementById("tutkinto-filter") as HTMLSelectElement | null;
 const paikkaFilterEl = document.getElementById("paikkakunta-filter") as HTMLDivElement | null;
 const paikkaFilterSummaryEl = document.getElementById("paikkakunta-filter-trigger");
+const paikkaFilterDropdownEl = document.getElementById("paikkakunta-filter-dropdown") as HTMLDetailsElement | null;
 const savedOnlyFilterEl = document.getElementById("saved-only-filter") as HTMLInputElement | null;
+const clearFiltersButtonEl = document.getElementById("clear-filters-button") as HTMLButtonElement | null;
 
 let activeId: number | null = null;
 let activeApi: Api | null = null;
@@ -464,6 +466,39 @@ function scheduleApplyFilters(): void {
   }, 200);
 }
 
+async function clearFilters(): Promise<void> {
+  filterState.query = "";
+  filterState.tutkintoId = null;
+  filterState.paikkakunnat = [];
+  filterState.savedOnly = false;
+
+  if (searchTimeout) {
+    window.clearTimeout(searchTimeout);
+    searchTimeout = null;
+  }
+
+  if (searchInput) {
+    searchInput.value = "";
+  }
+  if (tutkintoFilterEl) {
+    tutkintoFilterEl.value = "";
+  }
+  if (paikkaFilterEl) {
+    paikkaFilterEl.querySelectorAll<HTMLInputElement>('input[type="checkbox"]').forEach((input) => {
+      input.checked = false;
+    });
+  }
+  if (savedOnlyFilterEl) {
+    savedOnlyFilterEl.checked = false;
+  }
+  if (paikkaFilterDropdownEl) {
+    paikkaFilterDropdownEl.open = false;
+  }
+
+  updatePaikkakuntaSummary();
+  await applyFilters();
+}
+
 async function loadInitial(api: Api): Promise<void> {
   renderEmpty("Ladataan...");
   await loadSavedIds();
@@ -502,6 +537,10 @@ function bindEvents(): void {
       void applyFilters();
     });
   }
+
+  clearFiltersButtonEl?.addEventListener("click", () => {
+    void clearFilters();
+  });
 }
 
 async function init(): Promise<InitAttemptResult> {
