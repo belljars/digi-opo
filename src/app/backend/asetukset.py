@@ -61,6 +61,69 @@ class AsetuksetApiMixin:
             for row in rows
         ]
 
+    def list_paikkakunnat(self) -> list[dict[str, str | int]]:
+        '''Listaa näkyvät paikkakunnat asetusten hallintaa varten'''
+
+        with self._lock:
+            rows = self._conn.execute(
+                """
+                SELECT n.paikkakunta
+                FROM tutkintonimikkeet n
+                JOIN tutkinnot t ON t.id = n.tutkinto_id
+                LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
+                LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
+                WHERE ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL;
+                """
+            ).fetchall()
+            hidden_rows = self._conn.execute("SELECT paikkakunta FROM hidden_paikkakunnat;").fetchall()
+
+        hidden = {str(row["paikkakunta"]).strip().casefold() for row in hidden_rows if str(row["paikkakunta"]).strip()}
+        labels: dict[str, str] = {}
+        counts: dict[str, int] = {}
+        for row in rows:
+            for paikkakunta in self._parse_paikkakunnat(row["paikkakunta"]):
+                key = paikkakunta.casefold()
+                if key in hidden:
+                    continue
+                labels.setdefault(key, paikkakunta)
+                counts[key] = counts.get(key, 0) + 1
+
+        return [
+            {"paikkakunta": labels[key], "tutkintonimikeCount": counts[key]}
+            for key in sorted(labels, key=lambda value: labels[value])
+        ]
+
+    def list_hidden_paikkakunnat(self) -> list[dict[str, str | int]]:
+        '''Listaa paikkakunnat, jotka käyttäjä on piilottanut näkyvistä'''
+
+        with self._lock:
+            rows = self._conn.execute(
+                """
+                SELECT hp.paikkakunta, hp.hidden_at, COUNT(n.id) AS tutkintonimike_count
+                FROM hidden_paikkakunnat hp
+                LEFT JOIN tutkintonimikkeet n
+                  ON EXISTS (
+                    SELECT 1
+                    FROM json_each(n.paikkakunta)
+                    WHERE lower(json_each.value) = lower(hp.paikkakunta)
+                  )
+                LEFT JOIN tutkinnot t ON t.id = n.tutkinto_id
+                LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
+                LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
+                WHERE n.id IS NULL OR (ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL)
+                GROUP BY hp.paikkakunta, hp.hidden_at
+                ORDER BY hp.paikkakunta;
+                """
+            ).fetchall()
+        return [
+            {
+                "paikkakunta": row["paikkakunta"],
+                "hiddenAt": row["hidden_at"],
+                "tutkintonimikeCount": row["tutkintonimike_count"],
+            }
+            for row in rows
+        ]
+
     def hide_tutkinto(self, tutkinto_id: int) -> bool:
         '''Merkitsee tutkinnon piilotetuksi koko sovelluksessa'''
 
@@ -154,5 +217,53 @@ class AsetuksetApiMixin:
                     WHERE tutkintonimike_id = ?;
                     """,
                     (normalized_id,),
+                )
+        return cursor.rowcount > 0
+
+    def hide_paikkakunta(self, paikkakunta: str) -> bool:
+        '''Merkitsee paikkakunnan piilotetuksi koko sovelluksessa'''
+
+        normalized = str(paikkakunta or "").strip()
+        if not normalized:
+            raise ValueError("Paikkakunta is required")
+
+        with self._lock:
+            exists = self._conn.execute(
+                """
+                SELECT 1
+                FROM tutkintonimikkeet n, json_each(n.paikkakunta)
+                WHERE lower(json_each.value) = lower(?)
+                LIMIT 1;
+                """,
+                (normalized,),
+            ).fetchone()
+            if not exists:
+                raise ValueError(f"Unknown paikkakunta: {normalized}")
+            with self._conn:
+                self._conn.execute(
+                    """
+                    INSERT INTO hidden_paikkakunnat (paikkakunta, hidden_at)
+                    VALUES (?, ?)
+                    ON CONFLICT(paikkakunta) DO UPDATE SET hidden_at = excluded.hidden_at;
+                    """,
+                    (normalized, utc_now_iso()),
+                )
+        return True
+
+    def unhide_paikkakunta(self, paikkakunta: str) -> bool:
+        '''Poistaa paikkakunnan piilotuksen'''
+
+        normalized = str(paikkakunta or "").strip()
+        if not normalized:
+            raise ValueError("Paikkakunta is required")
+
+        with self._lock:
+            with self._conn:
+                cursor = self._conn.execute(
+                    """
+                    DELETE FROM hidden_paikkakunnat
+                    WHERE lower(paikkakunta) = lower(?);
+                    """,
+                    (normalized,),
                 )
         return cursor.rowcount > 0

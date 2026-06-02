@@ -30,6 +30,15 @@ type HiddenTutkintonimikeItem = TutkintonimikeItem & {
   hiddenAt: string;
 };
 
+type PaikkakuntaListItem = {
+  paikkakunta: string;
+  tutkintonimikeCount: number;
+};
+
+type HiddenPaikkakuntaListItem = PaikkakuntaListItem & {
+  hiddenAt: string;
+};
+
 type ExportUserDataPdfResult = {
   success: boolean;
   cancelled: boolean;
@@ -39,6 +48,7 @@ type ExportUserDataPdfResult = {
   noteCount: number;
   hiddenTutkinnotCount: number;
   hiddenTutkintonimikkeetCount: number;
+  hiddenPaikkakunnatCount: number;
   quizResultCount: number;
   quizSessionCount: number;
 };
@@ -48,10 +58,14 @@ type Api = {
   list_hidden_tutkinnot: () => Promise<HiddenTutkintoListItem[]>;
   list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
   list_hidden_tutkintonimikkeet: () => Promise<HiddenTutkintonimikeItem[]>;
+  list_paikkakunnat: () => Promise<PaikkakuntaListItem[]>;
+  list_hidden_paikkakunnat: () => Promise<HiddenPaikkakuntaListItem[]>;
   hide_tutkinto: (id: number) => Promise<boolean>;
   unhide_tutkinto: (id: number) => Promise<boolean>;
   hide_tutkintonimike: (id: number) => Promise<boolean>;
   unhide_tutkintonimike: (id: number) => Promise<boolean>;
+  hide_paikkakunta: (paikkakunta: string) => Promise<boolean>;
+  unhide_paikkakunta: (paikkakunta: string) => Promise<boolean>;
   export_user_data_pdf: () => Promise<ExportUserDataPdfResult>;
 };
 
@@ -64,10 +78,14 @@ const unhideAllTutkinnotButtonEl = document.getElementById("asetukset-unhide-all
 const unhideAllTutkintonimikkeetButtonEl = document.getElementById(
   "asetukset-unhide-all-tutkintonimikkeet-button"
 ) as HTMLButtonElement | null;
+const unhideAllPaikkakunnatButtonEl = document.getElementById("asetukset-unhide-all-paikkakunnat-button") as
+  | HTMLButtonElement
+  | null;
 const tutkintoSearchEl = document.getElementById("asetukset-tutkinto-search") as HTMLInputElement | null;
 const tutkintonimikeSearchEl = document.getElementById("asetukset-tutkintonimike-search") as
   | HTMLInputElement
   | null;
+const paikkakuntaSearchEl = document.getElementById("asetukset-paikkakunta-search") as HTMLInputElement | null;
 const visibleTutkinnotCountEl = document.getElementById("asetukset-visible-tutkinnot-count");
 const hiddenTutkinnotCountEl = document.getElementById("asetukset-hidden-tutkinnot-count");
 const visibleTutkinnotEl = document.getElementById("asetukset-visible-tutkinnot");
@@ -76,17 +94,25 @@ const visibleTutkintonimikkeetCountEl = document.getElementById("asetukset-visib
 const hiddenTutkintonimikkeetCountEl = document.getElementById("asetukset-hidden-tutkintonimikkeet-count");
 const visibleTutkintonimikkeetEl = document.getElementById("asetukset-visible-tutkintonimikkeet");
 const hiddenTutkintonimikkeetEl = document.getElementById("asetukset-hidden-tutkintonimikkeet");
+const visiblePaikkakunnatCountEl = document.getElementById("asetukset-visible-paikkakunnat-count");
+const hiddenPaikkakunnatCountEl = document.getElementById("asetukset-hidden-paikkakunnat-count");
+const visiblePaikkakunnatEl = document.getElementById("asetukset-visible-paikkakunnat");
+const hiddenPaikkakunnatEl = document.getElementById("asetukset-hidden-paikkakunnat");
 
 let activeApi: Api | null = null; // 
 let visibleTutkinnot: TutkintoListItem[] = [];
 let hiddenTutkinnot: HiddenTutkintoListItem[] = [];
 let visibleTutkintonimikkeet: TutkintonimikeItem[] = [];
 let hiddenTutkintonimikkeet: HiddenTutkintonimikeItem[] = [];
+let visiblePaikkakunnat: PaikkakuntaListItem[] = [];
+let hiddenPaikkakunnat: HiddenPaikkakuntaListItem[] = [];
 let exportInFlight = false;
 let unhideAllTutkinnotInFlight = false;
 let unhideAllTutkintonimikkeetInFlight = false;
+let unhideAllPaikkakunnatInFlight = false;
 let tutkintoSearchTimeout: number | null = null;
 let tutkintonimikeSearchTimeout: number | null = null;
+let paikkakuntaSearchTimeout: number | null = null;
 
 const searchDebounceMs = 200;
 
@@ -115,6 +141,10 @@ function sortTutkinnot<T extends TutkintoListItem>(items: T[]): T[] {
 
 function sortTutkintonimikkeet<T extends TutkintonimikeItem>(items: T[]): T[] {
   return [...items].sort((left, right) => left.nimi.localeCompare(right.nimi, "fi"));
+}
+
+function sortPaikkakunnat<T extends PaikkakuntaListItem>(items: T[]): T[] {
+  return [...items].sort((left, right) => left.paikkakunta.localeCompare(right.paikkakunta, "fi"));
 }
 
 function getHiddenTimestamp(): string {
@@ -152,6 +182,14 @@ function updateBulkUnhideButtonStates(): void {
     unhideAllTutkintonimikkeetButtonEl.disabled =
       unhideAllTutkintonimikkeetInFlight || !activeApi || hiddenTutkintonimikkeet.length === 0;
     unhideAllTutkintonimikkeetButtonEl.textContent = unhideAllTutkintonimikkeetInFlight
+      ? "Palautetaan..."
+      : "Palauta kaikki";
+  }
+
+  if (unhideAllPaikkakunnatButtonEl) {
+    unhideAllPaikkakunnatButtonEl.disabled =
+      unhideAllPaikkakunnatInFlight || !activeApi || hiddenPaikkakunnat.length === 0;
+    unhideAllPaikkakunnatButtonEl.textContent = unhideAllPaikkakunnatInFlight
       ? "Palautetaan..."
       : "Palauta kaikki";
   }
@@ -197,6 +235,29 @@ function createTutkintoRow(
     copy.append(meta);
   }
 
+  row.append(copy, createActionButton(actionLabel, onAction));
+  return row;
+}
+
+function createPaikkakuntaRow(
+  item: PaikkakuntaListItem | HiddenPaikkakuntaListItem,
+  actionLabel: string,
+  onAction: () => void
+): HTMLElement {
+  const row = document.createElement("article");
+  row.className = "asetukset-item";
+
+  const copy = document.createElement("div");
+  copy.className = "asetukset-item-copy";
+
+  const title = document.createElement("h4");
+  title.textContent = item.paikkakunta;
+
+  const meta = document.createElement("p");
+  meta.className = "tutkintonimike-meta";
+  meta.textContent = `${item.tutkintonimikeCount} tutkintonimiketta`;
+
+  copy.append(title, meta);
   row.append(copy, createActionButton(actionLabel, onAction));
   return row;
 }
@@ -306,11 +367,50 @@ function renderHiddenTutkintonimikkeet(): void {
   );
 }
 
+function renderVisiblePaikkakunnat(): void {
+  const query = paikkakuntaSearchEl?.value.trim().toLowerCase() ?? "";
+  const items = query
+    ? visiblePaikkakunnat.filter((item) => item.paikkakunta.toLowerCase().includes(query))
+    : visiblePaikkakunnat;
+
+  setCount(visiblePaikkakunnatCountEl, "näkyvissä", items.length);
+  if (!items.length) {
+    renderEmpty(visiblePaikkakunnatEl, query ? "Ei hakutuloksia." : "Ei näkyviä paikkakuntia.");
+    return;
+  }
+
+  visiblePaikkakunnatEl?.replaceChildren(
+    ...items.map((item) =>
+      createPaikkakuntaRow(item, "Piilota", () => {
+        void hidePaikkakunta(item);
+      })
+    )
+  );
+}
+
+function renderHiddenPaikkakunnat(): void {
+  setCount(hiddenPaikkakunnatCountEl, "piilotettu", hiddenPaikkakunnat.length);
+  if (!hiddenPaikkakunnat.length) {
+    renderEmpty(hiddenPaikkakunnatEl, "Ei piilotettuja paikkakuntia.");
+    return;
+  }
+
+  hiddenPaikkakunnatEl?.replaceChildren(
+    ...hiddenPaikkakunnat.map((item) =>
+      createPaikkakuntaRow(item, "Palauta", () => {
+        void unhidePaikkakunta(item);
+      })
+    )
+  );
+}
+
 function renderAll(): void {
   renderVisibleTutkinnot();
   renderHiddenTutkinnot();
   renderVisibleTutkintonimikkeet();
   renderHiddenTutkintonimikkeet();
+  renderVisiblePaikkakunnat();
+  renderHiddenPaikkakunnat();
   updateBulkUnhideButtonStates();
 }
 
@@ -336,23 +436,45 @@ function scheduleVisibleTutkintonimikkeetRender(): void {
   }, searchDebounceMs);
 }
 
+function scheduleVisiblePaikkakunnatRender(): void {
+  if (paikkakuntaSearchTimeout !== null) {
+    window.clearTimeout(paikkakuntaSearchTimeout);
+  }
+
+  paikkakuntaSearchTimeout = window.setTimeout(() => {
+    paikkakuntaSearchTimeout = null;
+    renderVisiblePaikkakunnat();
+  }, searchDebounceMs);
+}
+
 async function loadData(): Promise<void> {
   if (!activeApi) {
     return;
   }
 
-  const [nextVisibleTutkinnot, nextHiddenTutkinnot, nextVisibleTutkintonimikkeet, nextHiddenTutkintonimikkeet] =
+  const [
+    nextVisibleTutkinnot,
+    nextHiddenTutkinnot,
+    nextVisibleTutkintonimikkeet,
+    nextHiddenTutkintonimikkeet,
+    nextVisiblePaikkakunnat,
+    nextHiddenPaikkakunnat
+  ] =
     await Promise.all([
       activeApi.list_tutkinnot(),
       activeApi.list_hidden_tutkinnot(),
       activeApi.list_tutkintonimikkeet(),
-      activeApi.list_hidden_tutkintonimikkeet()
+      activeApi.list_hidden_tutkintonimikkeet(),
+      activeApi.list_paikkakunnat(),
+      activeApi.list_hidden_paikkakunnat()
     ]);
 
   visibleTutkinnot = nextVisibleTutkinnot;
   hiddenTutkinnot = nextHiddenTutkinnot;
   visibleTutkintonimikkeet = nextVisibleTutkintonimikkeet;
   hiddenTutkintonimikkeet = nextHiddenTutkintonimikkeet;
+  visiblePaikkakunnat = nextVisiblePaikkakunnat;
+  hiddenPaikkakunnat = nextHiddenPaikkakunnat;
 }
 
 async function reloadAll(): Promise<void> {
@@ -540,12 +662,75 @@ async function unhideAllTutkintonimikkeet(): Promise<void> {
   }
 }
 
+async function hidePaikkakunta(item: PaikkakuntaListItem): Promise<void> {
+  if (!activeApi) {
+    return;
+  }
+
+  try {
+    await activeApi.hide_paikkakunta(item.paikkakunta);
+    const hiddenItem: HiddenPaikkakuntaListItem = {
+      ...item,
+      hiddenAt: getHiddenTimestamp()
+    };
+    visiblePaikkakunnat = visiblePaikkakunnat.filter(
+      (visibleItem) => visibleItem.paikkakunta !== item.paikkakunta
+    );
+    hiddenPaikkakunnat = sortPaikkakunnat([
+      ...hiddenPaikkakunnat.filter((hidden) => hidden.paikkakunta !== item.paikkakunta),
+      hiddenItem
+    ]);
+    setFeedback(`Paikkakunta "${item.paikkakunta}" piilotettiin koko sovelluksesta.`);
+    await reloadAll();
+  } catch {
+    setFeedback(`Paikkakunnan "${item.paikkakunta}" piilotus epäonnistui.`);
+  }
+}
+
+async function unhidePaikkakunta(item: HiddenPaikkakuntaListItem): Promise<void> {
+  if (!activeApi) {
+    return;
+  }
+
+  try {
+    await activeApi.unhide_paikkakunta(item.paikkakunta);
+    setFeedback(`Paikkakunta "${item.paikkakunta}" palautettiin näkyviin.`);
+    await reloadAll();
+  } catch {
+    setFeedback(`Paikkakunnan "${item.paikkakunta}" palautus epäonnistui.`);
+  }
+}
+
+async function unhideAllPaikkakunnat(): Promise<void> {
+  if (!activeApi || unhideAllPaikkakunnatInFlight || hiddenPaikkakunnat.length === 0) {
+    return;
+  }
+
+  const api = activeApi;
+  const items = [...hiddenPaikkakunnat];
+  unhideAllPaikkakunnatInFlight = true;
+  updateBulkUnhideButtonStates();
+
+  try {
+    await Promise.all(items.map((item) => api.unhide_paikkakunta(item.paikkakunta)));
+    await reloadAll();
+    setFeedback(`${items.length} piilotettua paikkakuntaa palautettiin näkyviin.`);
+  } catch {
+    setFeedback("Kaikkien paikkakuntien palautus epäonnistui.");
+  } finally {
+    unhideAllPaikkakunnatInFlight = false;
+    updateBulkUnhideButtonStates();
+  }
+}
+
 async function init(): Promise<InitAttemptResult> {
   setFeedback("");
   renderEmpty(visibleTutkinnotEl, "Ladataan...");
   renderEmpty(hiddenTutkinnotEl, "Ladataan...");
   renderEmpty(visibleTutkintonimikkeetEl, "Ladataan...");
   renderEmpty(hiddenTutkintonimikkeetEl, "Ladataan...");
+  renderEmpty(visiblePaikkakunnatEl, "Ladataan...");
+  renderEmpty(hiddenPaikkakunnatEl, "Ladataan...");
 
   const api = await waitForPywebviewApi<Api>();
   if (!api) {
@@ -554,6 +739,8 @@ async function init(): Promise<InitAttemptResult> {
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
+    renderEmpty(visiblePaikkakunnatEl, "Asetuksia ei voitu ladata.");
+    renderEmpty(hiddenPaikkakunnatEl, "Asetuksia ei voitu ladata.");
     updateExportButtonState();
     updateBulkUnhideButtonStates();
     return { success: false, retryDelayMs: 500 };
@@ -570,6 +757,9 @@ async function init(): Promise<InitAttemptResult> {
     tutkintonimikeSearchEl?.addEventListener("input", () => {
       scheduleVisibleTutkintonimikkeetRender();
     });
+    paikkakuntaSearchEl?.addEventListener("input", () => {
+      scheduleVisiblePaikkakunnatRender();
+    });
     exportPdfButtonEl?.addEventListener("click", () => {
       void exportUserDataPdf();
     });
@@ -579,6 +769,9 @@ async function init(): Promise<InitAttemptResult> {
     unhideAllTutkintonimikkeetButtonEl?.addEventListener("click", () => {
       void unhideAllTutkintonimikkeet();
     });
+    unhideAllPaikkakunnatButtonEl?.addEventListener("click", () => {
+      void unhideAllPaikkakunnat();
+    });
     return { success: true };
   } catch {
     setFeedback("Asetusten lataus epäonnistui. Yritetään uudelleen...");
@@ -586,6 +779,8 @@ async function init(): Promise<InitAttemptResult> {
     renderEmpty(hiddenTutkinnotEl, "Asetuksia ei voitu ladata.");
     renderEmpty(visibleTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
     renderEmpty(hiddenTutkintonimikkeetEl, "Asetuksia ei voitu ladata.");
+    renderEmpty(visiblePaikkakunnatEl, "Asetuksia ei voitu ladata.");
+    renderEmpty(hiddenPaikkakunnatEl, "Asetuksia ei voitu ladata.");
     updateExportButtonState();
     updateBulkUnhideButtonStates();
     return { success: false, retryDelayMs: 1000 };

@@ -26,6 +26,15 @@ type HiddenTutkintonimikeItem = TutkintonimikeItem & {
   hiddenAt: string;
 };
 
+type PaikkakuntaListItem = {
+  paikkakunta: string;
+  tutkintonimikeCount: number;
+};
+
+type HiddenPaikkakuntaListItem = PaikkakuntaListItem & {
+  hiddenAt: string;
+};
+
 type TutkintoDetail = {
   id: number;
   nimi: string;
@@ -76,6 +85,7 @@ type ExportUserDataPdfResult = {
   noteCount: number;
   hiddenTutkinnotCount: number;
   hiddenTutkintonimikkeetCount: number;
+  hiddenPaikkakunnatCount: number;
   quizResultCount: number;
   quizSessionCount: number;
 };
@@ -92,6 +102,8 @@ type PywebviewApi = {
   search_tutkinnot: (query: string) => Promise<TutkintoListItem[]>;
   list_tutkintonimikkeet: () => Promise<TutkintonimikeItem[]>;
   list_hidden_tutkintonimikkeet: () => Promise<HiddenTutkintonimikeItem[]>;
+  list_paikkakunnat: () => Promise<PaikkakuntaListItem[]>;
+  list_hidden_paikkakunnat: () => Promise<HiddenPaikkakuntaListItem[]>;
   list_saved_tutkintonimikkeet: () => Promise<(TutkintonimikeItem & { savedAt: string })[]>;
   save_tutkintonimike: (id: number) => Promise<TutkintonimikeItem & { savedAt: string }>;
   remove_saved_tutkintonimike: (id: number) => Promise<boolean>;
@@ -102,6 +114,8 @@ type PywebviewApi = {
   unhide_tutkinto: (id: number) => Promise<boolean>;
   hide_tutkintonimike: (id: number) => Promise<boolean>;
   unhide_tutkintonimike: (id: number) => Promise<boolean>;
+  hide_paikkakunta: (paikkakunta: string) => Promise<boolean>;
+  unhide_paikkakunta: (paikkakunta: string) => Promise<boolean>;
   list_opiskelu_suunnat: () => Promise<OpiskeluSuunta[]>;
   get_opintopolku_quiz: () => Promise<unknown>;
   list_quiz_results: (quizId?: string) => Promise<QuizResultEntry[]>;

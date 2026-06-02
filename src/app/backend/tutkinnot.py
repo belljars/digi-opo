@@ -27,10 +27,39 @@ class TutkinnotApiMixin:
             return []
         return [str(item).strip() for item in parsed if str(item).strip()]
 
+    def _get_hidden_paikkakunnat(self) -> set[str]:
+        '''Palauttaa asetuksissa piilotetut paikkakunnat normalisoituna vertailua varten'''
+
+        rows = self._conn.execute("SELECT paikkakunta FROM hidden_paikkakunnat;").fetchall()
+        return {str(row["paikkakunta"]).strip().casefold() for row in rows if str(row["paikkakunta"]).strip()}
+
+    def _filter_visible_paikkakunnat(
+        self,
+        raw_value: Any,
+        hidden_paikkakunnat: set[str] | None = None,
+    ) -> list[str]:
+        '''Poistaa tutkintonimikkeen paikkakunnista käyttäjän piilottamat paikkakunnat'''
+
+        paikkakunnat = self._parse_paikkakunnat(raw_value)
+        hidden = hidden_paikkakunnat if hidden_paikkakunnat is not None else self._get_hidden_paikkakunnat()
+        if not hidden:
+            return paikkakunnat
+        return [paikkakunta for paikkakunta in paikkakunnat if paikkakunta.casefold() not in hidden]
+
+    def _row_is_visible_for_paikkakunnat(
+        self,
+        raw_value: Any,
+        hidden_paikkakunnat: set[str] | None = None,
+    ) -> bool:
+        '''Säilyttää paikkakunnattomat nimikkeet ja nimikkeet, joilla on ainakin yksi näkyvä paikkakunta'''
+
+        paikkakunnat = self._parse_paikkakunnat(raw_value)
+        return not paikkakunnat or bool(self._filter_visible_paikkakunnat(raw_value, hidden_paikkakunnat))
+
     def _get_visible_tutkintonimike_row(self, nimike_id: int):
         '''Palauttaa näkyvän tutkintonimikkeen rivin tai `None`, jos sitä ei voi käyttää'''
 
-        return self._conn.execute(
+        row = self._conn.execute(
             """
             SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta, n.tutkinto_id, t.nimi AS tutkinto_nimi
             FROM tutkintonimikkeet n
@@ -41,6 +70,9 @@ class TutkinnotApiMixin:
             """,
             (nimike_id,),
         ).fetchone()
+        if row is None or not self._row_is_visible_for_paikkakunnat(row["paikkakunta"]):
+            return None
+        return row
 
     def _serialize_saved_item(self, row, saved_at: str, plan_priority, plan_status, next_step, plan_updated_at) -> dict:
         '''Muotoilee tallennetun tutkintonimikkeen käyttöliittymän odottamaan JSON-muotoon'''
@@ -50,7 +82,7 @@ class TutkinnotApiMixin:
             "nimi": row["nimi"],
             "linkki": row["linkki"],
             "img": row["img"],
-            "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
+            "paikkakunta": self._filter_visible_paikkakunnat(row["paikkakunta"]),
             "tutkinto_id": row["tutkinto_id"],
             "tutkinto_nimi": row["tutkinto_nimi"],
             "savedAt": saved_at,
@@ -102,6 +134,12 @@ class TutkinnotApiMixin:
                 """,
                 (tutkinto_id,),
             ).fetchall()
+        hidden_paikkakunnat = self._get_hidden_paikkakunnat()
+        visible_nimikkeet = [
+            nimike
+            for nimike in nimikkeet
+            if self._row_is_visible_for_paikkakunnat(nimike["paikkakunta"], hidden_paikkakunnat)
+        ]
         return {
             "id": row["id"],
             "nimi": row["nimi"],
@@ -112,9 +150,12 @@ class TutkinnotApiMixin:
                     "nimi": nimike["nimi"],
                     "linkki": nimike["linkki"],
                     "img": nimike["img"],
-                    "paikkakunta": self._parse_paikkakunnat(nimike["paikkakunta"]),
+                    "paikkakunta": self._filter_visible_paikkakunnat(
+                        nimike["paikkakunta"],
+                        hidden_paikkakunnat,
+                    ),
                 }
-                for nimike in nimikkeet
+                for nimike in visible_nimikkeet
             ],
         }
 
@@ -127,7 +168,7 @@ class TutkinnotApiMixin:
         with self._lock:
             rows = self._conn.execute(
                 """
-                SELECT DISTINCT t.id, t.nimi
+                SELECT DISTINCT t.id, t.nimi, t.desc
                 FROM tutkinnot t
                 LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
                 LEFT JOIN tutkintonimikkeet n ON n.tutkinto_id = t.id
@@ -142,7 +183,16 @@ class TutkinnotApiMixin:
                 """,
                 (term, term, term),
             ).fetchall()
-        return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
+        normalized_query = str(query).strip().casefold()
+        results = []
+        for row in rows:
+            if normalized_query in str(row["nimi"]).casefold() or normalized_query in str(row["desc"]).casefold():
+                results.append(row)
+                continue
+            detail = self.get_tutkinto(row["id"])
+            if detail and any(normalized_query in str(item["nimi"]).casefold() for item in detail["tutkintonimikkeet"]):
+                results.append(row)
+        return [{"id": row["id"], "nimi": row["nimi"]} for row in results]
 
     def list_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
         '''Palauttaa kaikki näkyvät tutkintonimikkeet yhdessä listassa'''
@@ -159,17 +209,26 @@ class TutkinnotApiMixin:
                 ORDER BY n.nimi;
                 """
             ).fetchall()
+        hidden_paikkakunnat = self._get_hidden_paikkakunnat()
+        visible_rows = [
+            row
+            for row in rows
+            if self._row_is_visible_for_paikkakunnat(row["paikkakunta"], hidden_paikkakunnat)
+        ]
         return [
             {
                 "id": row["id"],
                 "nimi": row["nimi"],
                 "linkki": row["linkki"],
                 "img": row["img"],
-                "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
+                "paikkakunta": self._filter_visible_paikkakunnat(
+                    row["paikkakunta"],
+                    hidden_paikkakunnat,
+                ),
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
             }
-            for row in rows
+            for row in visible_rows
         ] # type: ignore
 
     def list_saved_tutkintonimikkeet(self) -> list[dict]:
@@ -200,13 +259,22 @@ class TutkinnotApiMixin:
                 ORDER BY n.nimi;
                 """
             ).fetchall()
+        hidden_paikkakunnat = self._get_hidden_paikkakunnat()
+        visible_rows = [
+            row
+            for row in rows
+            if self._row_is_visible_for_paikkakunnat(row["paikkakunta"], hidden_paikkakunnat)
+        ]
         return [
             {
                 "id": row["id"],
                 "nimi": row["nimi"],
                 "linkki": row["linkki"],
                 "img": row["img"],
-                "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
+                "paikkakunta": self._filter_visible_paikkakunnat(
+                    row["paikkakunta"],
+                    hidden_paikkakunnat,
+                ),
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
                 "savedAt": row["saved_at"],
@@ -215,7 +283,7 @@ class TutkinnotApiMixin:
                 "nextStep": row["next_step"],
                 "planUpdatedAt": row["plan_updated_at"],
             }
-            for row in rows
+            for row in visible_rows
         ]
 
     def save_tutkintonimike(self, tutkintonimike_id: int) -> dict:
@@ -296,19 +364,28 @@ class TutkinnotApiMixin:
                 ORDER BY notes.updated_at DESC, n.nimi;
                 """
             ).fetchall()
+        hidden_paikkakunnat = self._get_hidden_paikkakunnat()
+        visible_rows = [
+            row
+            for row in rows
+            if self._row_is_visible_for_paikkakunnat(row["paikkakunta"], hidden_paikkakunnat)
+        ]
         return [
             {
                 "id": row["id"],
                 "nimi": row["nimi"],
                 "linkki": row["linkki"],
                 "img": row["img"],
-                "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
+                "paikkakunta": self._filter_visible_paikkakunnat(
+                    row["paikkakunta"],
+                    hidden_paikkakunnat,
+                ),
                 "tutkinto_id": row["tutkinto_id"],
                 "tutkinto_nimi": row["tutkinto_nimi"],
                 "noteText": row["note_text"],
                 "updatedAt": row["updated_at"],
             }
-            for row in rows
+            for row in visible_rows
         ]
 
     def save_tutkintonimike_note(self, tutkintonimike_id: int, note_text: str) -> dict:
@@ -324,17 +401,7 @@ class TutkinnotApiMixin:
             raise ValueError("note_text is required")
 
         with self._lock:
-            row = self._conn.execute(
-                """
-                SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta, n.tutkinto_id, t.nimi AS tutkinto_nimi
-                FROM tutkintonimikkeet n
-                JOIN tutkinnot t ON t.id = n.tutkinto_id
-                LEFT JOIN hidden_tutkinnot ht ON ht.tutkinto_id = t.id
-                LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
-                WHERE n.id = ? AND ht.tutkinto_id IS NULL AND hn.tutkintonimike_id IS NULL;
-                """,
-                (nimike_id,),
-            ).fetchone()
+            row = self._get_visible_tutkintonimike_row(nimike_id)
             if row is None:
                 raise ValueError(f"Unknown tutkintonimike id: {nimike_id}")
 
@@ -355,7 +422,7 @@ class TutkinnotApiMixin:
             "nimi": row["nimi"],
             "linkki": row["linkki"],
             "img": row["img"],
-            "paikkakunta": self._parse_paikkakunnat(row["paikkakunta"]),
+            "paikkakunta": self._filter_visible_paikkakunnat(row["paikkakunta"]),
             "tutkinto_id": row["tutkinto_id"],
             "tutkinto_nimi": row["tutkinto_nimi"],
             "noteText": normalized_note,

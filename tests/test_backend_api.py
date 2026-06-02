@@ -71,13 +71,14 @@ class BackendApiTests(unittest.TestCase):
                             "nimi": "Sahkoasentaja",
                             "linkki": "https://example.invalid/sahko",
                             "img": "assets/ammatit/sahkoasentaja.png",
+                            "paikkakunta": ["Oulu", "Muhos"],
                         }
                     ],
                 },
                 {
                     "nimi": "Kokki",
                     "desc": "Ravintola- ja catering-ala",
-                    "tutkintonimikkeet": [{"nimi": "Kokki", "linkki": "", "img": ""}],
+                    "tutkintonimikkeet": [{"nimi": "Kokki", "linkki": "", "img": "", "paikkakunta": ["Muhos"]}],
                 },
             ]
         }
@@ -375,6 +376,34 @@ class BackendApiTests(unittest.TestCase):
         self.assertEqual(note_names, ["Sahkoasentaja"])
         self.assertEqual(kokki["nimi"], "Kokki")
 
+    def test_hidden_paikkakunta_filters_items_until_unhidden(self) -> None:
+        # Piilotettu paikkakunta piilottaa vain nimikkeet, joille ei jää yhtään näkyvää paikkakuntaa
+        api = self.create_api()
+
+        paikkakunnat = api.list_paikkakunnat()
+        self.assertEqual([item["paikkakunta"] for item in paikkakunnat], ["Muhos", "Oulu"])
+
+        self.assertTrue(api.hide_paikkakunta("Muhos"))
+
+        hidden_paikkakunnat = api.list_hidden_paikkakunnat()
+        self.assertEqual(len(hidden_paikkakunnat), 1)
+        self.assertEqual(hidden_paikkakunnat[0]["paikkakunta"], "Muhos")
+        self.assertEqual(hidden_paikkakunnat[0]["tutkintonimikeCount"], 2)
+
+        visible_items = api.list_tutkintonimikkeet()
+        self.assertEqual([item["nimi"] for item in visible_items], ["Sahkoasentaja"])
+        self.assertEqual(visible_items[0]["paikkakunta"], ["Oulu"])
+        self.assertEqual([item["nimi"] for item in api.search_tutkinnot("Kokki")], ["Kokki"])
+
+        kokki_tutkinto = next(item for item in api.list_tutkinnot() if item["nimi"] == "Kokki")
+        detail = api.get_tutkinto(kokki_tutkinto["id"])
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail["tutkintonimikkeet"], [])
+
+        self.assertTrue(api.unhide_paikkakunta("Muhos"))
+        restored_names = sorted(item["nimi"] for item in api.list_tutkintonimikkeet())
+        self.assertEqual(restored_names, ["Kokki", "Sahkoasentaja"])
+
     def test_tutkintonimike_note_can_be_saved_listed_and_removed(self) -> None:
         # Muistiinpano voidaan tallentaa, listata ja lopuksi poistaa
         api = self.create_api()
@@ -559,6 +588,7 @@ class BackendApiTests(unittest.TestCase):
         api.save_tutkintonimike_note(sahkoasentaja["id"], "Kiinnostava vaihtoehto.")
         api.hide_tutkinto(kokki["tutkinto_id"])
         api.hide_tutkintonimike(sahkoasentaja["id"])
+        api.hide_paikkakunta("Muhos")
         api.save_quiz_result("opintopolku", {"topPathId": "lukio", "scores": {"lukio": 3}})
         api.save_quiz_session("tutkinto-kysely", {"currentIndex": 2, "winnerId": 7})
 
@@ -594,10 +624,13 @@ class BackendApiTests(unittest.TestCase):
         self.assertIn("Opintopolku-kysely", html)
         self.assertNotIn("Amis-korttivertailu", html)
         self.assertIn("Kokki", html)
+        self.assertIn("Piilotetut paikkakunnat", html)
+        self.assertIn("Muhos", html)
         self.assertNotIn("Kesken olevat kyselyt", html)
         self.assertTrue(output_path.exists())
         self.assertEqual(result["quizResultCount"], 1)
         self.assertEqual(result["quizSessionCount"], 1)
+        self.assertEqual(result["hiddenPaikkakunnatCount"], 1)
 
     def test_export_user_data_pdf_returns_cancelled_when_save_dialog_is_closed(self) -> None:
         '''PDF-vienti ei kirjoita tiedostoa, jos käyttäjä sulkee tallennusvalintaikkunan'''

@@ -121,6 +121,15 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
 
     conn.execute(
         """
+        CREATE TABLE IF NOT EXISTS hidden_paikkakunnat (
+            paikkakunta TEXT PRIMARY KEY,
+            hidden_at TEXT NOT NULL
+        );
+        """
+    )
+
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS tutkintonimike_notes (
             tutkintonimike_id INTEGER PRIMARY KEY,
             note_text TEXT NOT NULL,

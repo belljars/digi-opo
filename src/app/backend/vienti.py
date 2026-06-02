@@ -104,6 +104,7 @@ class VientiApiMixin:
         notes = self._list_all_notes_for_export()
         hidden_tutkinnot = self.list_hidden_tutkinnot()
         hidden_tutkintonimikkeet = self.list_hidden_tutkintonimikkeet()
+        hidden_paikkakunnat = self.list_hidden_paikkakunnat()
         quiz_results = self.list_quiz_results()
         with self._lock:
             quiz_sessions = sorted(
@@ -120,6 +121,7 @@ class VientiApiMixin:
                 "noteCount": len(notes),
                 "hiddenTutkinnotCount": len(hidden_tutkinnot),
                 "hiddenTutkintonimikkeetCount": len(hidden_tutkintonimikkeet),
+                "hiddenPaikkakunnatCount": len(hidden_paikkakunnat),
                 "quizResultCount": len(quiz_results),
                 "quizSessionCount": len(quiz_sessions),
             },
@@ -128,6 +130,7 @@ class VientiApiMixin:
                 "notes": notes,
                 "hiddenTutkinnot": hidden_tutkinnot,
                 "hiddenTutkintonimikkeet": hidden_tutkintonimikkeet,
+                "hiddenPaikkakunnat": hidden_paikkakunnat,
                 "quizResults": quiz_results,
                 "quizSessions": quiz_sessions,
             },
@@ -137,6 +140,9 @@ class VientiApiMixin:
         raise NotImplementedError
 
     def list_hidden_tutkintonimikkeet(self) -> list[dict]:
+        raise NotImplementedError
+
+    def list_hidden_paikkakunnat(self) -> list[dict]:
         raise NotImplementedError
 
     def list_quiz_results(self) -> list[dict]:
@@ -187,6 +193,7 @@ class VientiApiMixin:
                 "noteCount": 0,
                 "hiddenTutkinnotCount": 0,
                 "hiddenTutkintonimikkeetCount": 0,
+                "hiddenPaikkakunnatCount": 0,
                 "quizResultCount": 0,
                 "quizSessionCount": 0,
             }
@@ -204,6 +211,7 @@ class VientiApiMixin:
             "noteCount": summary["noteCount"],
             "hiddenTutkinnotCount": summary["hiddenTutkinnotCount"],
             "hiddenTutkintonimikkeetCount": summary["hiddenTutkintonimikkeetCount"],
+            "hiddenPaikkakunnatCount": summary["hiddenPaikkakunnatCount"],
             "quizResultCount": summary["quizResultCount"],
             "quizSessionCount": summary["quizSessionCount"],
         }

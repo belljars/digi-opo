@@ -206,6 +206,22 @@ def _render_hidden_nimikkeet(items: list[dict]) -> str:
     )
 
 
+def _render_hidden_paikkakunnat(items: list[dict]) -> str:
+    if not items:
+        return _empty_state("Piilotettuja paikkakuntia ei ole.")
+
+    return _unordered_list(
+        [
+            (
+                f"<strong>{escape(item['paikkakunta'])}</strong>"
+                f"<br/>Piilotettu: {escape(format_iso_timestamp(item.get('hiddenAt')))}"
+                f"<br/>Tutkintonimikkeita: {escape(str(item.get('tutkintonimikeCount', 0)))}"
+            )
+            for item in items
+        ]
+    )
+
+
 def _render_top_items(items: list[str], max_items: int = 5) -> str:
     if not items:
         return "<p>-</p>"
@@ -338,6 +354,7 @@ def build_user_export_html(payload: dict) -> str:
         <li>Muistiinpanoja: {summary['noteCount']}</li>
         <li>Piilotettuja tutkintoja: {summary['hiddenTutkinnotCount']}</li>
         <li>Piilotettuja tutkintonimikkeitä: {summary['hiddenTutkintonimikkeetCount']}</li>
+        <li>Piilotettuja paikkakuntia: {summary['hiddenPaikkakunnatCount']}</li>
         <li>Valmiita kyselytuloksia: {summary['quizResultCount']}</li>
       </ul>
     </section>
@@ -360,6 +377,11 @@ def build_user_export_html(payload: dict) -> str:
     <section>
       <h2>Piilotetut tutkintonimikkeet</h2>
       {_render_hidden_nimikkeet(sections["hiddenTutkintonimikkeet"])}
+    </section>
+
+    <section>
+      <h2>Piilotetut paikkakunnat</h2>
+      {_render_hidden_paikkakunnat(sections["hiddenPaikkakunnat"])}
     </section>
 
     <section>

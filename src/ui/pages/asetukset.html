@@ -144,6 +144,55 @@
                     </div>
                 </div>
             </section>
+            <section class="asetukset-section" aria-labelledby="asetukset-paikkakunnat-title">
+                <div class="asetukset-section-header">
+                    <div>
+                        <h3 id="asetukset-paikkakunnat-title">Paikkakunnat</h3>
+                        <p class="saved-page-copy">
+                            Piilota paikkakunnat, joita et halua nähdä tutkintopankissa tai tallennetuissa vaihtoehdoissa.
+                        </p>
+                    </div>
+                </div>
+                <div class="asetukset-columns">
+                    <div class="asetukset-pane">
+                        <details class="asetukset-dropdown">
+                            <summary class="asetukset-dropdown-summary">
+                                <span class="asetukset-dropdown-title">Näkyvät paikkakunnat</span>
+                                <span id="asetukset-visible-paikkakunnat-count" class="count"></span>
+                            </summary>
+                            <div class="asetukset-dropdown-body">
+                                <div class="search">
+                                    <label for="asetukset-paikkakunta-search">Hae näkyvää paikkakuntaa</label>
+                                    <input
+                                        id="asetukset-paikkakunta-search"
+                                        type="search"
+                                        placeholder="Hae paikkakuntaa nimellä"
+                                        autocomplete="off"
+                                        />
+                                </div>
+                                <div id="asetukset-visible-paikkakunnat" class="asetukset-list"></div>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="asetukset-pane asetukset-pane--hidden">
+                        <div class="asetukset-pane-heading">
+                            <div>
+                                <p class="asetukset-pane-label">Piilotetut paikkakunnat</p>
+                                <div id="asetukset-hidden-paikkakunnat-count" class="count"></div>
+                            </div>
+                            <button
+                                id="asetukset-unhide-all-paikkakunnat-button"
+                                type="button"
+                                class="tutkintonimike-action"
+                                disabled
+                                >
+                            Palauta kaikki
+                            </button>
+                        </div>
+                        <div id="asetukset-hidden-paikkakunnat" class="asetukset-list"></div>
+                    </div>
+                </div>
+            </section>
         </section>
     </main>
     <script type="module" src="../scripts/ulkoasu.js"></script>
