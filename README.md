@@ -69,12 +69,12 @@ SQLite + user JSON -tiedostot + lähde-JSON:t
 
 Keskeiset toteutusratkaisut:
 
-- `src/app/app.py` on sovelluksen käynnistyspiste.
-- `src/app/backend/api.py` kokoaa julkisen backend-API:n mixin-luokista.
-- `src/app/projekti_paths.py` määrittää ajonaikaiset polut ja käynnistää paikallisen staattisen palvelimen.
-- Sovelluksen aloitussivu on `src/ui/pages/index.html`.
-- Frontend ei käytä REST-API:a, vaan kutsuu Python-metodeja `window.pywebview.api` -rajapinnan kautta.
-- Staattinen palvelin tarjoaa vain `/src/ui/`-polut. Raaka lähdedata ja käyttäjädata eivät ole suoraan selaimen luettavissa.
+- `src/app/app.py` on sovelluksen käynnistyspiste
+- `src/app/backend/api.py` kokoaa julkisen backend-API:n mixin-luokista
+- `src/app/projekti_paths.py` määrittää ajonaikaiset polut ja käynnistää paikallisen staattisen palvelimen
+- Sovelluksen aloitussivu on `src/ui/pages/index.html`
+- Frontend ei käytä REST-API:a, vaan kutsuu Python-metodeja `window.pywebview.api` -rajapinnan kautta
+- Staattinen palvelin tarjoaa vain `/src/ui/`-polut. Raaka lähdedata ja käyttäjädata eivät ole suoraan selaimen luettavissa
 
 ## Data ja tallennus
 
