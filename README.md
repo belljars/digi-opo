@@ -42,7 +42,7 @@ Projektissa on kolme pääkerrosta:
 Ajonaikainen virta:
 
 ```text
-scripts/linux/run_linux.sh tai scripts/windows/run_windows.bat
+scripts/linux/run_linux.sh tai scripts/win/run_win.bat
         |
         v
 TypeScript build
@@ -138,7 +138,7 @@ npm install
 npm run build
 ```
 
-Windowsissa:
+winissa:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -169,24 +169,24 @@ Skripti:
 - poistaa `user/*.json`- ja `data/*.db*`-tiedostot ennen käynnistystä
 - käynnistää `src/app/app.py`:n
 
-### Windows
+### win
 
 Käytä:
 
 ```powershell
-.\scripts\windows\compile_windows.bat
-.\scripts\windows\run_windows.bat
+.\scripts\win\compile_win.bat
+.\scripts\win\run_win.bat
 ```
 
 Skriptit:
 
-- `compile_windows.bat` ajaa `npm run build` ja tarkistaa odotetut `.js`-tulostiedostot
-- `run_windows.bat` etsii `py -3.12`- tai `py -3.11`-version
-- `run_windows.bat` luo tai rakentaa `.venv`:n uudelleen tarvittaessa
-- `run_windows.bat` asentaa Python-riippuvuudet
-- `run_windows.bat` tarkistaa, että frontend on jo buildattu
-- `run_windows.bat` poistaa `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä
-- `run_windows.bat` käynnistää `src\app\app.py`:n
+- `compile_win.bat` ajaa `npm run build` ja tarkistaa odotetut `.js`-tulostiedostot
+- `run_win.bat` etsii `py -3.12`- tai `py -3.11`-version
+- `run_win.bat` luo tai rakentaa `.venv`:n uudelleen tarvittaessa
+- `run_win.bat` asentaa Python-riippuvuudet
+- `run_win.bat` tarkistaa, että frontend on jo buildattu
+- `run_win.bat` poistaa `user/*.json`- ja `data/*.db`-tiedostot ennen käynnistystä
+- `run_win.bat` käynnistää `src\app\app.py`:n
 
 Jos riippuvuudet ja build ovat jo valmiina, voit käynnistää sovelluksen myös npm-helperillä:
 
@@ -194,14 +194,14 @@ Jos riippuvuudet ja build ovat jo valmiina, voit käynnistää sovelluksen myös
 npm run run
 ```
 
-Se ajaa `scripts\windows\run-app.mjs`-tiedoston, joka etsii sopivan Python-tulkin ja käynnistää `src\app\app.py`:n ilman `.venv`-rakennusta tai frontend-buildiä.
+Se ajaa `scripts\win\run-app.mjs`-tiedoston, joka etsii sopivan Python-tulkin ja käynnistää `src\app\app.py`:n ilman `.venv`-rakennusta tai frontend-buildiä.
 
-### Windows EXE
+### win EXE
 
-Rakenna Windows-jakelukansio komennolla:
+Rakenna win-jakelukansio komennolla:
 
 ```powershell
-.\scripts\windows\build_windows_exe.bat
+.\scripts\win\build_win_exe.bat
 ```
 
 Tai npm:n kautta:
@@ -216,7 +216,7 @@ Build-komento:
 - asentaa build-riippuvuudet tiedostosta `requirements-build.txt`
 - ajaa `npm install` ja `npm run build`
 - ajaa `PyInstaller`-buildin tiedostolla `digi-opo.spec`
-- tuottaa yksittaisen Windows-exen polkuun `dist/digi-opo.exe`
+- tuottaa yksittaisen win-exen polkuun `dist/digi-opo.exe`
 
 Valmis käynnistettävä tiedosto on:
 
@@ -228,7 +228,7 @@ Huomioita paketoinnista:
 
 - Tämä projekti rakentaa tällä hetkellä `onedir`-jakelun, ei yksittäistä `onefile`-exeä.
 - Pakattu sovellus lukee staattiset resurssit paketista, mutta kirjoittaa käyttäjädatan erilliseen kirjoitettavaan hakemistoon.
-- Windowsissa käyttäjädata tallennetaan pakatussa ajossa oletuksena polkuun `%LOCALAPPDATA%\digi-opo`.
+- winissa käyttäjädata tallennetaan pakatussa ajossa oletuksena polkuun `%LOCALAPPDATA%\digi-opo`.
 - Pakattu ajo tyhjentää käyttäjäkohtaisen sovellusdatan käynnistyksen yhteydessä.
 - `dist/digi-opo/` tulee jakaa kokonaisena kansiona, ei pelkkänä `.exe`-tiedostona.
 
@@ -262,7 +262,7 @@ Huomio:
 - `npm run build` kääntää TypeScriptin suoraan hakemistoon `src/ui/ts/`.
 - Erillistä frontend-`dist/`-hakemistoa ei ole.
 - Lähdekoodista ajettaessa ajonaikainen data tallennetaan projektijuuren alle hakemistoihin `data/`, `user/` ja `exports/`.
-- `scripts/linux/run_linux.sh` ja `scripts/windows/run_windows.bat` ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
+- `scripts/linux/run_linux.sh` ja `scripts/win/run_win.bat` ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
 
 ## Kehitystyö
 
@@ -300,7 +300,7 @@ npm run check
 npm run test:frontend-init
 python -m unittest tests.test_backend_api
 python -m unittest tests.test_ui_smoke
-python -m unittest tests.test_windows_launcher
+python -m unittest tests.test_win_launcher
 ```
 
 ### Päivitä tutkintojen lähdedata
@@ -317,7 +317,7 @@ Backend laskee import-signaturen uudelleen ja rakentaa tutkintotaulut SQLiteen u
 
 ### Sovellus käynnistyy tyhjällä käyttäjädatalla
 
-Jos käynnistät sovelluksen skripteillä `scripts/linux/run_linux.sh` tai `scripts/windows/run_windows.bat`, tämä on odotettu toiminta. Skriptit poistavat ajonaikaista dataa ennen käynnistystä.
+Jos käynnistät sovelluksen skripteillä `scripts/linux/run_linux.sh` tai `scripts/win/run_win.bat`, tämä on odotettu toiminta. Skriptit poistavat ajonaikaista dataa ennen käynnistystä.
 
 Käytä manuaalista käynnistystä, jos haluat säilyttää paikallisen ajonaikaisen datan käynnistysten välillä.
 
