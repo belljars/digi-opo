@@ -146,7 +146,7 @@ Huomio:
 - Lähdekoodista ajettaessa ajonaikainen data tallennetaan projektijuuren alle hakemistoihin `data/`, `user/` ja `exports/`
 - `scripts/linux/run_linux.sh` ja `scripts/win/run.bat` ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja
 
-## Kehitystyö
+## Kehitys
 
 Yleisimmät komennot:
 
