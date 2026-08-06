@@ -248,7 +248,7 @@
         {
           "nimi": "Tarjoilija",
           "linkki": "https://luovi.fi/koulutukset/tarjoilija/",
-          "img": "",
+          "img": "assets/ammatit/tarjoilija.png",
           "paikkakunta": ["Kokkola"]
         }
       ]
