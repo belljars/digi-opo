@@ -1,9 +1,9 @@
-# OS
+# os
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Editors / IDEs
+# ide
 .vscode/
 .idea/
 *.swp
@@ -18,12 +18,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment files
+# env
 .env
 .env.*
 !.env.example
 
-# Python
+# py
 __pycache__/
 *.py[cod]
 *$py.class
@@ -55,7 +55,7 @@ env/
 ENV/
 .ipynb_checkpoints/
 
-# Node / JavaScript / TypeScript
+# npm/js/ts
 node_modules/
 .npm/
 .pnpm-store/
@@ -72,26 +72,27 @@ coverage/
 *.tsbuildinfo
 vite.svg
 
-# Build output
+# build output
 out/
 tmp/
 temp/
 .cache/
 .eslintcache
 
-# Framework / tooling
+# framework
 .vercel/
 .netlify/
 .turbo/
 
-# Package manager locks (uncomment if desired)
+# pck mngr
 package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
 
-# Buildatut JS-tiedostot (TypeScript on lähdekieli)
+# rakennettu js
 src/ui/ts/*.js
 
+# etc
 *.db
 user/
 exports/

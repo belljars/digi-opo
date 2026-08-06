@@ -1,4 +1,3 @@
-'''Päämoduuli, joka käynnistää käyttöliittymän ja paikallisen palvelimen'''
 from __future__ import annotations
 
 import os
