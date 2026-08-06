@@ -1,6 +1,6 @@
 # digi-opo
 
-`digi-opo` on paikallinen työpöytäsovellus Luovin tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun. Se yhdistää Python-backendin, `pywebview`-ikkunan, TypeScript-käyttöliittymän, ajonaikaisen SQLite-tietokannan ja repoon versionhallittavan JSON-lähdedatan.
+`digi-opo` on paikallinen työpöytäsovellus **Ammattiopisto Luovin** tutkintojen, tutkintonimikkeiden ja opintopolkujen selailuun. Se yhdistää Python-backendin, `pywebview`-ikkunan, TypeScript-käyttöliittymän, ajonaikaisen SQLite-tietokannan ja repoon versionhallittavan JSON-lähdedatan.
 
 Sovellus toimii kokonaan paikallisesti. Backend käynnistää HTTP-palvelimen osoitteeseen `127.0.0.1`, palvelee tiedostot hakemistosta `src/ui/` ja tarjoaa frontendille sovellusmetodit `window.pywebview.api` -rajapinnan kautta.
 
