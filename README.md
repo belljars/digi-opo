@@ -364,17 +364,6 @@ digi-opo/
 └── user/                 # Käyttäjäkohtainen ajonaikainen data lähdekoodista ajettaessa
 ```
 
-## Lisälukeminen
-
-Tarkempi dokumentaatio löytyy hakemistosta `docs/`:
-
-- `docs/README.md`
-- `docs/arkkitehtuuri.md`
-- `docs/backend.md`
-- `docs/frontend.md`
-- `docs/kayttovirrat.md`
-- `docs/kehitys-ja-testaus.md`
-
 ## Lisenssi
 
 Katso [LICENSE](LICENSE).
