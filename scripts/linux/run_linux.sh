@@ -13,7 +13,7 @@ rm -f user/*.json data/*.db
 
 # Tulostaa tavalliset infoviestit yhtenaisessa muodossa
 log() {
-  printf '[INFO] %s\n' "$1"
+  printf '* %s\n' "$1"
 }
 
 # Tulostaa virheviestin stderr-virtaan ja keskeyttaa skriptin
