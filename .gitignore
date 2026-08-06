@@ -90,7 +90,7 @@ package-lock.json
 # pnpm-lock.yaml
 
 # Buildatut JS-tiedostot (TypeScript on lähdekieli)
-src/ui/scripts/*.js
+src/ui/ts/*.js
 
 *.db
 user/

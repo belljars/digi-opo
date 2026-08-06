@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>digi-opo - opintopolut</title>
+        <title>digi-opo - Digitaalinen tutkintopankki</title>
         <script>
             (() => {
               const storageKey = "digi-opo.theme-mode";
@@ -29,16 +29,15 @@
         </script>
         <link rel="stylesheet" href="../styles/styles.css" />
     </head>
-    <a class="skip-link" href="#main-content">Siirry sisältöön</a>
-    <main class="app" id="main-content">
-        <section class="panel opintopolut-page">
-            <div class="detail opintopolut-detail">
-                <p id="opintopolut-status" class="empty" hidden>Ladataan...</p>
-                <div id="opintopolut-list" class="opintopolut-grid"></div>
-            </div>
-        </section>
-    </main>
-    <script type="module" src="../scripts/ulkoasu.js"></script>
-    <script type="module" src="../scripts/opintopolut.js"></script>
+    <body>
+        <a class="skip-link" href="#main-content">Siirry sisältöön</a>
+        <main class="app" id="main-content">
+            <div id="app-header"></div>
+            <section class="home-page">
+                <iframe src="home.html" title="Sisältö" class="iframe-content" id="iframe-content" name="iframe-content" style="height: 100%; width: 100%; border: none;"></iframe>
+            </section>
+            <footer id="app-footer" class="site-footer"></footer>
+        </main>
+        <script type="module" src="../ts/ulkoasu.js"></script>
     </body>
 </html>

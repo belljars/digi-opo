@@ -65,50 +65,50 @@ echo [INFO] Asennetaan Python-riippuvuudet: "%VENV_PY%" -m pip install -r requir
 "%VENV_PY%" -m pip install -r requirements.txt
 if errorlevel 1 exit /b %errorlevel%
 
-if not exist "src\ui\scripts\pankki.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\pankki.js
+if not exist "src\ui\ts\pankki.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\pankki.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )
 
-if not exist "src\ui\scripts\quiz.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\quiz.js
+if not exist "src\ui\ts\quiz.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\quiz.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )
 
-if not exist "src\ui\scripts\ulkoasu.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\ulkoasu.js
+if not exist "src\ui\ts\ulkoasu.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\ulkoasu.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )
 
-if not exist "src\ui\scripts\opintopolut.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\opintopolut.js
+if not exist "src\ui\ts\opintopolut.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\opintopolut.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )
 
-if not exist "src\ui\scripts\tutkinto-kysely.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tutkinto-kysely.js
+if not exist "src\ui\ts\tutkinto-kysely.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\tutkinto-kysely.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )
 
-if not exist "src\ui\scripts\tallennetut.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tallennetut.js
+if not exist "src\ui\ts\tallennetut.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\tallennetut.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )
 
-if not exist "src\ui\scripts\asetukset.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\asetukset.js
+if not exist "src\ui\ts\asetukset.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\asetukset.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )
 
-if not exist "src\ui\scripts\tutkintonimike-kortti.js" (
-  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\scripts\tutkintonimike-kortti.js
+if not exist "src\ui\ts\tutkintonimike-kortti.js" (
+  echo [VIRHE] Buildin tulostiedosto puuttuu: src\ui\ts\tutkintonimike-kortti.js
   echo [VIRHE] Aja ensin scripts\windows\compile_windows.bat
   exit /b 1
 )

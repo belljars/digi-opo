@@ -8,6 +8,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/ui/**/*.ts", "src/ui/scripts/tutkintonimike-kortit.js", "src/ui/scripts/pywebview-init.ts", "src/ui/scripts/quiz.ts", "src/ui/scripts/suunitelma.ts", "src/ui/scripts/tallennetut.ts", "src/ui/scripts/tutkinto-kysely.ts", "src/ui/scripts/theme.ts", "src/ui/scripts/ulkoasu.ts"]
+  "include": ["src/ui/**/*.ts", "src/ui/ts/tutkintonimike-kortit.js", "src/ui/ts/pywebview-init.ts", "src/ui/ts/quiz.ts", "src/ui/ts/suunitelma.ts", "src/ui/ts/tallennetut.ts", "src/ui/ts/tutkinto-kysely.ts", "src/ui/ts/theme.ts", "src/ui/ts/ulkoasu.ts"]
 }
 

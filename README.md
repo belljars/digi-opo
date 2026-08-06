@@ -6,7 +6,7 @@ Sovellus toimii kokonaan paikallisesti. Backend käynnistää HTTP-palvelimen os
 
 ## Yleiskuva
 
-Nykyiset näkymät hakemistossa `src/ui/pages/`:
+Nykyiset näkymät hakemistossa `src/ui/html/`:
 
 - `index.html`
 - `home.html`
@@ -72,7 +72,7 @@ Keskeiset toteutusratkaisut:
 - `src/app/app.py` on sovelluksen käynnistyspiste
 - `src/app/backend/api.py` kokoaa julkisen backend-API:n mixin-luokista
 - `src/app/projekti_paths.py` määrittää ajonaikaiset polut ja käynnistää paikallisen staattisen palvelimen
-- Sovelluksen aloitussivu on `src/ui/pages/index.html`
+- Sovelluksen aloitussivu on `src/ui/html/index.html`
 - Frontend ei käytä REST-API:a, vaan kutsuu Python-metodeja `window.pywebview.api` -rajapinnan kautta
 - Staattinen palvelin tarjoaa vain `/src/ui/`-polut. Raaka lähdedata ja käyttäjädata eivät ole suoraan selaimen luettavissa
 
@@ -259,7 +259,7 @@ python src/app/app.py
 
 Huomio:
 
-- `npm run build` kääntää TypeScriptin suoraan hakemistoon `src/ui/scripts/`.
+- `npm run build` kääntää TypeScriptin suoraan hakemistoon `src/ui/ts/`.
 - Erillistä frontend-`dist/`-hakemistoa ei ole.
 - Lähdekoodista ajettaessa ajonaikainen data tallennetaan projektijuuren alle hakemistoihin `data/`, `user/` ja `exports/`.
 - `scripts/linux/run_linux.sh` ja `scripts/windows/run_windows.bat` ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja.
@@ -275,7 +275,7 @@ npm run build
 python src/app/app.py
 ```
 
-Koska TypeScriptin tulostiedostot syntyvät lähdekoodin viereen hakemistoon `src/ui/scripts/`, käyttöliittymämuutokset etenevät yleensä tällä kierrolla:
+Koska TypeScriptin tulostiedostot syntyvät lähdekoodin viereen hakemistoon `src/ui/ts/`, käyttöliittymämuutokset etenevät yleensä tällä kierrolla:
 
 ```bash
 npm run check
@@ -326,7 +326,7 @@ Käytä manuaalista käynnistystä, jos haluat säilyttää paikallisen ajonaika
 Tarkista, että:
 
 - frontendin build valmistui ilman virheitä
-- odotetut `.js`-tiedostot ovat olemassa hakemistossa `src/ui/scripts/`
+- odotetut `.js`-tiedostot ovat olemassa hakemistossa `src/ui/ts/`
 - sivu käyttää `waitForPywebviewApi()`- tai `createRetryingPageInit()`-mallia ennen backend-kutsuja
 
 ### Tutkintodata näyttää vanhalta JSON-muutosten jälkeen

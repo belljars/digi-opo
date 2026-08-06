@@ -83,14 +83,14 @@ ensure_venv() {
 build_frontend() {
   local tsc_bin="./node_modules/.bin/tsc"
   local -a expected_files=(
-    "src/ui/scripts/pankki.js"
-    "src/ui/scripts/quiz.js"
-    "src/ui/scripts/ulkoasu.js"
-    "src/ui/scripts/opintopolut.js"
-    "src/ui/scripts/tutkinto-kysely.js"
-    "src/ui/scripts/tallennetut.js"
-    "src/ui/scripts/asetukset.js"
-    "src/ui/scripts/tutkintonimike-kortti.js"
+    "src/ui/ts/pankki.js"
+    "src/ui/ts/quiz.js"
+    "src/ui/ts/ulkoasu.js"
+    "src/ui/ts/opintopolut.js"
+    "src/ui/ts/tutkinto-kysely.js"
+    "src/ui/ts/tallennetut.js"
+    "src/ui/ts/asetukset.js"
+    "src/ui/ts/tutkintonimike-kortti.js"
   )
   local file
 
