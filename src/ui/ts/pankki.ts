@@ -424,10 +424,10 @@ async function selectTutkinto(id: number): Promise<void> {
     return;
   }
   renderDetail(detail);
-  refreshActiveStyles();
+  refreshActivecss();
 }
 
-function refreshActiveStyles(): void {
+function refreshActivecss(): void {
   if (!listEl) {
     return;
   }

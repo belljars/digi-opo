@@ -356,10 +356,10 @@ digi-opo/
 │   ├── app/              # Pythonin käynnistyspiste, backend ja runtime-apurit
 │   ├── data/             # Versionhallittava JSON-lähdedata
 │   └── ui/
-│       ├── assets/       # Kuvat ja muut staattiset tiedostot
+│       ├── img/       # Kuvat ja muut staattiset tiedostot
 │       ├── pages/        # HTML-näkymät
 │       ├── scripts/      # TypeScript-lähdekoodi ja käännetty JavaScript
-│       └── styles/       # CSS
+│       └── css/       # CSS
 ├── tests/                # Backend- ja UI-testit
 └── user/                 # Käyttäjäkohtainen ajonaikainen data lähdekoodista ajettaessa
 ```
