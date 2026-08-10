@@ -24,7 +24,7 @@ digi-opo/
 │       └── css/
 └── user/ *
 ```
-`*` ajonaikainen
+- `*` ajonaikainen
 
 ## Asennus
 
