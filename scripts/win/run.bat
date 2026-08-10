@@ -13,7 +13,6 @@ echo * Etsitaan tuettu Python-versio (3.12 tai 3.11)...
 
 where py >nul 2>nul
 if %errorlevel%==0 (
-  rem Testaa onko Python 3.12 saatavilla ja toimiva
   py -3.12 -c "import sys" >nul 2>nul
   if %errorlevel%==0 set "PY_LAUNCHER=py -3.12"
 
@@ -29,7 +28,7 @@ if not defined PY_LAUNCHER (
   exit /b 1
 )
 
-echo * Kaytetaan Python-launcheria: %PY_LAUNCHER%
+echo * Käytetään Python-launcheria: %PY_LAUNCHER%
 
 if not exist ".venv\Scripts\python.exe" (
   echo * Luodaan Windows-virtuaaliymparisto .venv kansioon kayttaen komentoa: %PY_LAUNCHER%...
@@ -40,11 +39,11 @@ if not exist ".venv\Scripts\python.exe" (
   )
 )
 if exist ".venv\Scripts\python.exe" (
-  echo * Virtuaaliymparisto loytyi: .venv\Scripts\python.exe
+  echo * Virtuaaliympäristo loytyi: .venv\Scripts\python.exe
 )
 
 if not exist ".venv\Scripts\python.exe" (
-  echo ERROR: Windows-virtuaaliympariston luonti epaonnistui polkuun .venv\Scripts\python.exe
+  echo ERROR: Windows-virtuaaliympäriston luonti epaonnistui polkuun .venv\Scripts\python.exe
   exit /b 1
 )
 
