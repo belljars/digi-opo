@@ -8,6 +8,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/ui/**/*.ts", "src/ui/ts/tutkintonimike-kortit.js", "src/ui/ts/pywebview-init.ts", "src/ui/ts/quiz.ts", "src/ui/ts/suunitelma.ts", "src/ui/ts/tallennetut.ts", "src/ui/ts/tutkinto-kysely.ts", "src/ui/ts/theme.ts", "src/ui/ts/ulkoasu.ts"]
+  "include": ["src/ui/**/*.ts"]
 }
 

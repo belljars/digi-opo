@@ -66,49 +66,49 @@ if errorlevel 1 exit /b %errorlevel%
 
 if not exist "src\ui\ts\pankki.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\pankki.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 
 if not exist "src\ui\ts\quiz.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\quiz.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 
 if not exist "src\ui\ts\ulkoasu.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\ulkoasu.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 
 if not exist "src\ui\ts\opintopolut.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\opintopolut.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 
 if not exist "src\ui\ts\tutkinto-kysely.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\tutkinto-kysely.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 
 if not exist "src\ui\ts\tallennetut.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\tallennetut.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 
 if not exist "src\ui\ts\asetukset.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\asetukset.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 
 if not exist "src\ui\ts\tutkintonimike-kortti.js" (
   echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\tutkintonimike-kortti.js
-  echo ERROR: Aja ensin scripts\windows\compile_windows.bat
+  echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )
 

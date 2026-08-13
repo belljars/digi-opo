@@ -676,7 +676,7 @@ async function renderSavedHub(): Promise<void> {
     api.list_saved_tutkintonimikkeet(),
     api.list_tutkintonimike_notes(),
     api.list_quiz_results(),
-    api.get_quiz_session("amis-quiz"),
+    api.get_quiz_session("tutkinto-kysely"),
     api.get_quiz_session("opintopolku")
   ]);
 
