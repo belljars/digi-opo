@@ -54,16 +54,15 @@ if errorlevel 1 exit /b %errorlevel%
 echo * Siivotaan vanha build-kansio...
 if exist "build" rmdir /s /q "build"
 if exist "dist\digi-opo" rmdir /s /q "dist\digi-opo"
-if exist "dist\digi-opo.exe" del /q "dist\digi-opo.exe"
 
 echo * Rakennetaan PyInstaller-paketti...
 "%VENV_PY%" -m PyInstaller --noconfirm --clean digi-opo.spec
 if errorlevel 1 exit /b %errorlevel%
 
-if not exist "dist\digi-opo.exe" (
-  echo ERROR: EXE puuttuu: dist\digi-opo.exe
+if not exist "dist\digi-opo\digi-opo.exe" (
+  echo ERROR: EXE puuttuu: dist\digi-opo\digi-opo.exe
   exit /b 1
 )
 
 echo * EXE-build valmistui.
-echo * Kaynnistettava tiedosto: dist\digi-opo.exe
+echo * Kaynnistettava tiedosto: dist\digi-opo\digi-opo.exe

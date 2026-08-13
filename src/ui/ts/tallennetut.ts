@@ -696,14 +696,18 @@ async function removeSavedItem(id: number, nimi: string): Promise<void> {
     return;
   }
 
-  const removed = await api.remove_saved_tutkintonimike(id);
-  if (removed) {
-    savedItems = savedItems.filter((item) => item.id !== id);
-    renderSavedItems();
-    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
-    renderSavedStats(savedItems);
+  try {
+    const removed = await api.remove_saved_tutkintonimike(id);
+    if (removed) {
+      savedItems = savedItems.filter((item) => item.id !== id);
+      renderSavedItems();
+      setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+      renderSavedStats(savedItems);
+    }
+    setFeedback(removed ? `"${nimi}" poistettiin tallennuksista.` : `"${nimi}" ei löytynyt tallennuksista.`);
+  } catch {
+    setFeedback(`"${nimi}" poistaminen tallennuksista epäonnistui.`);
   }
-  setFeedback(removed ? `"${nimi}" poistettiin tallennuksista.` : `"${nimi}" ei löytynyt tallennuksista.`);
 }
 
 async function saveNote(id: number, nimi: string, noteText: string): Promise<void> {
@@ -801,13 +805,17 @@ async function removeQuizResult(resultId: string): Promise<void> {
     return;
   }
 
-  const removed = await api.remove_quiz_result(resultId);
-  if (removed) {
-    quizResults = quizResults.filter((result) => result.id !== resultId);
-    renderQuizResults();
-    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+  try {
+    const removed = await api.remove_quiz_result(resultId);
+    if (removed) {
+      quizResults = quizResults.filter((result) => result.id !== resultId);
+      renderQuizResults();
+      setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+    }
+    setFeedback(removed ? "Kyselytulos poistettiin." : "Kyselytulosta ei löytynyt.");
+  } catch {
+    setFeedback("Kyselytuloksen poisto epäonnistui.");
   }
-  setFeedback(removed ? "Kyselytulos poistettiin." : "Kyselytulosta ei löytynyt.");
 }
 
 async function removeQuizSession(quizId: string): Promise<void> {
@@ -817,13 +825,17 @@ async function removeQuizSession(quizId: string): Promise<void> {
     return;
   }
 
-  const removed = await api.clear_quiz_session(quizId);
-  if (removed) {
-    quizSessions = quizSessions.filter((session) => session.quizId !== quizId);
-    renderQuizSessions();
-    setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+  try {
+    const removed = await api.clear_quiz_session(quizId);
+    if (removed) {
+      quizSessions = quizSessions.filter((session) => session.quizId !== quizId);
+      renderQuizSessions();
+      setCounts(savedItems.length, quizResults.length, quizSessions.length, savedNotes.length);
+    }
+    setFeedback(removed ? `${getQuizLabel(quizId)} poistettiin keskeneräisistä.` : "Keskeneräistä kyselytilaa ei löytynyt.");
+  } catch {
+    setFeedback(`${getQuizLabel(quizId)} poisto epäonnistui.`);
   }
-  setFeedback(removed ? `${getQuizLabel(quizId)} poistettiin keskeneräisistä.` : "Keskeneräistä kyselytilaa ei löytynyt.");
 }
 
 async function init(): Promise<InitAttemptResult> {

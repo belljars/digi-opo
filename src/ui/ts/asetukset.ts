@@ -563,7 +563,8 @@ async function unhideAllTutkinnot(): Promise<void> {
     await reloadAll();
     setFeedback(`${items.length} piilotettua tutkintoa palautettiin näkyviin.`);
   } catch {
-    setFeedback("Kaikkien tutkintojen palautus epäonnistui.");
+    await reloadAll();
+    setFeedback("Kaikkien tutkintojen palautus epäonnistui. Osa saattoi silti palautua näkyviin.");
   } finally {
     unhideAllTutkinnotInFlight = false;
     updateBulkUnhideButtonStates();
@@ -655,7 +656,8 @@ async function unhideAllTutkintonimikkeet(): Promise<void> {
     renderHiddenTutkintonimikkeet();
     updateBulkUnhideButtonStates();
   } catch {
-    setFeedback("Kaikkien tutkintonimikkeiden palautus epäonnistui.");
+    await reloadAll();
+    setFeedback("Kaikkien tutkintonimikkeiden palautus epäonnistui. Osa saattoi silti palautua näkyviin.");
   } finally {
     unhideAllTutkintonimikkeetInFlight = false;
     updateBulkUnhideButtonStates();
@@ -716,7 +718,8 @@ async function unhideAllPaikkakunnat(): Promise<void> {
     await reloadAll();
     setFeedback(`${items.length} piilotettua paikkakuntaa palautettiin näkyviin.`);
   } catch {
-    setFeedback("Kaikkien paikkakuntien palautus epäonnistui.");
+    await reloadAll();
+    setFeedback("Kaikkien paikkakuntien palautus epäonnistui. Osa saattoi silti palautua näkyviin.");
   } finally {
     unhideAllPaikkakunnatInFlight = false;
     updateBulkUnhideButtonStates();

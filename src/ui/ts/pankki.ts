@@ -325,28 +325,11 @@ function renderDetail(detail: TutkintoDetail): void {
       paikkakuntaMeta.className = "tutkintonimike-meta";
       paikkakuntaMeta.style.fontStyle = "italic";
 
-      const markIds = [
-        "mark-one",
-        "mark-two",
-        "mark-three",
-        "mark-four",
-        "mark-five",
-        "mark-six",
-        "mark-seven",
-        "mark-eight"
-      ];
-      const paikkakuntaMarkIds = new Map<string, string>();
-
       nimike.paikkakunta.forEach((paikkakunta, index) => {
         const normalizedPaikkakunta = normalizeValue(paikkakunta);
         const textNode = document.createTextNode(paikkakunta);
         if (selectedPaikkakunnat.has(normalizedPaikkakunta)) {
           const mark = document.createElement("mark");
-          const markId = paikkakuntaMarkIds.get(normalizedPaikkakunta) ?? markIds[paikkakuntaMarkIds.size % markIds.length];
-          if (!paikkakuntaMarkIds.has(normalizedPaikkakunta)) {
-            paikkakuntaMarkIds.set(normalizedPaikkakunta, markId);
-          }
-          mark.id = markId;
           mark.append(textNode);
           paikkakuntaMeta.append(mark);
         } else {

@@ -344,17 +344,6 @@ function parseSessionState(entry: QuizSessionEntry | null): QuizSessionState | n
   };
 }
 
-function formatTimestamp(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return new Intl.DateTimeFormat("fi-FI", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(date);
-}
-
 async function saveSession(): Promise<void> {
   if (!activeApi || !quizData || answers.length === 0 || currentIndex >= quizData.questions.length) {
     return;
