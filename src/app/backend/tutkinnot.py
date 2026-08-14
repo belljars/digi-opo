@@ -159,12 +159,19 @@ class TutkinnotApiMixin:
             ],
         }
 
+    @staticmethod
+    def _like_term(value: str) -> str:
+        '''Muuntaa hakusanan LIKE-lausekkeeksi, jossa hakusanan omat %- ja _-merkit kasitellaan kirjaimellisina'''
+
+        escaped = value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        return f"%{escaped}%"
+
     def search_tutkinnot(self, query: str | None) -> list[dict[str, str | int]]:
         '''Hakee tutkintoja nimen, kuvauksen tai tutkintonimikkeen perusteella'''
 
         if not query or not str(query).strip():
             return self.list_tutkinnot()
-        term = f"%{str(query).strip()}%"
+        term = self._like_term(str(query).strip())
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -175,9 +182,9 @@ class TutkinnotApiMixin:
                 LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
                 WHERE ht.tutkinto_id IS NULL
                   AND (
-                    t.nimi LIKE ?
-                    OR t.desc LIKE ?
-                    OR (hn.tutkintonimike_id IS NULL AND n.nimi LIKE ?)
+                    t.nimi LIKE ? ESCAPE '\\'
+                    OR t.desc LIKE ? ESCAPE '\\'
+                    OR (hn.tutkintonimike_id IS NULL AND n.nimi LIKE ? ESCAPE '\\')
                   )
                 ORDER BY t.nimi;
                 """,

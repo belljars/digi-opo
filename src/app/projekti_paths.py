@@ -165,12 +165,16 @@ class ProjectPaths:
         for rel in list(rel_candidates):
             rel_candidates.append(Path("src/ui") / rel)
 
+        resolved_root = self.resource_root.resolve()
         seen: set[Path] = set()
         for rel in rel_candidates:
             if rel in seen:
                 continue
             seen.add(rel)
-            abs_path = self.resource_root / rel
+            abs_path = (self.resource_root / rel).resolve()
+            if abs_path != resolved_root and resolved_root not in abs_path.parents:
+                # Torjuu polut, jotka sisaisen ".."-segmentin kautta paatyisivat resource_rootin ulkopuolelle
+                continue
             if abs_path.exists():
                 return abs_path
         return None
