@@ -85,7 +85,6 @@ temp/
 .turbo/
 
 # pck mngr
-package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
 
