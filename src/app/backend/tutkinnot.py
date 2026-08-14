@@ -183,14 +183,37 @@ class TutkinnotApiMixin:
                 """,
                 (term, term, term),
             ).fetchall()
+
+            if not rows:
+                return []
+
+            candidate_ids = [row["id"] for row in rows]
+            placeholders = ",".join("?" for _ in candidate_ids)
+            nimike_rows = self._conn.execute(
+                f"""
+                SELECT n.tutkinto_id, n.nimi, n.paikkakunta
+                FROM tutkintonimikkeet n
+                LEFT JOIN hidden_tutkintonimikkeet hn ON hn.tutkintonimike_id = n.id
+                WHERE n.tutkinto_id IN ({placeholders}) AND hn.tutkintonimike_id IS NULL;
+                """,
+                candidate_ids,
+            ).fetchall()
+
+        hidden_paikkakunnat = self._get_hidden_paikkakunnat()
+        nimike_names_by_tutkinto: dict[int, list[str]] = {}
+        for nimike_row in nimike_rows:
+            if not self._row_is_visible_for_paikkakunnat(nimike_row["paikkakunta"], hidden_paikkakunnat):
+                continue
+            nimike_names_by_tutkinto.setdefault(nimike_row["tutkinto_id"], []).append(nimike_row["nimi"])
+
         normalized_query = str(query).strip().casefold()
         results = []
         for row in rows:
             if normalized_query in str(row["nimi"]).casefold() or normalized_query in str(row["desc"]).casefold():
                 results.append(row)
                 continue
-            detail = self.get_tutkinto(row["id"])
-            if detail and any(normalized_query in str(item["nimi"]).casefold() for item in detail["tutkintonimikkeet"]):
+            nimike_names = nimike_names_by_tutkinto.get(row["id"], [])
+            if any(normalized_query in str(nimi).casefold() for nimi in nimike_names):
                 results.append(row)
         return [{"id": row["id"], "nimi": row["nimi"]} for row in results]
 
