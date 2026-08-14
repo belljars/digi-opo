@@ -1,5 +1,5 @@
-pywebview
-PyQt6
-PyQt6-WebEngine
-QtPy
-typing-extensions
+pywebview~=6.2.1
+PyQt6~=6.11.0
+PyQt6-WebEngine~=6.11.0
+QtPy~=2.4.3
+typing-extensions~=4.16.0
