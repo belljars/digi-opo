@@ -96,3 +96,4 @@ src/ui/ts/*.js
 *.db
 user/
 exports/
+etc/
