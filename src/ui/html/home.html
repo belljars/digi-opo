@@ -1,11 +1,10 @@
 <!doctype html>
 <html lang="fi">
-  <head>
-    <meta charset="UTF-8" />
-    <title>digi-opo - Digitaalinen tutkintopankki</title>
-
-    <link rel="cssheet" href="../css/css.css" />
-    <script>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>digi-opo - Digitaalinen tutkintopankki</title>
+        <script>
             (() => {
               const storageKey = "digi-opo.theme-mode";
               const isThemeMode = (value) => value === "auto" || value === "light" || value === "dark";
@@ -18,124 +17,65 @@
               } catch {
                 mode = "auto";
               }
-            
+
               const effectiveTheme = mode === "auto"
                 ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
                 : mode;
-            
+
               document.documentElement.dataset.themeMode = mode;
               document.documentElement.dataset.theme = effectiveTheme;
               document.documentElement.style.colorScheme = effectiveTheme;
             })();
         </script>
-  </head>
-    <a class="skip-link" href="#main-content">Siirry sisältöön</a>
-    <main class="app" id="main-content">
-
-      <section class="home-page">
-        <section class="home-section" aria-labelledby="home-browse-title">
-          <div class="home-section-header">
-            <div>
-              <h3 id="home-browse-title">Aloita tutustuminen</h3>
-              <p class="saved-page-copy">Selaa pankkia tai katso valmiita opintopolkuja ennen kuin alat vertailla vaihtoehtoja tarkemmin.</p>
-            </div>
-          </div>
-          <div id="card-select">
-            <a href="./pankki.html" class="card">
-              <img class="card-image" src="../img/home/tutkintopankki.png" alt="Amis tutkintopankki" />
-              <h2>Amis Tutkintopankki</h2>
-              <p>Selaa tutkintopankin tietokantaa ja löydä sinua kiinnostavia tutkintoja.</p>
-            </a>
-            <a href="./opintopolut.html" class="card">
-              <img class="card-image" src="../img/home/opintopolu.png" alt="Erilaiset opintopolut" />
-              <h2>Erilaiset opintopolut</h2>
-              <p>Katso erilaisia opintopolkuja ja suunnittele oma reittisi kohti unelmiesi uraa.</p>
-            </a>
-          </div>
-        </section>
-
-        <section class="home-section" id="kyselyt" aria-labelledby="home-quiz-title">
-          <div class="home-section-header">
-            <div>
-              <h3 id="home-quiz-title">Kyselyt</h3>
-              <p class="saved-page-copy">Löydä sinulle sopivia tutkintoja vastaamalla kysymyksiin tai vertailemalla vaihtoehtoja yksi pari kerrallaan.</p>
-            </div>
-          </div>
-          <div id="kyselyt-cards">
-            <a href="./opintopolku-kysely.html" class="card">
-              <img class="card-image" src="../img/home/quiz.png" alt="Opintopolku-kysely" />
-              <h2>Opintopolku-kysely</h2>
-              <p>Vastaa kysymyksiin ja löydä sinulle sopivin opintopolku.</p>
-            </a>
-            <a href="./tutkinto-kysely.html" class="card">
-              <img class="card-image" src="../img/home/vertailu.png" alt="Amis-korttivertailu" />
-              <h2>Amis-korttivertailu</h2>
-              <p>Vertaile kahta tutkintonimikettä kerrallaan ja tee valintoja.</p>
-            </a>
-          </div>
-        </section>
-      </section>
-    </main>
-    <script type="module" src="../ts/ulkoasu.js"></script>
-  </body>
-</html>
-Option 2: Or upload your HTML file
-File encoding
-Indentation level
--Formatted HTML-
-
-<!doctype html>
-<html lang="fi">
-    <head>
-        <meta charset="UTF-8" />
-        <title>digi-opo - Digitaalinen tutkintopankki</title>
         <link rel="stylesheet" href="../css/init.css" />
     </head>
-    <a class="skip-link" href="#main-content">Siirry sisältöön</a>
-    <main class="app" id="main-content">
-        <section class="home-page">
-            <section class="home-section" aria-labelledby="home-browse-title">
-                <div class="home-section-header">
-                    <div>
-                        <h3 id="home-browse-title">Aloita tutustuminen</h3>
-                        <p class="saved-page-copy">Selaa pankkia tai katso valmiita opintopolkuja ennen kuin alat vertailla vaihtoehtoja tarkemmin.</p>
+    <body>
+        <a class="skip-link" href="#main-content">Siirry sisältöön</a>
+        <main class="app" id="main-content">
+            <section class="home-page">
+                <section class="home-section" aria-labelledby="home-browse-title">
+                    <div class="home-section-header">
+                        <div>
+                            <h3 id="home-browse-title">Aloita tutustuminen</h3>
+                            <p class="saved-page-copy">Selaa pankkia tai katso valmiita opintopolkuja ennen kuin alat vertailla vaihtoehtoja tarkemmin.</p>
+                        </div>
                     </div>
-                </div>
-                <div id="card-select">
-                    <a href="./pankki.html" class="card">
-                        <img class="card-image" src="../img/home/tutkintopankki.png" alt="Amis tutkintopankki" />
-                        <h2>Amis Tutkintopankki</h2>
-                        <p>Selaa tutkintopankin tietokantaa ja löydä sinua kiinnostavia tutkintoja.</p>
-                    </a>
-                    <a href="./opintopolut.html" class="card">
-                        <img class="card-image" src="../img/home/opintopolu.png" alt="Erilaiset opintopolut" />
-                        <h2>Erilaiset opintopolut</h2>
-                        <p>Katso erilaisia opintopolkuja ja suunnittele oma reittisi kohti unelmiesi uraa.</p>
-                    </a>
-                </div>
-            </section>
-            <section class="home-section" id="kyselyt" aria-labelledby="home-quiz-title">
-                <div class="home-section-header">
-                    <div>
-                        <h3 id="home-quiz-title">Kyselyt</h3>
-                        <p class="saved-page-copy">Löydä sinulle sopivia tutkintoja vastaamalla kysymyksiin tai vertailemalla vaihtoehtoja yksi pari kerrallaan.</p>
+                    <div id="card-select">
+                        <a href="./pankki.html" class="card">
+                            <img class="card-image" src="../img/home/tutkintopankki.jpg" alt="Amis tutkintopankki" />
+                            <h2>Amis Tutkintopankki</h2>
+                            <p>Selaa tutkintopankin tietokantaa ja löydä sinua kiinnostavia tutkintoja.</p>
+                        </a>
+                        <a href="./opintopolut.html" class="card">
+                            <img class="card-image" src="../img/home/opintopolu.jpg" alt="Erilaiset opintopolut" />
+                            <h2>Erilaiset opintopolut</h2>
+                            <p>Katso erilaisia opintopolkuja ja suunnittele oma reittisi kohti unelmiesi uraa.</p>
+                        </a>
                     </div>
-                </div>
-                <div id="kyselyt-cards">
-                    <a href="./opintopolku-kysely.html" class="card">
-                        <img class="card-image" src="../img/home/quiz.png" alt="Opintopolku-kysely" />
-                        <h2>Opintopolku-kysely</h2>
-                        <p>Vastaa kysymyksiin ja löydä sinulle sopivin opintopolku.</p>
-                    </a>
-                    <a href="./tutkinto-kysely.html" class="card">
-                        <img class="card-image" src="../img/home/vertailu.png" alt="Amis-korttivertailu" />
-                        <h2>Amis-korttivertailu</h2>
-                        <p>Vertaile kahta tutkintonimikettä kerrallaan ja tee valintoja.</p>
-                    </a>
-                </div>
+                </section>
+
+                <section class="home-section" id="kyselyt" aria-labelledby="home-quiz-title">
+                    <div class="home-section-header">
+                        <div>
+                            <h3 id="home-quiz-title">Kyselyt</h3>
+                            <p class="saved-page-copy">Löydä sinulle sopivia tutkintoja vastaamalla kysymyksiin tai vertailemalla vaihtoehtoja yksi pari kerrallaan.</p>
+                        </div>
+                    </div>
+                    <div id="kyselyt-cards">
+                        <a href="./opintopolku-kysely.html" class="card">
+                            <img class="card-image" src="../img/home/quiz.jpg" alt="Opintopolku-kysely" />
+                            <h2>Opintopolku-kysely</h2>
+                            <p>Vastaa kysymyksiin ja löydä sinulle sopivin opintopolku.</p>
+                        </a>
+                        <a href="./tutkinto-kysely.html" class="card">
+                            <img class="card-image" src="../img/home/vertailu.jpg" alt="Amis-korttivertailu" />
+                            <h2>Amis-korttivertailu</h2>
+                            <p>Vertaile kahta tutkintonimikettä kerrallaan ja tee valintoja.</p>
+                        </a>
+                    </div>
+                </section>
             </section>
-        </section>
-    </main>
-    <script type="module" src="../ts/ulkoasu.js"></script>
+        </main>
+        <script type="module" src="../ts/ulkoasu.js"></script>
     </body>
 </html>

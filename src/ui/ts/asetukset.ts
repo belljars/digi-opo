@@ -671,17 +671,6 @@ async function hidePaikkakunta(item: PaikkakuntaListItem): Promise<void> {
 
   try {
     await activeApi.hide_paikkakunta(item.paikkakunta);
-    const hiddenItem: HiddenPaikkakuntaListItem = {
-      ...item,
-      hiddenAt: getHiddenTimestamp()
-    };
-    visiblePaikkakunnat = visiblePaikkakunnat.filter(
-      (visibleItem) => visibleItem.paikkakunta !== item.paikkakunta
-    );
-    hiddenPaikkakunnat = sortPaikkakunnat([
-      ...hiddenPaikkakunnat.filter((hidden) => hidden.paikkakunta !== item.paikkakunta),
-      hiddenItem
-    ]);
     setFeedback(`Paikkakunta "${item.paikkakunta}" piilotettiin koko sovelluksesta.`);
     await reloadAll();
   } catch {
