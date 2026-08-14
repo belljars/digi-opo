@@ -321,27 +321,20 @@ function renderDetail(detail: TutkintoDetail): void {
     }
     if (nimike.paikkakunta.length > 0) {
       const selectedPaikkakunnat = new Set(filterState.paikkakunnat.map((value) => normalizeValue(value)));
-      const paikkakuntaMeta = document.createElement("p");
-      paikkakuntaMeta.className = "tutkintonimike-meta";
-      paikkakuntaMeta.style.fontStyle = "italic";
+      const paikkakuntaList = document.createElement("div");
+      paikkakuntaList.className = "tutkintonimike-paikkakunnat";
 
-      nimike.paikkakunta.forEach((paikkakunta, index) => {
-        const normalizedPaikkakunta = normalizeValue(paikkakunta);
-        const textNode = document.createTextNode(paikkakunta);
-        if (selectedPaikkakunnat.has(normalizedPaikkakunta)) {
-          const mark = document.createElement("mark");
-          mark.append(textNode);
-          paikkakuntaMeta.append(mark);
-        } else {
-          paikkakuntaMeta.append(textNode);
+      nimike.paikkakunta.forEach((paikkakunta) => {
+        const chip = document.createElement("span");
+        chip.className = "paikkakunta-chip";
+        chip.textContent = paikkakunta;
+        if (selectedPaikkakunnat.has(normalizeValue(paikkakunta))) {
+          chip.classList.add("is-selected");
         }
-
-        if (index < nimike.paikkakunta.length - 1) {
-          paikkakuntaMeta.append(document.createTextNode(", "));
-        }
+        paikkakuntaList.append(chip);
       });
 
-      body.insertBefore(paikkakuntaMeta, actions);
+      body.insertBefore(paikkakuntaList, actions);
     }
 
     actions.append(button);

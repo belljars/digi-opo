@@ -28,7 +28,9 @@
     --color-surface-muted: #e9e9e9;
     --color-surface-mark: #0000001f;
     --color-card-bg: #fbfbfb;
-    --color-shadow: transparent;
+    --color-shadow: #0000001f;
+    --color-selected-bg: #ffd54f;
+    --color-selected-text: #171717;
 }
 
 :root[data-theme="dark"] {
@@ -39,8 +41,10 @@
     --color-surface-muted: #262b30;
     --color-surface-mark: #4e565e;
     --color-card-bg: #171a1d;
-    --color-shadow: transparent;
-}   
+    --color-shadow: #00000066;
+    --color-selected-bg: #ffd54f;
+    --color-selected-text: #171717;
+}
 
 /* ------------------------------------------------------------
    2. Perusnollaus
@@ -96,7 +100,7 @@ button:focus-visible {
    ------------------------------------------------------------ */
 :is(.panel,
     .card,
-    .tutkintonimike-kortti,
+    .tutkintonimike-card,
     .quiz-overview,
     .quiz-play,
     .quiz-result-card,
@@ -107,7 +111,7 @@ button:focus-visible {
     border: 1px solid currentColor;
 }
 
-:is(.card, .tutkintonimike-kortti) {
+:is(.card, .tutkintonimike-card) {
     overflow: hidden;
 }
 
@@ -428,22 +432,9 @@ body {
 .filter-dropdown-option {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: var(--space-2);
     padding: var(--space-2);
     cursor: pointer;
-}
-
-.filter-dropdown-option input[type="checkbox"] {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    border: 0;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
 }
 
 .filter-dropdown-option span {
@@ -554,11 +545,13 @@ body {
     gap: var(--space-4);
 }
 
-.tutkintonimike-kortti {
+.tutkintonimike-card {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
     overflow: hidden;
+    background: var(--color-card-bg);
+    box-shadow: 0 2px 8px var(--color-shadow);
 }
 
 .tutkintonimike-image {
@@ -568,12 +561,33 @@ body {
     object-fit: cover;
 }
 
-.tutkintonimike-kortti-body {
+.tutkintonimike-card-body {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-4);
+}
+
+.tutkintonimike-paikkakunnat {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.paikkakunta-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem var(--space-2);
+    border-radius: 0.5rem;
+    background: var(--color-surface-muted);
+    font-size: 0.85rem;
+}
+
+.paikkakunta-chip.is-selected {
+    background: var(--color-selected-bg);
+    color: var(--color-selected-text);
+    font-weight: 600;
 }
 
 .tutkintonimike-kortti-actions,
@@ -834,12 +848,12 @@ body {
     text-decoration: none;
 }
 
-.quiz-choice-button .tutkintonimike-kortti {
+.quiz-choice-button .tutkintonimike-card {
     height: 100%;
     border: none;
 }
 
-.quiz-choice-button .tutkintonimike-kortti-body {
+.quiz-choice-button .tutkintonimike-card-body {
     padding-bottom: var(--space-5);
 }
 
@@ -1187,7 +1201,7 @@ details.quiz-ranking[open] summary::before {
     display: none;
 }
 
-.saved-item-card .tutkintonimike-kortti-body {
+.saved-item-card .tutkintonimike-card-body {
     gap: var(--space-3);
     padding: var(--space-4);
 }
