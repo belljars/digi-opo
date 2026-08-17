@@ -34,8 +34,7 @@ class Api(interface.Api):
 
 def main() -> None:
     paths = _project_paths()
-    if getattr(sys, "frozen", False):
-        path.clear_user_data_root(paths.user_data_root)
+    path.clear_user_data_root(paths.user_data_root)
     api = Api(paths)
     server, port = path.start_static_server(paths)
     try:

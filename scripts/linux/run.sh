@@ -5,8 +5,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$ROOT_DIR"
 
-rm -f user/*.json data/*.db
-
 log() {
   printf '* %s\n' "$1"
 }
@@ -72,7 +70,8 @@ build_frontend() {
     "src/ui/ts/pankki.js"
     "src/ui/ts/quiz.js"
     "src/ui/ts/ulkoasu.js"
-    "src/ui/ts/opintopolku.js"
+    "src/ui/ts/opintopolut.js"
+    "src/ui/ts/suunitelma.js"
     "src/ui/ts/tutkinto-kysely.js"
     "src/ui/ts/tallennetut.js"
     "src/ui/ts/asetukset.js"

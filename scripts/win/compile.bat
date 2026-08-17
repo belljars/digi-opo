@@ -26,8 +26,13 @@ if not exist "src\ui\ts\ulkoasu.js" (
   exit /b 1
 )
 
-if not exist "src\ui\ts\opintopolku.js" (
-  echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\opintopolku.js
+if not exist "src\ui\ts\opintopolut.js" (
+  echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\opintopolut.js
+  exit /b 1
+)
+
+if not exist "src\ui\ts\suunitelma.js" (
+  echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\suunitelma.js
   exit /b 1
 )
 

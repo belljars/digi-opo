@@ -5,8 +5,6 @@ set "SCRIPT_DIR=%~dp0"
 for %%I in ("%SCRIPT_DIR%..\..") do set "ROOT_DIR=%%~fI"
 cd /d "%ROOT_DIR%"
 
-del /f /q user\*.json data\*.db >nul 2>nul
-
 set "PY_LAUNCHER="
 echo * Aloitetaan digi-opo Windows-kaynnistys.
 echo * Etsitaan tuettu Python-versio (3.12 tai 3.11)...
@@ -81,8 +79,14 @@ if not exist "src\ui\ts\ulkoasu.js" (
   exit /b 1
 )
 
-if not exist "src\ui\ts\opintopolku.js" (
-  echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\opintopolku.js
+if not exist "src\ui\ts\opintopolut.js" (
+  echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\opintopolut.js
+  echo ERROR: Aja ensin scripts\win\compile.bat
+  exit /b 1
+)
+
+if not exist "src\ui\ts\suunitelma.js" (
+  echo ERROR: Buildin tulostiedosto puuttuu: src\ui\ts\suunitelma.js
   echo ERROR: Aja ensin scripts\win\compile.bat
   exit /b 1
 )

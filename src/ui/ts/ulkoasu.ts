@@ -34,7 +34,7 @@ const navItems: NavItem[] = [
   { id: "index", href: "./pankki.html", label: "Tutkintopankki", target: "iframe-sisalto" },
   { id: "saved", href: "./tallennetut.html", label: "Tallennetut", target: "iframe-sisalto" },
   { id: "suunitelma", href: "./suunitelma.html", label: "Oma suunnitelma", target: "iframe-sisalto" },
-  { id: "opintopolku", href: "./opintopolku.html", label: "opintopolku", target: "iframe-sisalto" },
+  { id: "opintopolku", href: "./opintopolut.html", label: "Opintopolut", target: "iframe-sisalto" },
   { id: "asetukset", href: "./asetukset.html", label: "Asetukset", target: "iframe-sisalto" }
 ];
 
