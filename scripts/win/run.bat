@@ -51,7 +51,6 @@ set "VENV_PY=.venv\Scripts\python.exe"
 
 "%VENV_PY%" -c "import sys; raise SystemExit(0 if sys.version_info[:2] in ((3, 12), (3, 11)) else 1)"
 if errorlevel 1 (
-  rem Jos .venv on tehty väärällä Python-versiolla, se luodaan puhtaasti uudelleen
   echo * Luodaan .venv uudelleen tuetulla Python-versiolla...
   %PY_LAUNCHER% -m venv .venv --clear
   if errorlevel 1 (

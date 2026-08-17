@@ -12,19 +12,13 @@ from paths import ProjectPaths
 
 AMMATIT_IMPORT_VERSION = "5"
 
-
 def connect_db(paths: ProjectPaths) -> sqlite3.Connection:
-    '''Avaa yhteyden sovelluksen SQLite-tietokantaan ja säätää perusasetukset'''
-
     conn = sqlite3.connect(paths.tietokanta_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
-
 def ensure_schema(conn: sqlite3.Connection) -> None:
-    ''' Luo sovelluksen tarvitsemat taulut ja lisää puuttuvat migraatiosarakkeet'''
-
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS tutkinnot (
@@ -132,7 +126,6 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
 
 
 def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: list) -> None:
-    '''Tuo tutkintodatan JSON-lähteestä SQLite-tietokannan riveiksi'''
     
     for tutkinto in tutkinnot:
         nimi = str(tutkinto.get("nimi", "")).strip()
@@ -173,15 +166,10 @@ def import_tutkinnot(conn: sqlite3.Connection, paths: ProjectPaths, tutkinnot: l
 
 
 def get_meta(conn: sqlite3.Connection, key: str) -> str | None:
-    '''Hakee sovelluksen metataulusta yhden arvon avaimella'''
-
     row = conn.execute("SELECT value FROM app_meta WHERE key = ?;", (key,)).fetchone()
     return row["value"] if row else None
 
-
 def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
-    '''Tallentaa metatauluun avain-arvo-parin päälle kirjoittaen vanhan arvon'''
-
     conn.execute(
         """
         INSERT INTO app_meta (key, value)
@@ -190,7 +178,6 @@ def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
         """,
         (key, value),
     )
-
 
 def ensure_data(conn: sqlite3.Connection, paths: ProjectPaths) -> None:
     '''Varmistaa, että tietokanta vastaa nykyistä lähde-JSONia ja skeemaa'''
@@ -219,11 +206,9 @@ def ensure_data(conn: sqlite3.Connection, paths: ProjectPaths) -> None:
             import_tutkinnot(conn, paths, tutkinnot)
             set_meta(conn, "ammatit_json_sha256", import_signature)
 
-
 def migrate_saved_tutkintonimikkeet_from_json(
     conn: sqlite3.Connection, paths: ProjectPaths
 ) -> None:
-    '''Siirtää vanhat JSON-muotoiset suosikit kerran SQLite-tallennukseen'''
     legacy_path = paths.saved_tutkintonimikkeet_path()
     if not legacy_path.exists():
         return

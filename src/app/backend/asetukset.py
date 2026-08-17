@@ -1,17 +1,13 @@
-'''Sisältää backend-API:n toteutuksen, joka yhdistää useista osa-alueista peräisin olevat metodit yhdeksi luokaksi'''
 from __future__ import annotations
 from typing import Any
 from apu import utc_now_iso
 
 class AsetuksetApiMixin:
-    '''Mixin, joka lisää backendiin asetuksiin liittyvät metodit'''
 
     _lock: Any
     _conn: Any
 
     def list_hidden_tutkinnot(self) -> list[dict[str, str | int]]:
-        '''Listaa tutkinnot, jotka käyttäjä on piilottanut näkyvistä'''
-
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -34,8 +30,6 @@ class AsetuksetApiMixin:
         ]
 
     def list_hidden_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
-        '''Listaa yksittäiset tutkintonimikkeet, jotka on piilotettu näkyvistä'''
-
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -62,7 +56,6 @@ class AsetuksetApiMixin:
         ]
 
     def list_paikkakunnat(self) -> list[dict[str, str | int]]:
-        '''Listaa näkyvät paikkakunnat asetusten hallintaa varten'''
 
         with self._lock:
             rows = self._conn.execute(
@@ -94,7 +87,6 @@ class AsetuksetApiMixin:
         ]
 
     def list_hidden_paikkakunnat(self) -> list[dict[str, str | int]]:
-        '''Listaa paikkakunnat, jotka käyttäjä on piilottanut näkyvistä'''
 
         with self._lock:
             rows = self._conn.execute(
@@ -135,8 +127,6 @@ class AsetuksetApiMixin:
         ]
 
     def hide_tutkinto(self, tutkinto_id: int) -> bool:
-        '''Merkitsee tutkinnon piilotetuksi koko sovelluksessa'''
-
         try:
             normalized_id = int(tutkinto_id)
         except (TypeError, ValueError) as exc:
@@ -161,13 +151,11 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_tutkinto(self, tutkinto_id: int) -> bool:
-        '''Poistaa tutkinnon piilotuksen ja palauttaa sen jälleen näkyviin'''
 
         try:
             normalized_id = int(tutkinto_id)
         except (TypeError, ValueError) as exc:
             raise ValueError("Invalid tutkinto id") from exc
-
         with self._lock:
             with self._conn:
                 cursor = self._conn.execute(
@@ -180,13 +168,11 @@ class AsetuksetApiMixin:
         return cursor.rowcount > 0
 
     def hide_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        '''Merkitsee yksittäisen tutkintonimikkeen piilotetuksi'''
 
         try:
             normalized_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
             raise ValueError("Invalid tutkintonimike id") from exc
-
         with self._lock:
             exists = self._conn.execute(
                 """
@@ -212,7 +198,6 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        '''Poistaa tutkintonimikkeen piilotuksen'''
 
         try:
             normalized_id = int(tutkintonimike_id)
@@ -231,7 +216,6 @@ class AsetuksetApiMixin:
         return cursor.rowcount > 0
 
     def hide_paikkakunta(self, paikkakunta: str) -> bool:
-        '''Merkitsee paikkakunnan piilotetuksi koko sovelluksessa'''
 
         normalized = str(paikkakunta or "").strip()
         if not normalized:
@@ -261,7 +245,6 @@ class AsetuksetApiMixin:
         return True
 
     def unhide_paikkakunta(self, paikkakunta: str) -> bool:
-        '''Poistaa paikkakunnan piilotuksen'''
 
         normalized = str(paikkakunta or "").strip()
         if not normalized:

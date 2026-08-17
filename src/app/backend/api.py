@@ -1,5 +1,3 @@
-'''Yhdistää eri vastuualueet omista mixin-luokistaan yhdeksi API-luokaksi, jonka käyttöliittymä näkee yhtenä kokonaisuutena'''
-
 from __future__ import annotations
 from .asetukset import AsetuksetApiMixin
 from .perusta import BackendBase

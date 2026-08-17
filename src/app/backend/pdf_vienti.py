@@ -1,27 +1,17 @@
-'''Vastaa käyttäjätietojen PDF-viennistä'''
-
 from __future__ import annotations
-
 from html import escape
 from pathlib import Path
 
-
 def format_iso_timestamp(value: str | None) -> str:
-    '''Muuntaa ISO-aikaleiman luettavaksi tekstiksi'''
-
     if not value:
         return "-"
-
     normalized = str(value).strip()
     if not normalized:
         return "-"
-
     return normalized.replace("T", " ").replace("Z", " UTC")
 
 
 def format_plan_priority(value: str | None) -> str:
-    '''Muuntaa suunnitelman tärkeyden koodiarvon luettavaksi tekstiksi'''
-
     labels = {
         "ensisijainen": "Ensisijainen",
         "selvitettava": "Selvitettava",
@@ -29,10 +19,7 @@ def format_plan_priority(value: str | None) -> str:
     }
     return labels.get(str(value or "").strip(), "-")
 
-
 def format_plan_status(value: str | None) -> str:
-    '''Muuntaa suunnitelman tilan koodiarvon luettavaksi tekstiksi'''
-
     labels = {
         "en-tieda-viela": "En tiedä vielä",
         "haluan-selvittaa-lisaa": "Haluan selvittää lisää",
@@ -394,8 +381,6 @@ def build_user_export_html(payload: dict) -> str:
 
 
 def render_html_to_pdf(html: str, output_path: Path) -> None:
-    '''Renderöi HTML-koodi PDF-tiedostoksi käyttäen PyQt:n renderöintimoottoria'''
-
     from PyQt6.QtGui import QTextDocument  # pylint: disable=no-name-in-module
     from PyQt6.QtPrintSupport import QPrinter  # pylint: disable=no-name-in-module
 

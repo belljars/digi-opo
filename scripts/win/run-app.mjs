@@ -85,13 +85,9 @@ try {
           }
           process.exit(code ?? 1);
         });
-        fallbackChild.on("error", () => {
-          // Try the next interpreter candidate.
-        });
+        fallbackChild.on("error", () => {});
         return;
-      } catch {
-        // Try the next interpreter candidate.
-      }
+      } catch {}
     }
 
     console.error("Could not find a working Python interpreter for src/app/app.py.");
