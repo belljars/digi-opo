@@ -63,7 +63,7 @@ reexec_in_nix_shell() {
   fi
 
   log "Tuettua Python-versiota ei loytynyt. Kaynnistetaan sovellus flaken kautta."
-  exec nix develop "path:$ROOT_DIR" --command env DIGI_OPO_IN_NIX_SHELL=1 bash "$SCRIPT_DIR/run_linux.sh" "$@"
+  exec nix develop "path:$ROOT_DIR" --command env DIGI_OPO_IN_NIX_SHELL=1 bash "$SCRIPT_DIR/run.sh" "$@"
 }
 
 # Luo .venv-virtuaaliympariston, tai kayttaa olemassa olevaa jos se on tehty tuetulla Python-versiolla
