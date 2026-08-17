@@ -20,8 +20,8 @@ type Api = {
   list_opiskelu_suunnat: () => Promise<OpiskeluSuunta[]>;
 };
 
-const statusEl = document.getElementById("opintopolut-status");
-const listEl = document.getElementById("opintopolut-list");
+const statusEl = document.getElementById("opintopolku-02");
+const listEl = document.getElementById("opintopolku-lista");
 
 function setStatus(message: string): void {
   if (statusEl) {
@@ -74,7 +74,7 @@ function renderItems(items: OpiskeluSuunta[]): void {
       subheading.textContent = "Kenelle sopii";
 
       const list = document.createElement("ul");
-      list.className = "opintopolku-list";
+      list.className = "opintopolku-lista";
       const rows = parseKenelleList(item.kenelle);
       list.replaceChildren(
         ...rows.map((row) => {

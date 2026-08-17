@@ -1,7 +1,7 @@
 '''Sisältää backend-API:n toteutuksen, joka yhdistää useista osa-alueista peräisin olevat metodit yhdeksi luokaksi'''
 from __future__ import annotations
 from typing import Any
-from backend_apu import utc_now_iso
+from apu import utc_now_iso
 
 class AsetuksetApiMixin:
     '''Mixin, joka lisää backendiin asetuksiin liittyvät metodit'''

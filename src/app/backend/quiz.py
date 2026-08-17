@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from threading import Lock
 
-from backend_apu import (
+from apu import (
     laske_sha256,
     utc_now_iso,
 )

@@ -1,7 +1,7 @@
 '''Tutkintoihin, suosikkeihin ja käyttäjän omiin muistiinpanoihin liittyvä API'''
 
 from __future__ import annotations
-from backend_apu import utc_now_iso
+from apu import utc_now_iso
 import json
 from typing import Any
 

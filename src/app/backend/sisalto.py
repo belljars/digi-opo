@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from typing import Any
-from backend_apu import parse_json_payload
+from apu import parse_json_payload
 
 class SisaltoApiMixin:
     _paths: Any

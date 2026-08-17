@@ -86,7 +86,7 @@ build_frontend() {
     "src/ui/ts/pankki.js"
     "src/ui/ts/quiz.js"
     "src/ui/ts/ulkoasu.js"
-    "src/ui/ts/opintopolut.js"
+    "src/ui/ts/opintopolku.js"
     "src/ui/ts/tutkinto-kysely.js"
     "src/ui/ts/tallennetut.js"
     "src/ui/ts/asetukset.js"

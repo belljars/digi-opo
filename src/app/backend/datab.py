@@ -2,13 +2,13 @@ from __future__ import annotations
 import json
 import sqlite3
 
-from backend_apu import (
+from apu import (
     laske_sha256,
     lue_json_objekti,
     parse_json_payload,
     utc_now_iso,
 )
-from projekti_paths import ProjectPaths
+from paths import ProjectPaths
 
 AMMATIT_IMPORT_VERSION = "5"
 

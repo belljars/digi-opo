@@ -101,13 +101,13 @@ const quizQuestionEl = document.getElementById("quiz-question");
 const quizOptionsEl = document.getElementById("quiz-options");
 const quizPrevEl = document.getElementById("quiz-prev") as HTMLButtonElement | null;
 const quizNextEl = document.getElementById("quiz-next") as HTMLButtonElement | null;
-const quizProgressEl = document.getElementById("quiz-progress");
+const quizProgressEl = document.getElementById("quiz-05");
 const quizStatusEl = document.getElementById("quiz-status");
 const quizFeedbackEl = document.getElementById("quiz-feedback");
 const quizResultsEl = document.getElementById("quiz-results");
 const quizTopEl = document.getElementById("quiz-top");
 const quizRunnerUpEl = document.getElementById("quiz-runner-up");
-const quizRestartEl = document.getElementById("quiz-restart") as HTMLButtonElement | null;
+const quizRestartEl = document.getElementById("quiz-04") as HTMLButtonElement | null;
 
 let quizData: QuizData | null = null;
 let currentIndex = 0;

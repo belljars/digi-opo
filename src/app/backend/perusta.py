@@ -6,14 +6,14 @@ import sqlite3
 import threading
 from typing import Any
 
-from backend_apu import (
+from apu import (
     kirjoita_json_objekti,
     lue_json_objekti,
     utc_now_iso,
 )
-from projekti_paths import ProjectPaths, clear_user_data_root
+from paths import ProjectPaths, clear_user_data_root
 
-from .tietokanta import (
+from .datab import (
     connect_db,
     ensure_data,
     migrate_saved_tutkintonimikkeet_from_json,
