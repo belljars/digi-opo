@@ -30,55 +30,55 @@
         <link rel="stylesheet" href="../css/init.css" />
     </head>
     <body>
-        <a class="skip-link" href="#main-sisalto">Siirry sisältöön</a>
-        <main class="app" id="main-sisalto">
-            <section class="workspace">
-                <aside class="panel panel-list">
-                    <div class="pankki-filters">
-                        <div class="search">
-                            <label for="tutkinto-search">Haku</label>
+        <a class="ohita-linkki" href="#paa-sisalto">Siirry sisältöön</a>
+        <main class="app" id="paa-sisalto">
+            <section class="tyoalue">
+                <aside class="paneeli pankki-01">
+                    <div class="pankki-02">
+                        <div class="haku">
+                            <label for="pankki-03">Haku</label>
                             <input
-                                id="tutkinto-search"
-                                type="search"
+                                id="pankki-03"
+                                type="haku"
                                 placeholder="Hae tutkinnon nimellä tai nimikkeellä"
                                 autocomplete="off"
                             />
                         </div>
-                        <div class="search">
-                            <label for="tutkinto-filter">Tutkinto</label>
-                            <select id="tutkinto-filter">
+                        <div class="haku">
+                            <label for="pankki-04">Tutkinto</label>
+                            <select id="pankki-04">
                                 <option value="">Kaikki tutkinnot</option>
                             </select>
-                            <span id="paikkakunta-filter-label">Paikkakunta</span>
-                            <details class="filter-dropdown" id="paikkakunta-filter-dropdown">
+                            <span id="pankki-05">Paikkakunta</span>
+                            <details class="pankki-06" id="pankki-07">
                                 <summary
-                                    id="paikkakunta-filter-trigger"
-                                    class="filter-dropdown-trigger"
-                                    aria-describedby="paikkakunta-filter-help"
+                                    id="pankki-08"
+                                    class="pankki-09"
+                                    aria-describedby="pankki-10"
                                 >
                                     Kaikki paikkakunnat
                                 </summary>
                                 <div
-                                    id="paikkakunta-filter"
-                                    class="filter-dropdown-panel"
+                                    id="pankki-11"
+                                    class="pankki-12"
                                     role="group"
-                                    aria-labelledby="paikkakunta-filter-label"
+                                    aria-labelledby="pankki-05"
                                 ></div>
                             </details>
                         </div>
-                        <label class="filter-toggle" for="saved-only-filter">
-                            <input id="saved-only-filter" type="checkbox" />
+                        <label class="pankki-13" for="pankki-14">
+                            <input id="pankki-14" type="checkbox" />
                             <span>Vain tallennetut tutkintonimikkeet</span>
                         </label>
-                        <button id="clear-filters-button" type="button" class="tutkintonimike-action">
+                        <button id="pankki-15" type="button" class="tutkintonimike-toiminto">
                             Tyhjennä suodattimet
                         </button>
                     </div>
-                    <div id="count" class="count"></div>
-                    <ul id="tutkinto-list" class="list"></ul>
+                    <div id="maara" class="maara"></div>
+                    <ul id="pankki-16" class="lista"></ul>
                 </aside>
-                <section class="panel panel-detail">
-                    <div id="detail-feedback" class="saved-feedback" aria-live="polite"></div>
+                <section class="paneeli pankki-17">
+                    <div id="pankki-18" class="palaute" aria-live="polite"></div>
                     <div id="detail" class="detail"></div>
                 </section>
             </section>

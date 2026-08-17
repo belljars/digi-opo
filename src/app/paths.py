@@ -1,7 +1,4 @@
-'''Määrittelee projektin tiedostopolut ja paikallisen HTTP-palvelimen käynnistämisen varten'''
-
 from __future__ import annotations
-
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
@@ -14,10 +11,7 @@ import sys
 import threading
 from urllib.parse import unquote, urlparse
 
-
 def is_allowed_static_path(request_path: str) -> bool:
-    '''Staattinen palvelin tarjoilee vain kayttoliittyman tiedostoja'''
-
     raw_path = unquote(urlparse(request_path).path)
     normalized_path = posixpath.normpath(raw_path)
     if raw_path.endswith("/") and not normalized_path.endswith("/"):
@@ -26,26 +20,19 @@ def is_allowed_static_path(request_path: str) -> bool:
 
 
 def default_user_data_root() -> Path:
-    '''Palauttaa oletusarvoisen käyttäjätiedostojen juurikansion'''
-
     if sys.platform.startswith("win"):
         base = os.environ.get("LOCALAPPDATA")
         if base:
             return Path(base) / "digi-opo"
         return Path.home() / "AppData" / "Local" / "digi-opo"
-
     if sys.platform == "darwin":
         return Path.home() / "Library" / "Application Support" / "digi-opo"
-
     base = os.environ.get("XDG_DATA_HOME")
     if base:
         return Path(base) / "digi-opo"
     return Path.home() / ".local" / "share" / "digi-opo"
 
-
 def clear_user_data_root(user_data_root: Path) -> list[Path]:
-    '''Poistaa koko kirjoitettavan datajuuren sisallon turvallisesti'''
-
     root = Path(user_data_root).resolve()
     if not root.exists():
         return []
@@ -74,8 +61,6 @@ def clear_user_data_root(user_data_root: Path) -> list[Path]:
 
 @dataclass(frozen=True)
 class ProjectPaths:
-    '''Määrittelee projektin tiedostopolut'''
-
     resource_root: Path
     user_data_root: Path | None = None
 
@@ -87,8 +72,6 @@ class ProjectPaths:
 
     @property
     def project_root(self) -> Path:
-        '''Palauttaa projektin juurikansion'''
-
         return self.resource_root
 
     @classmethod
@@ -136,6 +119,7 @@ class ProjectPaths:
         return self.kayttaja_data_dir() / "quiz_results.json"
 
     def quiz_tila_polku(self) -> Path:
+        
         return self.kayttaja_data_dir() / "quiz_sessions.json"
 
     def resolve_local_ui_path(self, raw_path: str) -> Path | None:
@@ -173,14 +157,12 @@ class ProjectPaths:
             seen.add(rel)
             abs_path = (self.resource_root / rel).resolve()
             if abs_path != resolved_root and resolved_root not in abs_path.parents:
-                # Torjuu polut, jotka sisaisen ".."-segmentin kautta paatyisivat resource_rootin ulkopuolelle
                 continue
             if abs_path.exists():
                 return abs_path
         return None
 
     def normalize_ui_asset_ref(self, raw_path: str) -> str:
-        '''Normalisoi käyttöliittymän staattisten resurssien polku, jotta ne voidaan tarjota paikallisesta HTTP-palvelimesta'''
 
         resolved = self.resolve_local_ui_path(raw_path)
         if not resolved:
@@ -191,7 +173,6 @@ class ProjectPaths:
             return f"/{rel}"
         except ValueError:
             return raw_path
-
 
 def start_static_server(paths: ProjectPaths) -> tuple[ThreadingHTTPServer, int]:
     allowed_root = (paths.resource_root / "src" / "ui").resolve()

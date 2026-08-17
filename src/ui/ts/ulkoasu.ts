@@ -30,12 +30,12 @@ type DeleteUserInfoApi = {
 };
 
 const navItems: NavItem[] = [
-  { id: "home", href: "./home.html", label: "Etusivu", target: "iframe-content" },
-  { id: "index", href: "./pankki.html", label: "Tutkintopankki", target: "iframe-content" },
-  { id: "saved", href: "./tallennetut.html", label: "Tallennetut", target: "iframe-content" },
-  { id: "suunitelma", href: "./suunitelma.html", label: "Oma suunnitelma", target: "iframe-content" },
-  { id: "opintopolku", href: "./opintopolku.html", label: "opintopolku", target: "iframe-content" },
-  { id: "asetukset", href: "./asetukset.html", label: "Asetukset", target: "iframe-content" }
+  { id: "home", href: "./home.html", label: "Etusivu", target: "iframe-sisalto" },
+  { id: "index", href: "./pankki.html", label: "Tutkintopankki", target: "iframe-sisalto" },
+  { id: "saved", href: "./tallennetut.html", label: "Tallennetut", target: "iframe-sisalto" },
+  { id: "suunitelma", href: "./suunitelma.html", label: "Oma suunnitelma", target: "iframe-sisalto" },
+  { id: "opintopolku", href: "./opintopolku.html", label: "opintopolku", target: "iframe-sisalto" },
+  { id: "asetukset", href: "./asetukset.html", label: "Asetukset", target: "iframe-sisalto" }
 ];
 
 function getThemeToggleLabel(effectiveTheme: EffectiveTheme): string {
@@ -51,8 +51,8 @@ function getThemeModeLabel(mode: ThemeMode): string {
 }
 
 function updateThemeToggleButton(): void {
-  const toggleButton = document.getElementById("theme-toggle") as HTMLButtonElement | null;
-  const themeMenu = document.getElementById("theme-menu");
+  const toggleButton = document.getElementById("teema-vaihto") as HTMLButtonElement | null;
+  const themeMenu = document.getElementById("teema-valikko");
   if (!toggleButton) {
     return;
   }
@@ -76,7 +76,7 @@ function updateThemeToggleButton(): void {
 }
 
 function updateDeleteInfoButtonState(isDeleting: boolean): void {
-  const deleteButton = document.getElementById("delete-info-button") as HTMLButtonElement | null;
+  const deleteButton = document.getElementById("poista-tiedot-nappi") as HTMLButtonElement | null;
   if (!deleteButton) {
     return;
   }
@@ -121,7 +121,7 @@ async function handleDeleteInfo(): Promise<void> {
 }
 
 function renderHeader(): void {
-  const headerHost = document.getElementById("app-header");
+  const headerHost = document.getElementById("app-01");
   if (!headerHost) {
     return;
   }
@@ -133,24 +133,24 @@ function renderHeader(): void {
       const isActive = item.id === currentPage;
       const activeClass = isActive ? " active" : "";
       const ariaCurrent = isActive ? ' aria-current="page"' : "";
-      return `<a class="header-link${activeClass}" href="${item.href}" target="${item.target}"${ariaCurrent}>${item.label}</a>`;
+      return `<a class="header-01${activeClass}" href="${item.href}" target="${item.target}"${ariaCurrent}>${item.label}</a>`;
     })
     .join("");
 
   headerHost.innerHTML = `
-    <header class="header site-header">
+    <header class="header site-01">
       <div>
         <h1>digi-opo</h1>
       </div>
-      <nav class="header-actions site-nav" aria-label="Päävalikko">
+      <nav class="header-actions site-valikko" aria-label="Päävalikko">
         ${links}
-        <button type="button" id="delete-info-button" class="header-pill-action">Poista tiedot</button>
-        <details id="theme-menu" class="header-theme-menu">
-          <summary id="theme-toggle" class="header-theme-toggle"></summary>
-          <div class="header-theme-menu-body" role="menu" aria-label="Väriteema">
-            <button type="button" class="header-theme-option" data-theme-option="auto" role="menuitemradio">Automaattinen</button>
-            <button type="button" class="header-theme-option" data-theme-option="light" role="menuitemradio">Vaalea</button>
-            <button type="button" class="header-theme-option" data-theme-option="dark" role="menuitemradio">Tumma</button>
+        <button type="button" id="poista-tiedot-nappi" class="header-02">Poista tiedot</button>
+        <details id="teema-valikko" class="header-04">
+          <summary id="teema-vaihto" class="hheader-03"></summary>
+          <div class="header-04-body" role="menu" aria-label="Väriteema">
+            <button type="button" class="header-05" data-theme-option="auto" role="menuitemradio">Automaattinen</button>
+            <button type="button" class="header-05" data-theme-option="light" role="menuitemradio">Vaalea</button>
+            <button type="button" class="header-05" data-theme-option="dark" role="menuitemradio">Tumma</button>
           </div>
         </details>
       </nav>
@@ -165,14 +165,14 @@ function renderHeader(): void {
       }
 
       setThemeMode(nextMode);
-      const themeMenu = document.getElementById("theme-menu") as HTMLDetailsElement | null;
+      const themeMenu = document.getElementById("teema-valikko") as HTMLDetailsElement | null;
       if (themeMenu) {
         themeMenu.open = false;
       }
     });
   });
 
-  document.getElementById("delete-info-button")?.addEventListener("click", () => {
+  document.getElementById("poista-tiedot-nappi")?.addEventListener("click", () => {
     void handleDeleteInfo();
   });
 
@@ -181,7 +181,7 @@ function renderHeader(): void {
 }
 
 function renderFooter(): void {
-  const footerHost = document.getElementById("app-footer");
+  const footerHost = document.getElementById("app-02");
   if (!footerHost) {
     return;
   }
@@ -189,8 +189,8 @@ function renderFooter(): void {
   const year = new Date().getFullYear();
 
   footerHost.innerHTML = `
-    <p class="site-footer-copy">© ${year} <em>digi-opo</em> • <a href="https://www.luovi.fi" target="_blank" rel="noopener noreferrer">Ammattiopisto Luovi</a></p>
-    <p class="site-footer-copy"> • <a href="https://www.github.com/belljars/digi-opo" target="_blank" rel="noopener noreferrer">Lähdekoodi</a></p>
+    <p class="site-alatunniste-copy">© ${year} <em>digi-opo</em> • <a href="https://www.luovi.fi" target="_blank" rel="noopener noreferrer">Ammattiopisto Luovi</a></p>
+    <p class="site-alatunniste-copy"> • <a href="https://www.github.com/belljars/digi-opo" target="_blank" rel="noopener noreferrer">Lähdekoodi</a></p>
   `;
 }
 

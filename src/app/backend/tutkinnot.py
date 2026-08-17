@@ -1,13 +1,9 @@
-'''Tutkintoihin, suosikkeihin ja käyttäjän omiin muistiinpanoihin liittyvä API'''
-
 from __future__ import annotations
 from apu import utc_now_iso
 import json
 from typing import Any
 
 class TutkinnotApiMixin:
-    '''Mixini, joka lisää backendiin tutkintojen luku- ja tallennusmetodit'''
-
     _conn: Any
     _lock: Any
 
@@ -15,7 +11,6 @@ class TutkinnotApiMixin:
     _ALLOWED_PLAN_STATUSES = {"", "en-tieda-viela", "haluan-selvittaa-lisaa", "vahva-vaihtoehto"}
 
     def _parse_paikkakunnat(self, raw_value: Any) -> list[str]:
-        '''Muuntaa tietokannassa JSON-merkkijonona olevan paikkakuntalistan käyttöliittymälle'''
 
         if not raw_value:
             return []
@@ -28,8 +23,6 @@ class TutkinnotApiMixin:
         return [str(item).strip() for item in parsed if str(item).strip()]
 
     def _get_hidden_paikkakunnat(self) -> set[str]:
-        '''Palauttaa asetuksissa piilotetut paikkakunnat normalisoituna vertailua varten'''
-
         rows = self._conn.execute("SELECT paikkakunta FROM hidden_paikkakunnat;").fetchall()
         return {str(row["paikkakunta"]).strip().casefold() for row in rows if str(row["paikkakunta"]).strip()}
 
@@ -38,8 +31,6 @@ class TutkinnotApiMixin:
         raw_value: Any,
         hidden_paikkakunnat: set[str] | None = None,
     ) -> list[str]:
-        '''Poistaa tutkintonimikkeen paikkakunnista käyttäjän piilottamat paikkakunnat'''
-
         paikkakunnat = self._parse_paikkakunnat(raw_value)
         hidden = hidden_paikkakunnat if hidden_paikkakunnat is not None else self._get_hidden_paikkakunnat()
         if not hidden:
@@ -51,14 +42,11 @@ class TutkinnotApiMixin:
         raw_value: Any,
         hidden_paikkakunnat: set[str] | None = None,
     ) -> bool:
-        '''Säilyttää paikkakunnattomat nimikkeet ja nimikkeet, joilla on ainakin yksi näkyvä paikkakunta'''
 
         paikkakunnat = self._parse_paikkakunnat(raw_value)
         return not paikkakunnat or bool(self._filter_visible_paikkakunnat(raw_value, hidden_paikkakunnat))
 
     def _get_visible_tutkintonimike_row(self, nimike_id: int):
-        '''Palauttaa näkyvän tutkintonimikkeen rivin tai `None`, jos sitä ei voi käyttää'''
-
         row = self._conn.execute(
             """
             SELECT n.id, n.nimi, n.linkki, n.img, n.paikkakunta, n.tutkinto_id, t.nimi AS tutkinto_nimi
@@ -75,8 +63,6 @@ class TutkinnotApiMixin:
         return row
 
     def _serialize_saved_item(self, row, saved_at: str, plan_priority, plan_status, next_step, plan_updated_at) -> dict:
-        '''Muotoilee tallennetun tutkintonimikkeen käyttöliittymän odottamaan JSON-muotoon'''
-
         return {
             "id": row["id"],
             "nimi": row["nimi"],
@@ -93,7 +79,6 @@ class TutkinnotApiMixin:
         }
 
     def list_tutkinnot(self) -> list[dict[str, str | int]]:
-        '''Palauttaa kaikki näkyvät tutkinnot listanäkymää varten'''
 
         with self._lock:
             rows = self._conn.execute(
@@ -108,8 +93,6 @@ class TutkinnotApiMixin:
         return [{"id": row["id"], "nimi": row["nimi"]} for row in rows]
 
     def get_tutkinto(self, tutkinto_id: int) -> dict | None:
-        '''Hakee yhden tutkinnon tiedot ja siihen kuuluvat näkyvät nimikkeet'''
-
         with self._lock:
             row = self._conn.execute(
                 """
@@ -161,13 +144,10 @@ class TutkinnotApiMixin:
 
     @staticmethod
     def _like_term(value: str) -> str:
-        '''Muuntaa hakusanan LIKE-lausekkeeksi, jossa hakusanan omat %- ja _-merkit kasitellaan kirjaimellisina'''
-
         escaped = value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
         return f"%{escaped}%"
 
     def search_tutkinnot(self, query: str | None) -> list[dict[str, str | int]]:
-        '''Hakee tutkintoja nimen, kuvauksen tai tutkintonimikkeen perusteella'''
 
         if not query or not str(query).strip():
             return self.list_tutkinnot()
@@ -225,8 +205,6 @@ class TutkinnotApiMixin:
         return [{"id": row["id"], "nimi": row["nimi"]} for row in results]
 
     def list_tutkintonimikkeet(self) -> list[dict[str, str | int | None]]:
-        '''Palauttaa kaikki näkyvät tutkintonimikkeet yhdessä listassa'''
-
         with self._lock:
             rows = self._conn.execute(
                 """
@@ -262,7 +240,6 @@ class TutkinnotApiMixin:
         ] # type: ignore
 
     def list_saved_tutkintonimikkeet(self) -> list[dict]:
-        '''Palauttaa käyttäjän tallentamat ja edelleen näkyvät suosikit'''
 
         with self._lock:
             rows = self._conn.execute(
@@ -317,7 +294,6 @@ class TutkinnotApiMixin:
         ]
 
     def save_tutkintonimike(self, tutkintonimike_id: int) -> dict:
-        '''Tallentaa näkyvän tutkintonimikkeen käyttäjän suosikkeihin'''
 
         try:
             nimike_id = int(tutkintonimike_id)
@@ -360,7 +336,6 @@ class TutkinnotApiMixin:
         )
 
     def remove_saved_tutkintonimike(self, tutkintonimike_id: int) -> bool:
-        '''Poistaa tutkintonimikkeen käyttäjän suosikeista'''
 
         try:
             nimike_id = int(tutkintonimike_id)
@@ -379,7 +354,6 @@ class TutkinnotApiMixin:
         return cursor.rowcount > 0
 
     def list_tutkintonimike_notes(self) -> list[dict]:
-        '''Listaa näkyville tutkintonimikkeille tallennetut muistiinpanot'''
 
         with self._lock:
             rows = self._conn.execute(
@@ -419,8 +393,6 @@ class TutkinnotApiMixin:
         ]
 
     def save_tutkintonimike_note(self, tutkintonimike_id: int, note_text: str) -> dict:
-        '''Tallentaa tai päivittää yhden tutkintonimikkeen muistiinpanon'''
-
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:
@@ -466,7 +438,6 @@ class TutkinnotApiMixin:
         status: str | None,
         next_step: str | None,
     ) -> dict:
-        '''Tallentaa suosikkirivin yhteyteen käyttäjän suunnitelmatiedot'''
         
         try:
             nimike_id = int(tutkintonimike_id)
@@ -542,8 +513,6 @@ class TutkinnotApiMixin:
         )
 
     def remove_tutkintonimike_note(self, tutkintonimike_id: int) -> bool:
-        '''Poistaa tutkintonimikkeeseen tallennetun muistiinpanon'''
-        
         try:
             nimike_id = int(tutkintonimike_id)
         except (TypeError, ValueError) as exc:

@@ -1,5 +1,3 @@
-'''Vienti-API, joka kokoaa käyttäjään liittyviä tietoja yhteen PDF-raporttia varten'''
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,8 +10,6 @@ from .pdf_vienti import build_user_export_html, render_html_to_pdf
 
 
 class VientiApiMixin:
-    '''Mixin, joka kokoaa käyttäjän tallennetut tiedot yhteen PDF-vientiä varten'''
-
     _lock: Any
     _conn: Any
     _paths: Any
@@ -165,6 +161,7 @@ class VientiApiMixin:
         if self._window is None:
             return self._paths.user_export_pdf_path()
 
+
         selected = self._window.create_file_dialog(
             webview.FileDialog.SAVE,
             directory=str(self._default_pdf_export_directory()),
@@ -180,8 +177,6 @@ class VientiApiMixin:
         return output_path
 
     def export_user_data_pdf(self) -> dict[str, str | int | bool]:
-        '''Luo käyttäjän tallennetuista tiedoista luettavan PDF-raportin käyttäjän valitsemaan sijaintiin'''
-
         output_path = self._prompt_user_export_pdf_path()
         if output_path is None:
             return {

@@ -21,7 +21,7 @@ type Api = {
 };
 
 const statusEl = document.getElementById("opintopolku-02");
-const listEl = document.getElementById("opintopolku-lista");
+const listEl = document.getElementById("opintopolku-05");
 
 function setStatus(message: string): void {
   if (statusEl) {
@@ -50,11 +50,11 @@ function renderItems(items: OpiskeluSuunta[]): void {
 
   listEl.replaceChildren(
     ...items.map((item) => {
-      const card = document.createElement("article");
-      card.className = "opintopolku-card";
+      const kortti = document.createElement("article");
+      kortti.className = "opintopolku-06";
 
       const image = document.createElement("img");
-      image.className = "card-image";
+      image.className = "kortti-kuva";
       image.src = item.img;
       image.alt = `${item.nimi} kuva`;
       image.addEventListener("error", () => {
@@ -62,7 +62,7 @@ function renderItems(items: OpiskeluSuunta[]): void {
       });
 
       const body = document.createElement("div");
-      body.className = "opintopolku-card-body";
+      body.className = "opintopolku-07";
 
       const title = document.createElement("h3");
       title.textContent = item.nimi;
@@ -73,10 +73,10 @@ function renderItems(items: OpiskeluSuunta[]): void {
       const subheading = document.createElement("h4");
       subheading.textContent = "Kenelle sopii";
 
-      const list = document.createElement("ul");
-      list.className = "opintopolku-lista";
+      const lista = document.createElement("ul");
+      lista.className = "opintopolku-05";
       const rows = parseKenelleList(item.kenelle);
-      list.replaceChildren(
+      lista.replaceChildren(
         ...rows.map((row) => {
           const li = document.createElement("li");
           li.textContent = row;
@@ -84,9 +84,9 @@ function renderItems(items: OpiskeluSuunta[]): void {
         })
       );
 
-      body.append(title, desc, subheading, list);
-      card.append(image, body);
-      return card;
+      body.append(title, desc, subheading, lista);
+      kortti.append(image, body);
+      return kortti;
     })
   );
 

@@ -69,35 +69,35 @@ type Api = {
   export_user_data_pdf: () => Promise<ExportUserDataPdfResult>;
 };
 
-const feedbackEl = document.getElementById("asetukset-feedback");
-const exportStatusEl = document.getElementById("asetukset-export-status");
-const exportPdfButtonEl = document.getElementById("asetukset-export-pdf-button") as HTMLButtonElement | null;
-const unhideAllTutkinnotButtonEl = document.getElementById("asetukset-unhide-all-tutkinnot-button") as
+const feedbackEl = document.getElementById("asetukset-06");
+const exportStatusEl = document.getElementById("asetukset-05");
+const exportPdfButtonEl = document.getElementById("asetukset-04") as HTMLButtonElement | null;
+const unhideAllTutkinnotButtonEl = document.getElementById("asetukset-23") as
   | HTMLButtonElement
   | null;
 const unhideAllTutkintonimikkeetButtonEl = document.getElementById(
-  "asetukset-unhide-all-tutkintonimikkeet-button"
+  "asetukset-30"
 ) as HTMLButtonElement | null;
-const unhideAllPaikkakunnatButtonEl = document.getElementById("asetukset-unhide-all-paikkakunnat-button") as
+const unhideAllPaikkakunnatButtonEl = document.getElementById("asetukset-37") as
   | HTMLButtonElement
   | null;
-const tutkintoSearchEl = document.getElementById("asetukset-tutkinto-search") as HTMLInputElement | null;
-const tutkintonimikeSearchEl = document.getElementById("asetukset-tutkintonimike-search") as
+const tutkintoSearchEl = document.getElementById("asetukset-16") as HTMLInputElement | null;
+const tutkintonimikeSearchEl = document.getElementById("asetukset-27") as
   | HTMLInputElement
   | null;
-const paikkakuntaSearchEl = document.getElementById("asetukset-paikkakunta-search") as HTMLInputElement | null;
-const visibleTutkinnotCountEl = document.getElementById("asetukset-visible-tutkinnot-count");
-const hiddenTutkinnotCountEl = document.getElementById("asetukset-hidden-tutkinnot-count");
-const visibleTutkinnotEl = document.getElementById("asetukset-visible-tutkinnot");
-const hiddenTutkinnotEl = document.getElementById("asetukset-hidden-tutkinnot");
-const visibleTutkintonimikkeetCountEl = document.getElementById("asetukset-visible-tutkintonimikkeet-count");
-const hiddenTutkintonimikkeetCountEl = document.getElementById("asetukset-hidden-tutkintonimikkeet-count");
-const visibleTutkintonimikkeetEl = document.getElementById("asetukset-visible-tutkintonimikkeet");
-const hiddenTutkintonimikkeetEl = document.getElementById("asetukset-hidden-tutkintonimikkeet");
-const visiblePaikkakunnatCountEl = document.getElementById("asetukset-visible-paikkakunnat-count");
-const hiddenPaikkakunnatCountEl = document.getElementById("asetukset-hidden-paikkakunnat-count");
-const visiblePaikkakunnatEl = document.getElementById("asetukset-visible-paikkakunnat");
-const hiddenPaikkakunnatEl = document.getElementById("asetukset-hidden-paikkakunnat");
+const paikkakuntaSearchEl = document.getElementById("asetukset-34") as HTMLInputElement | null;
+const visibleTutkinnotCountEl = document.getElementById("asetukset-14");
+const hiddenTutkinnotCountEl = document.getElementById("asetukset-22");
+const visibleTutkinnotEl = document.getElementById("asetukset-17");
+const hiddenTutkinnotEl = document.getElementById("asetukset-24");
+const visibleTutkintonimikkeetCountEl = document.getElementById("asetukset-26");
+const hiddenTutkintonimikkeetCountEl = document.getElementById("asetukset-29");
+const visibleTutkintonimikkeetEl = document.getElementById("asetukset-28");
+const hiddenTutkintonimikkeetEl = document.getElementById("asetukset-31");
+const visiblePaikkakunnatCountEl = document.getElementById("asetukset-33");
+const hiddenPaikkakunnatCountEl = document.getElementById("asetukset-36");
+const visiblePaikkakunnatEl = document.getElementById("asetukset-35");
+const hiddenPaikkakunnatEl = document.getElementById("asetukset-38");
 
 let activeApi: Api | null = null; // 
 let visibleTutkinnot: TutkintoListItem[] = [];
@@ -123,9 +123,9 @@ function setFeedback(message = ""): void {
   }
 }
 
-function setCount(host: HTMLElement | null, label: string, count: number): void {
+function setCount(host: HTMLElement | null, label: string, maara: number): void {
   if (host) {
-    host.textContent = `${count} ${label}`;
+    host.textContent = `${maara} ${label}`;
   }
 }
 
@@ -199,13 +199,13 @@ function renderEmpty(host: HTMLElement | null, message: string): void {
   if (!host) {
     return;
   }
-  host.innerHTML = `<p class="empty">${message}</p>`;
+  host.innerHTML = `<p class="tyhja">${message}</p>`;
 }
 
 function createActionButton(label: string, onClick: () => void): HTMLButtonElement {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "tutkintonimike-action";
+  button.className = "tutkintonimike-toiminto";
   button.textContent = label;
   button.addEventListener("click", onClick);
   return button;
@@ -218,10 +218,10 @@ function createTutkintoRow(
   metaText?: string
 ): HTMLElement {
   const row = document.createElement("article");
-  row.className = "asetukset-item";
+  row.className = "asetukset-39";
 
   const copy = document.createElement("div");
-  copy.className = "asetukset-item-copy";
+  copy.className = "asetukset-40";
 
   const title = document.createElement("h4");
   title.textContent = item.nimi;
@@ -230,7 +230,7 @@ function createTutkintoRow(
 
   if (metaText) {
     const meta = document.createElement("p");
-    meta.className = "tutkintonimike-meta";
+    meta.className = "tutkintonimike-tiedot";
     meta.textContent = metaText;
     copy.append(meta);
   }
@@ -245,16 +245,16 @@ function createPaikkakuntaRow(
   onAction: () => void
 ): HTMLElement {
   const row = document.createElement("article");
-  row.className = "asetukset-item";
+  row.className = "asetukset-39";
 
   const copy = document.createElement("div");
-  copy.className = "asetukset-item-copy";
+  copy.className = "asetukset-40";
 
   const title = document.createElement("h4");
   title.textContent = item.paikkakunta;
 
   const meta = document.createElement("p");
-  meta.className = "tutkintonimike-meta";
+  meta.className = "tutkintonimike-tiedot";
   meta.textContent = `${item.tutkintonimikeCount} tutkintonimiketta`;
 
   copy.append(title, meta);

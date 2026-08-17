@@ -272,7 +272,6 @@ def _render_quiz_result_body(item: dict) -> str:
 
     return _render_data_value(result, "result")
 
-
 def _render_quiz_entries(items: list[dict], title_timestamp_key: str) -> str:
     if not items:
         return _empty_state("Tallennuksia ei ole.")
@@ -292,7 +291,6 @@ def _render_quiz_entries(items: list[dict], title_timestamp_key: str) -> str:
 
 
 def build_user_export_html(payload: dict) -> str:
-    '''Rakentaa käyttäjätietojen PDF-viennin HTML-muodossa'''
 
     summary = payload["summary"]
     sections = payload["sections"]
@@ -381,8 +379,8 @@ def build_user_export_html(payload: dict) -> str:
 
 
 def render_html_to_pdf(html: str, output_path: Path) -> None:
-    from PyQt6.QtGui import QTextDocument  # pylint: disable=no-name-in-module
-    from PyQt6.QtPrintSupport import QPrinter  # pylint: disable=no-name-in-module
+    from PyQt6.QtGui import QTextDocument
+    from PyQt6.QtPrintSupport import QPrinter
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     document = QTextDocument()

@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import os
 from pathlib import Path
 import sys
@@ -7,13 +6,10 @@ import sys
 CURRENT_DIR = Path(__file__).resolve().parent
 if str(CURRENT_DIR) not in sys.path:
     sys.path.insert(0, str(CURRENT_DIR))
-
 if sys.platform.startswith("linux"):
     os.environ.setdefault("QT_API", "pyqt6")
-
 if sys.platform.startswith("linux") and os.environ.get("WAYLAND_DISPLAY"):
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
-
 import rajapinta as interface
 import paths as path
 import webview
@@ -26,23 +22,17 @@ def _project_root() -> Path:
         return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parents[2]
 
-
 def _project_paths() -> path.ProjectPaths:
     project_root = _project_root()
     if getattr(sys, "frozen", False):
         return path.ProjectPaths.for_runtime(project_root)
     return path.ProjectPaths(project_root)
 
-
 class Api(interface.Api):
-    '''Käyttöliittymän API-luokka, joka perii backendin API:n ja tarjoaa käyttöliittymään liittyviä toimintoja'''
     def __init__(self, paths: path.ProjectPaths | None = None) -> None:
-        # Alustaa backendin projektin juuren pohjalta
         super().__init__(paths or _project_paths())
 
-
 def main() -> None:
-    '''Sovelluksen pääfunktio, joka käynnistää käyttöliittymän ja paikallisen palvelimen'''
     paths = _project_paths()
     if getattr(sys, "frozen", False):
         path.clear_user_data_root(paths.user_data_root)

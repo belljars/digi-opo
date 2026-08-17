@@ -95,18 +95,18 @@ type Api = {
   clear_quiz_session: (quizId: string) => Promise<boolean>;
 };
 
-const quizLoadingEl = document.getElementById("quiz-loading");
-const quizFormEl = document.getElementById("quiz-form") as HTMLFormElement | null;
-const quizQuestionEl = document.getElementById("quiz-question");
-const quizOptionsEl = document.getElementById("quiz-options");
-const quizPrevEl = document.getElementById("quiz-prev") as HTMLButtonElement | null;
-const quizNextEl = document.getElementById("quiz-next") as HTMLButtonElement | null;
+const quizLoadingEl = document.getElementById("quiz-08");
+const quizFormEl = document.getElementById("quiz-09") as HTMLFormElement | null;
+const quizQuestionEl = document.getElementById("quiz-10");
+const quizOptionsEl = document.getElementById("quiz-11");
+const quizPrevEl = document.getElementById("quiz-13") as HTMLButtonElement | null;
+const quizNextEl = document.getElementById("quiz-14") as HTMLButtonElement | null;
 const quizProgressEl = document.getElementById("quiz-05");
-const quizStatusEl = document.getElementById("quiz-status");
+const quizStatusEl = document.getElementById("quiz-06");
 const quizFeedbackEl = document.getElementById("quiz-feedback");
-const quizResultsEl = document.getElementById("quiz-results");
-const quizTopEl = document.getElementById("quiz-top");
-const quizRunnerUpEl = document.getElementById("quiz-runner-up");
+const quizResultsEl = document.getElementById("quiz-tulokset");
+const quizTopEl = document.getElementById("quiz-15");
+const quizRunnerUpEl = document.getElementById("quiz-16");
 const quizRestartEl = document.getElementById("quiz-04") as HTMLButtonElement | null;
 
 let quizData: QuizData | null = null;
@@ -214,10 +214,10 @@ function renderQuestion(): void {
   question.options.forEach((option) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "quiz-option";
+    button.className = "quiz-37";
     button.textContent = option.text;
     if (option.id === selectedOptionId) {
-      button.classList.add("is-selected");
+      button.classList.add("valittu");
     }
     button.addEventListener("click", () => {
       if (advanceInFlight) {
@@ -226,9 +226,9 @@ function renderQuestion(): void {
       selectedOptionId = option.id;
       setNextEnabled(true);
       if (quizOptionsEl) {
-        const optionButtons = quizOptionsEl.querySelectorAll(".quiz-option");
-        optionButtons.forEach((btn) => btn.classList.remove("is-selected"));
-        button.classList.add("is-selected");
+        const optionButtons = quizOptionsEl.querySelectorAll(".quiz-37");
+        optionButtons.forEach((btn) => btn.classList.remove("valittu"));
+        button.classList.add("valittu");
       }
       void handleNext();
     });
@@ -299,7 +299,7 @@ function renderResultCard(target: HTMLElement | null, item: RankedScore | null):
   const summary = document.createElement("p");
   summary.textContent = item.path.summary;
   const score = document.createElement("span");
-  score.className = "quiz-score";
+  score.className = "quiz-pisteet";
   score.textContent = `Pisteet: ${item.score}`;
   target.append(title, summary, score);
 }

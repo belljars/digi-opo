@@ -29,9 +29,9 @@
         </script>
         <link rel="stylesheet" href="../css/init.css" />
     </head>
-    <a class="skip-link" href="#main-sisalto">Siirry sisältöön</a>
-    <main class="app" id="main-sisalto">
-        <section class="panel panel-quiz">
+    <a class="ohita-linkki" href="#paa-sisalto">Siirry sisältöön</a>
+    <main class="app" id="paa-sisalto">
+        <section class="paneeli paneeli-quiz">
             <header class="quiz-01">
                 <div>
                     <h2>Opintopolku-kysely</h2>
@@ -39,28 +39,28 @@
                 </div>
                 <button id="quiz-04" type="button">Aloita alusta</button>
             </header>
-            <section class="quiz-overview" aria-label="Kyselyn tila">
-                <div class="quiz-meta">
+            <section class="quiz-yleiskatsaus" aria-label="Kyselyn tila">
+                <div class="quiz-tiedot">
                     <span id="quiz-05"></span>
-                    <span id="quiz-status"></span>
+                    <span id="quiz-06"></span>
                 </div>
-                <p id="quiz-feedback" class="saved-feedback" aria-live="polite" hidden></p>
+                <p id="quiz-feedback" class="palaute" aria-live="polite" hidden></p>
             </section>
-            <div class="quiz-body">
-                <div id="quiz-loading" class="quiz-loading">Ladataan...</div>
-                <form id="quiz-form" class="quiz-form" hidden>
-                    <h3 id="quiz-question"></h3>
-                    <div id="quiz-options" class="quiz-options"></div>
-                    <div class="quiz-actions">
-                        <button id="quiz-prev" type="button">Edellinen</button>
-                        <button id="quiz-next" type="button" disabled>Seuraava</button>
+            <div class="quiz-07">
+                <div id="quiz-08" class="quiz-08">Ladataan...</div>
+                <form id="quiz-09" class="quiz-09" hidden>
+                    <h3 id="quiz-10"></h3>
+                    <div id="quiz-11" class="quiz-11"></div>
+                    <div class="quiz-12">
+                        <button id="quiz-13" type="button">Edellinen</button>
+                        <button id="quiz-14" type="button" disabled>Seuraava</button>
                     </div>
                 </form>
-                <section id="quiz-results" class="quiz-results" hidden>
+                <section id="quiz-tulokset" class="quiz-tulokset" hidden>
                     <h3>Sinulle sopivin vaihtoehto</h3>
-                    <div id="quiz-top" class="quiz-result-card"></div>
+                    <div id="quiz-15" class="quiz-tulos-kortti"></div>
                     <h4>Myös tämä voi sopia</h4>
-                    <div id="quiz-runner-up" class="quiz-result-card secondary"></div>
+                    <div id="quiz-16" class="quiz-tulos-kortti secondary"></div>
                 </section>
             </div>
         </section>

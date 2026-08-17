@@ -48,17 +48,17 @@ type FilterState = {
   savedOnly: boolean;
 };
 
-const listEl = document.getElementById("tutkinto-list");
+const listEl = document.getElementById("pankki-16");
 const detailEl = document.getElementById("detail");
-const countEl = document.getElementById("count");
-const feedbackEl = document.getElementById("detail-feedback");
-const searchInput = document.getElementById("tutkinto-search") as HTMLInputElement | null;
-const tutkintoFilterEl = document.getElementById("tutkinto-filter") as HTMLSelectElement | null;
-const paikkaFilterEl = document.getElementById("paikkakunta-filter") as HTMLDivElement | null;
-const paikkaFilterSummaryEl = document.getElementById("paikkakunta-filter-trigger");
-const paikkaFilterDropdownEl = document.getElementById("paikkakunta-filter-dropdown") as HTMLDetailsElement | null;
-const savedOnlyFilterEl = document.getElementById("saved-only-filter") as HTMLInputElement | null;
-const clearFiltersButtonEl = document.getElementById("clear-filters-button") as HTMLButtonElement | null;
+const countEl = document.getElementById("maara");
+const feedbackEl = document.getElementById("pankki-18");
+const searchInput = document.getElementById("pankki-03") as HTMLInputElement | null;
+const tutkintoFilterEl = document.getElementById("pankki-04") as HTMLSelectElement | null;
+const paikkaFilterEl = document.getElementById("pankki-11") as HTMLDivElement | null;
+const paikkaFilterSummaryEl = document.getElementById("pankki-08");
+const paikkaFilterDropdownEl = document.getElementById("pankki-07") as HTMLDetailsElement | null;
+const savedOnlyFilterEl = document.getElementById("pankki-14") as HTMLInputElement | null;
+const clearFiltersButtonEl = document.getElementById("pankki-15") as HTMLButtonElement | null;
 
 let activeId: number | null = null;
 let activeApi: Api | null = null;
@@ -146,7 +146,7 @@ function populatePaikkakuntaFilter(items: TutkintonimikeItem[]): void {
 
   paikkakunnat.forEach((paikkakunta) => {
     const label = document.createElement("label");
-    label.className = "filter-dropdown-option";
+    label.className = "pankki-19";
 
     const input = document.createElement("input");
     input.type = "checkbox";
@@ -224,7 +224,7 @@ function renderList(items: TutkintoListItem[]): void {
 
 function renderEmpty(message: string): void {
   if (detailEl) {
-    detailEl.innerHTML = `<p class="empty">${message}</p>`;
+    detailEl.innerHTML = `<p class="tyhja">${message}</p>`;
   }
 }
 
@@ -286,17 +286,17 @@ function renderDetail(detail: TutkintoDetail): void {
   detailEl.append(heading, description, subheading);
 
   if (!filteredDetail.tutkintonimikkeet.length) {
-    const empty = document.createElement("p");
-    empty.className = "empty";
-    empty.textContent = filterState.savedOnly
+    const tyhja = document.createElement("p");
+    tyhja.className = "tyhja";
+    tyhja.textContent = filterState.savedOnly
       ? "Ei tallennettuja tutkintonimikkeitä valituilla suodattimilla."
       : "Ei tutkintonimikkeitä valituilla suodattimilla.";
-    detailEl.append(empty);
+    detailEl.append(tyhja);
     return;
   }
 
   const grid = document.createElement("div");
-  grid.className = "tutkintonimike-grid";
+  grid.className = "pankki-20";
 
   filteredDetail.tutkintonimikkeet.forEach((nimike) => {
     const tutkintoNimi =
@@ -310,7 +310,7 @@ function renderDetail(detail: TutkintoDetail): void {
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "tutkintonimike-action";
+    button.className = "tutkintonimike-toiminto";
     button.textContent = savedIds.has(nimike.id) ? "Poista tallennuksista" : "Tallenna";
     button.addEventListener("click", () => {
       void toggleSavedTutkintonimike(nimike.id, nimike.nimi);
@@ -322,14 +322,14 @@ function renderDetail(detail: TutkintoDetail): void {
     if (nimike.paikkakunta.length > 0) {
       const selectedPaikkakunnat = new Set(filterState.paikkakunnat.map((value) => normalizeValue(value)));
       const paikkakuntaList = document.createElement("div");
-      paikkakuntaList.className = "tutkintonimike-paikkakunnat";
+      paikkakuntaList.className = "pankki-21";
 
       nimike.paikkakunta.forEach((paikkakunta) => {
         const chip = document.createElement("span");
-        chip.className = "paikkakunta-chip";
+        chip.className = "pankki-22";
         chip.textContent = paikkakunta;
         if (selectedPaikkakunnat.has(normalizeValue(paikkakunta))) {
-          chip.classList.add("is-selected");
+          chip.classList.add("valittu");
         }
         paikkakuntaList.append(chip);
       });

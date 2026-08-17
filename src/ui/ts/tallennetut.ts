@@ -49,7 +49,7 @@ type QuizSessionEntry = {
 type SavedTutkintoStat = {
   tutkintoId: number;
   tutkintoNimi: string;
-  count: number;
+  maara: number;
   share: number;
   items: SavedTutkintonimikeItem[];
 };
@@ -84,18 +84,18 @@ const QUIZ_PAGES: Record<string, string> = {
 };
 
 const summaryEl = document.getElementById("saved-summary");
-const statsCountEl = document.getElementById("saved-stats-count");
-const statsSummaryEl = document.getElementById("saved-stats-summary");
-const statsChartEl = document.getElementById("saved-stats-chart");
-const countEl = document.getElementById("saved-count");
-const resultsCountEl = document.getElementById("saved-results-count");
-const sessionsCountEl = document.getElementById("saved-sessions-count");
-const notesCountEl = document.getElementById("saved-notes-count");
-const listEl = document.getElementById("saved-list");
-const resultsListEl = document.getElementById("saved-results-list");
-const sessionsListEl = document.getElementById("saved-sessions-list");
-const notesListEl = document.getElementById("saved-notes-list");
-const feedbackEl = document.getElementById("saved-feedback");
+const statsCountEl = document.getElementById("saved-07");
+const statsSummaryEl = document.getElementById("saved-09");
+const statsChartEl = document.getElementById("saved-10");
+const countEl = document.getElementById("saved-13");
+const resultsCountEl = document.getElementById("saved-18");
+const sessionsCountEl = document.getElementById("saved-21");
+const notesCountEl = document.getElementById("saved-24");
+const listEl = document.getElementById("saved-14");
+const resultsListEl = document.getElementById("saved-19");
+const sessionsListEl = document.getElementById("saved-22");
+const notesListEl = document.getElementById("saved-25");
+const feedbackEl = document.getElementById("palaute");
 
 let noteSaveInFlightIds = new Set<number>();
 let noteDeleteInFlightIds = new Set<number>();
@@ -176,7 +176,7 @@ function setCounts(itemCount: number, resultCount: number, sessionCount: number,
 
 function renderEmpty(container: HTMLElement | null, message: string): void {
   if (container) {
-    container.innerHTML = `<p class="empty">${message}</p>`;
+    container.innerHTML = `<p class="tyhja">${message}</p>`;
   }
 }
 
@@ -187,7 +187,7 @@ function buildSavedTutkintoStats(items: SavedTutkintonimikeItem[]): SavedTutkint
   items.forEach((item) => {
     const existing = grouped.get(item.tutkinto_id);
     if (existing) {
-      existing.count += 1;
+      existing.maara += 1;
       existing.items.push(item);
       return;
     }
@@ -195,7 +195,7 @@ function buildSavedTutkintoStats(items: SavedTutkintonimikeItem[]): SavedTutkint
     grouped.set(item.tutkinto_id, {
       tutkintoId: item.tutkinto_id,
       tutkintoNimi: item.tutkinto_nimi,
-      count: 1,
+      maara: 1,
       share: 0,
       items: [item]
     });
@@ -204,10 +204,10 @@ function buildSavedTutkintoStats(items: SavedTutkintonimikeItem[]): SavedTutkint
   return Array.from(grouped.values())
     .map((entry) => ({
       ...entry,
-      share: total > 0 ? entry.count / total : 0,
+      share: total > 0 ? entry.maara / total : 0,
       items: [...entry.items].sort((left, right) => left.nimi.localeCompare(right.nimi, "fi"))
     }))
-    .sort((left, right) => right.count - left.count || left.tutkintoNimi.localeCompare(right.tutkintoNimi, "fi"));
+    .sort((left, right) => right.maara - left.maara || left.tutkintoNimi.localeCompare(right.tutkintoNimi, "fi"));
 }
 
 function buildSavedStatsMetrics(items: SavedTutkintonimikeItem[], stats: SavedTutkintoStat[]): SavedStatsMetric[] {
@@ -223,64 +223,64 @@ function buildSavedStatsMetrics(items: SavedTutkintonimikeItem[], stats: SavedTu
   return [
     { label: "Tallennettuja", value: String(items.length), accent: "strong" },
     { label: "Tutkintoja mukana", value: String(stats.length) },
-    { label: "Suurin keskittymä", value: `${topStat.tutkintoNimi} (${topStat.count})` }
+    { label: "Suurin keskittymä", value: `${topStat.tutkintoNimi} (${topStat.maara})` }
   ];
 }
 
 function createStatsMetricCard(metric: SavedStatsMetric): HTMLElement {
-  const card = document.createElement("article");
-  card.className = "saved-stats-metric";
-  card.dataset.accent = metric.accent ?? "default";
+  const kortti = document.createElement("article");
+  kortti.className = "saved-26";
+  kortti.dataset.accent = metric.accent ?? "default";
 
   const label = document.createElement("p");
-  label.className = "saved-stats-metric-label";
+  label.className = "saved-27";
   label.textContent = metric.label;
 
   const value = document.createElement("strong");
-  value.className = "saved-stats-metric-value";
+  value.className = "saved-28";
   value.textContent = metric.value;
 
-  card.append(label, value);
-  return card;
+  kortti.append(label, value);
+  return kortti;
 }
 
 function createStatsRow(stat: SavedTutkintoStat, maxCount: number): HTMLElement {
   const row = document.createElement("article");
-  row.className = "saved-stat-row";
-  row.style.setProperty("--saved-stat-ratio", maxCount > 0 ? String(stat.count / maxCount) : "0");
+  row.className = "saved-29";
+  row.style.setProperty("--saved-stat-ratio", maxCount > 0 ? String(stat.maara / maxCount) : "0");
 
   const header = document.createElement("div");
-  header.className = "saved-stat-row-header";
+  header.className = "saved-30";
 
   const titleGroup = document.createElement("div");
-  titleGroup.className = "saved-stat-row-title-group";
+  titleGroup.className = "saved-31";
 
   const title = document.createElement("strong");
   title.className = "saved-stat-row-title";
   title.textContent = stat.tutkintoNimi;
 
   const meta = document.createElement("p");
-  meta.className = "saved-stat-row-meta";
-  meta.textContent = `${stat.count} tutkintonimiketta | ${percentFormatter.format(stat.share)}`;
+  meta.className = "saved-32";
+  meta.textContent = `${stat.maara} tutkintonimiketta | ${percentFormatter.format(stat.share)}`;
 
   titleGroup.append(title, meta);
 
   const barValue = document.createElement("span");
-  barValue.className = "saved-stat-row-value";
-  barValue.textContent = String(stat.count);
+  barValue.className = "saved-33";
+  barValue.textContent = String(stat.maara);
 
   header.append(titleGroup, barValue);
 
   const barTrack = document.createElement("div");
-  barTrack.className = "saved-stat-bar-track";
+  barTrack.className = "saved-34";
   barTrack.setAttribute("aria-hidden", "true");
 
   const barFill = document.createElement("div");
-  barFill.className = "saved-stat-bar-fill";
+  barFill.className = "saved-35";
   barTrack.append(barFill);
 
   const itemList = document.createElement("p");
-  itemList.className = "saved-stat-row-items";
+  itemList.className = "saved-36";
   itemList.textContent = stat.items.map((item) => item.nimi).join(", ");
 
   row.append(header, barTrack, itemList);
@@ -305,7 +305,7 @@ function renderSavedStats(items: SavedTutkintonimikeItem[]): void {
   }
 
   if (statsChartEl) {
-    const maxCount = stats[0]?.count ?? 0;
+    const maxCount = stats[0]?.maara ?? 0;
     statsChartEl.replaceChildren(...stats.map((stat) => createStatsRow(stat, maxCount)));
   }
 }
@@ -375,37 +375,37 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
     img: item.img,
     tutkinto_nimi: item.tutkinto_nimi
   });
-  root.classList.add("saved-item-card");
+  root.classList.add("saved-37");
   media.remove();
 
   const removeButton = document.createElement("button");
   removeButton.type = "button";
-  removeButton.className = "tutkintonimike-action";
+  removeButton.className = "tutkintonimike-toiminto";
   removeButton.textContent = "Poista tallennuksista";
   removeButton.addEventListener("click", () => {
     void removeSavedItem(item.id, item.nimi);
   });
 
   const noteArea = document.createElement("div");
-  noteArea.className = "saved-note-editor";
+  noteArea.className = "saved-38";
 
   const noteLabel = document.createElement("label");
-  noteLabel.className = "saved-note-label";
+  noteLabel.className = "saved-39";
   noteLabel.textContent = "Oma muistiinpano";
 
   const textarea = document.createElement("textarea");
-  textarea.className = "saved-note-input";
+  textarea.className = "saved-40";
   textarea.rows = 4;
   textarea.value = noteText;
   textarea.placeholder = "Kirjoita oma huomio, kysymys tai muistettava asia...";
   textarea.disabled = noteSaveInFlightIds.has(item.id) || noteDeleteInFlightIds.has(item.id);
 
   const noteActions = document.createElement("div");
-  noteActions.className = "tutkintonimike-card-actions";
+  noteActions.className = "tutkintonimike-kortti-toiminnot";
 
   const saveNoteButton = document.createElement("button");
   saveNoteButton.type = "button";
-  saveNoteButton.className = "tutkintonimike-action";
+  saveNoteButton.className = "tutkintonimike-toiminto";
   saveNoteButton.textContent = "Tallenna muistiinpano";
   saveNoteButton.disabled =
     textarea.disabled || textarea.value.trim().length === 0;
@@ -415,7 +415,7 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
 
   const deleteNoteButton = document.createElement("button");
   deleteNoteButton.type = "button";
-  deleteNoteButton.className = "tutkintonimike-action";
+  deleteNoteButton.className = "tutkintonimike-toiminto";
   deleteNoteButton.textContent = "Poista muistiinpano";
   deleteNoteButton.disabled = textarea.disabled || noteText.trim().length === 0;
   deleteNoteButton.addEventListener("click", () => {
@@ -430,17 +430,17 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
   noteArea.append(noteLabel, textarea, noteActions);
 
   const planArea = document.createElement("div");
-  planArea.className = "saved-plan-editor";
+  planArea.className = "saved-41";
 
   const planTitle = document.createElement("p");
-  planTitle.className = "saved-note-label";
+  planTitle.className = "saved-39";
   planTitle.textContent = "Oma suunnitelma";
 
   const planGrid = document.createElement("div");
-  planGrid.className = "saved-plan-grid";
+  planGrid.className = "saved-42";
 
   const priorityWrap = document.createElement("div");
-  priorityWrap.className = "form-control";
+  priorityWrap.className = "lomake-kentta";
 
   const priorityLabel = document.createElement("label");
   priorityLabel.htmlFor = `saved-plan-priority-${item.id}`;
@@ -459,7 +459,7 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
   priorityWrap.append(priorityLabel, prioritySelect);
 
   const statusWrap = document.createElement("div");
-  statusWrap.className = "form-control";
+  statusWrap.className = "lomake-kentta";
 
   const statusLabel = document.createElement("label");
   statusLabel.htmlFor = `saved-plan-status-${item.id}`;
@@ -480,34 +480,34 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
   planGrid.append(priorityWrap, statusWrap);
 
   const nextStepWrap = document.createElement("div");
-  nextStepWrap.className = "saved-plan-next-step";
+  nextStepWrap.className = "saved-43";
 
   const nextStepLabel = document.createElement("label");
-  nextStepLabel.className = "saved-note-label";
+  nextStepLabel.className = "saved-39";
   nextStepLabel.htmlFor = `saved-plan-next-step-${item.id}`;
   nextStepLabel.textContent = "Seuraava askel";
 
   const nextStepInput = document.createElement("input");
   nextStepInput.type = "text";
   nextStepInput.id = `saved-plan-next-step-${item.id}`;
-  nextStepInput.className = "saved-plan-input";
+  nextStepInput.className = "saved-44";
   nextStepInput.placeholder = "Esim. Kysy opolta harjoittelusta";
   nextStepInput.value = item.nextStep ?? "";
   nextStepInput.disabled = planSaveInFlightIds.has(item.id);
   nextStepWrap.append(nextStepLabel, nextStepInput);
 
   const planMeta = document.createElement("p");
-  planMeta.className = "saved-plan-meta";
+  planMeta.className = "saved-45";
   planMeta.textContent = item.planUpdatedAt
     ? `Suunnitelma päivitetty ${formatTimestamp(item.planUpdatedAt)}`
     : "Valitse tärkeys, tilanne ja seuraava askel omalle vaihtoehdollesi.";
 
   const planActions = document.createElement("div");
-  planActions.className = "tutkintonimike-card-actions";
+  planActions.className = "tutkintonimike-kortti-toiminnot";
 
   const savePlanButton = document.createElement("button");
   savePlanButton.type = "button";
-  savePlanButton.className = "tutkintonimike-action";
+  savePlanButton.className = "tutkintonimike-toiminto";
   savePlanButton.textContent = "Tallenna suunnitelma";
   savePlanButton.disabled = planSaveInFlightIds.has(item.id);
   savePlanButton.addEventListener("click", () => {
@@ -516,7 +516,7 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
 
   const clearPlanButton = document.createElement("button");
   clearPlanButton.type = "button";
-  clearPlanButton.className = "tutkintonimike-action";
+  clearPlanButton.className = "tutkintonimike-toiminto";
   clearPlanButton.textContent = "Tyhjennä suunnitelma";
   clearPlanButton.disabled =
     planSaveInFlightIds.has(item.id) ||
@@ -550,10 +550,10 @@ function createSavedCard(item: SavedTutkintonimikeItem, noteText: string): HTMLE
 
 function createResultCard(item: QuizResultEntry): HTMLElement {
   const row = document.createElement("article");
-  row.className = "quiz-saved-result";
+  row.className = "quiz-tallennettu-tulos";
 
   const copy = document.createElement("div");
-  copy.className = "quiz-saved-result-copy";
+  copy.className = "quiz-tallennettu-tulos-copy";
 
   const title = document.createElement("strong");
   title.textContent =
@@ -575,11 +575,11 @@ function createResultCard(item: QuizResultEntry): HTMLElement {
   copy.append(title, meta);
 
   const actions = document.createElement("div");
-  actions.className = "quiz-result-footer";
+  actions.className = "quiz-tulos-alatunniste";
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
-  deleteButton.className = "tutkintonimike-action";
+  deleteButton.className = "tutkintonimike-toiminto";
   deleteButton.textContent = "Poista";
   deleteButton.addEventListener("click", () => {
     void removeQuizResult(item.id);
@@ -592,10 +592,10 @@ function createResultCard(item: QuizResultEntry): HTMLElement {
 
 function createSessionCard(item: QuizSessionEntry): HTMLElement {
   const row = document.createElement("article");
-  row.className = "quiz-saved-result";
+  row.className = "quiz-tallennettu-tulos";
 
   const copy = document.createElement("div");
-  copy.className = "quiz-saved-result-copy";
+  copy.className = "quiz-tallennettu-tulos-copy";
 
   const title = document.createElement("strong");
   title.textContent = getQuizLabel(item.quizId);
@@ -606,16 +606,16 @@ function createSessionCard(item: QuizSessionEntry): HTMLElement {
   copy.append(title, meta);
 
   const actions = document.createElement("div");
-  actions.className = "quiz-result-footer";
+  actions.className = "quiz-tulos-alatunniste";
 
   const continueLink = document.createElement("a");
   continueLink.href = QUIZ_PAGES[item.quizId] ?? "#";
-  continueLink.className = "tutkintonimike-link-action";
+  continueLink.className = "tutkintonimike-linkki-toiminto";
   continueLink.textContent = "Jatka";
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
-  deleteButton.className = "tutkintonimike-action";
+  deleteButton.className = "tutkintonimike-toiminto";
   deleteButton.textContent = "Poista tila";
   deleteButton.addEventListener("click", () => {
     void removeQuizSession(item.quizId);
@@ -628,10 +628,10 @@ function createSessionCard(item: QuizSessionEntry): HTMLElement {
 
 function createNoteCard(item: TutkintonimikeNoteItem): HTMLElement {
   const row = document.createElement("article");
-  row.className = "quiz-saved-result";
+  row.className = "quiz-tallennettu-tulos";
 
   const copy = document.createElement("div");
-  copy.className = "quiz-saved-result-copy";
+  copy.className = "quiz-tallennettu-tulos-copy";
 
   const title = document.createElement("strong");
   title.textContent = item.nimi;
@@ -640,17 +640,17 @@ function createNoteCard(item: TutkintonimikeNoteItem): HTMLElement {
   meta.textContent = `${item.tutkinto_nimi} | Päivitetty ${formatTimestamp(item.updatedAt)}`;
 
   const text = document.createElement("p");
-  text.className = "saved-note-preview";
+  text.className = "muistiinpano-esikatselu";
   text.textContent = item.noteText;
 
   copy.append(title, meta, text);
 
   const actions = document.createElement("div");
-  actions.className = "quiz-result-footer";
+  actions.className = "quiz-tulos-alatunniste";
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
-  deleteButton.className = "tutkintonimike-action";
+  deleteButton.className = "tutkintonimike-toiminto";
   deleteButton.textContent = "Poista";
   deleteButton.addEventListener("click", () => {
     void removeNote(item.id, item.nimi);

@@ -67,17 +67,17 @@ const SUUNNITELMA_TILA_TEKSTIT: Record<string, string> = {
   "vahva-vaihtoehto": "Vahva vaihtoehto"
 };
 
-const palauteEl = document.getElementById("oma-suunnitelma-palaute");
-const vaihtoehdotLkmEl = document.getElementById("oma-suunnitelma-vaihtoehdot-lkm");
-const vaihtoehdotEl = document.getElementById("oma-suunnitelma-vaihtoehdot");
-const jatkaLkmEl = document.getElementById("oma-suunnitelma-jatka-lkm");
-const jatkaEl = document.getElementById("oma-suunnitelma-jatka");
-const tuloksetLkmEl = document.getElementById("oma-suunnitelma-tulokset-lkm");
-const tuloksetEl = document.getElementById("oma-suunnitelma-tulokset");
-const muistiinpanotLkmEl = document.getElementById("oma-suunnitelma-muistiinpanot-lkm");
-const muistiinpanotEl = document.getElementById("oma-suunnitelma-muistiinpanot");
-const muistioEl = document.getElementById("oma-suunnitelma-muistio") as HTMLTextAreaElement | null;
-const muistioTilaEl = document.getElementById("oma-suunnitelma-muistio-tila");
+const palauteEl = document.getElementById("oma-suunnitelma-02");
+const vaihtoehdotLkmEl = document.getElementById("oma-suunnitelma-11");
+const vaihtoehdotEl = document.getElementById("oma-suunnitelma-12");
+const jatkaLkmEl = document.getElementById("oma-suunnitelma-07");
+const jatkaEl = document.getElementById("oma-suunnitelma-08");
+const tuloksetLkmEl = document.getElementById("oma-suunnitelma-23");
+const tuloksetEl = document.getElementById("oma-suunnitelma-24");
+const muistiinpanotLkmEl = document.getElementById("oma-suunnitelma-27");
+const muistiinpanotEl = document.getElementById("oma-suunnitelma-28");
+const muistioEl = document.getElementById("oma-suunnitelma-18") as HTMLTextAreaElement | null;
+const muistioTilaEl = document.getElementById("oma-suunnitelma-20");
 let muistioAlustettu = false;
 
 function haeRajapinta(): Rajapinta | null {
@@ -95,19 +95,19 @@ function naytaTyhja(container: HTMLElement | null, message: string): void {
   if (container) {
     if (container instanceof HTMLUListElement) {
       const item = document.createElement("li");
-      item.className = "empty";
+      item.className = "tyhja";
       item.textContent = message;
       container.replaceChildren(item);
       return;
     }
 
-    container.innerHTML = `<p class="empty">${message}</p>`;
+    container.innerHTML = `<p class="tyhja">${message}</p>`;
   }
 }
 
 function luoListarivi(content: HTMLElement): HTMLLIElement {
   const item = document.createElement("li");
-  item.className = "oma-suunnitelma-listarivi";
+  item.className = "oma-suunnitelma-29";
   item.append(content);
   return item;
 }
@@ -177,23 +177,23 @@ function haeSuunnitelmaPaino(item: TallennettuTutkintonimikeTieto): number {
 }
 
 function luoVaihtoehtokortti(item: TallennettuTutkintonimikeTieto, noteText: string | null): HTMLElement {
-  const card = document.createElement("article");
-  card.className = "oma-suunnitelma-vaihtoehto-kortti";
+  const kortti = document.createElement("article");
+  kortti.className = "oma-suunnitelma-30";
 
   const title = document.createElement("h4");
   title.textContent = item.nimi;
 
   const meta = document.createElement("p");
-  meta.className = "oma-suunnitelma-kortti-meta";
+  meta.className = "oma-suunnitelma-31";
   meta.textContent = `${item.tutkinto_nimi} | Tallennettu ${muotoileAikaleima(item.savedAt)}`;
 
   const tags = document.createElement("div");
-  tags.className = "oma-suunnitelma-tunnisteet";
+  tags.className = "oma-suunnitelma-32";
 
   const priorityLabel = haePrioriteettiTeksti(item.planPriority);
   if (priorityLabel) {
     const tag = document.createElement("span");
-    tag.className = "oma-suunnitelma-tunniste";
+    tag.className = "oma-suunnitelma-33";
     tag.textContent = priorityLabel;
     tags.append(tag);
   }
@@ -201,7 +201,7 @@ function luoVaihtoehtokortti(item: TallennettuTutkintonimikeTieto, noteText: str
   const statusLabel = haeTilaTeksti(item.planStatus);
   if (statusLabel) {
     const tag = document.createElement("span");
-    tag.className = "oma-suunnitelma-tunniste";
+    tag.className = "oma-suunnitelma-33";
     tag.textContent = statusLabel;
     tags.append(tag);
   }
@@ -210,11 +210,11 @@ function luoVaihtoehtokortti(item: TallennettuTutkintonimikeTieto, noteText: str
   const hasNextStep = Boolean((item.nextStep ?? "").trim().length > 0);
 
   const actions = document.createElement("div");
-  actions.className = "tutkintonimike-kortti-actions";
+  actions.className = "oma-suunnitelma-34";
 
   const savedLink = document.createElement("a");
   savedLink.href = "./tallennetut.html";
-  savedLink.className = "tutkintonimike-link-action";
+  savedLink.className = "tutkintonimike-linkki-toiminto";
   savedLink.textContent = "Avaa tallennetut";
 
   actions.append(savedLink);
@@ -224,48 +224,48 @@ function luoVaihtoehtokortti(item: TallennettuTutkintonimikeTieto, noteText: str
     externalLink.href = item.linkki;
     externalLink.target = "_blank";
     externalLink.rel = "noopener noreferrer";
-    externalLink.className = "tutkintonimike-link-action";
+    externalLink.className = "tutkintonimike-linkki-toiminto";
     externalLink.textContent = "Lisatietoa";
     actions.append(externalLink);
   }
 
-  card.append(title, meta);
+  kortti.append(title, meta);
 
   if (tags.childElementCount > 0) {
-    card.append(tags);
+    kortti.append(tags);
   }
 
   if (hasNote) {
     const note = document.createElement("p");
-    note.className = "oma-suunnitelma-kortti-muistio";
+    note.className = "oma-suunnitelma-35";
     note.textContent = noteText ?? "";
-    card.append(note);
+    kortti.append(note);
   }
 
   if (hasNextStep) {
     const nextStep = document.createElement("p");
-    nextStep.className = "oma-suunnitelma-kortti-seuraava-askel";
+    nextStep.className = "oma-suunnitelma-36";
     nextStep.textContent = `Seuraava askel: ${item.nextStep}`;
-    card.append(nextStep);
+    kortti.append(nextStep);
   }
 
   if (!hasNote && !hasNextStep) {
     const summary = document.createElement("p");
-    summary.className = "oma-suunnitelma-kortti-yhteenveto";
+    summary.className = "oma-suunnitelma-37";
     summary.textContent = "Avaa tallennetut ja lisää oma huomio tai seuraava askel.";
-    card.append(summary);
+    kortti.append(summary);
   }
 
-  card.append(actions);
-  return card;
+  kortti.append(actions);
+  return kortti;
 }
 
 function luoJatkaKortti(item: KyselyIstuntoTieto): HTMLElement {
   const row = document.createElement("article");
-  row.className = "quiz-saved-result";
+  row.className = "quiz-tallennettu-tulos";
 
   const copy = document.createElement("div");
-  copy.className = "quiz-saved-result-copy";
+  copy.className = "quiz-tallennettu-tulos-copy";
 
   const title = document.createElement("strong");
   title.textContent = haeKyselynNimi(item.quizId);
@@ -277,7 +277,7 @@ function luoJatkaKortti(item: KyselyIstuntoTieto): HTMLElement {
 
   const action = document.createElement("a");
   action.href = QUIZ_PAGES[item.quizId] ?? "./tallennetut.html";
-  action.className = "tutkintonimike-link-action";
+  action.className = "tutkintonimike-linkki-toiminto";
   action.textContent = "Jatka";
 
   row.append(copy, action);
@@ -286,10 +286,10 @@ function luoJatkaKortti(item: KyselyIstuntoTieto): HTMLElement {
 
 function luoTuloskortti(item: KyselyTulosTieto): HTMLElement {
   const row = document.createElement("article");
-  row.className = "quiz-saved-result";
+  row.className = "quiz-tallennettu-tulos";
 
   const copy = document.createElement("div");
-  copy.className = "quiz-saved-result-copy";
+  copy.className = "quiz-tallennettu-tulos-copy";
 
   const title = document.createElement("strong");
   title.textContent = haeTuloksenOtsikko(item);
@@ -301,7 +301,7 @@ function luoTuloskortti(item: KyselyTulosTieto): HTMLElement {
 
   const action = document.createElement("a");
   action.href = "./tallennetut.html";
-  action.className = "tutkintonimike-link-action";
+  action.className = "tutkintonimike-linkki-toiminto";
   action.textContent = "Avaa tallennetut";
 
   row.append(copy, action);
@@ -310,10 +310,10 @@ function luoTuloskortti(item: KyselyTulosTieto): HTMLElement {
 
 function luoMuistiinpanoKortti(item: TutkintonimikeMuistiinpanoTieto): HTMLElement {
   const row = document.createElement("article");
-  row.className = "quiz-saved-result";
+  row.className = "quiz-tallennettu-tulos";
 
   const copy = document.createElement("div");
-  copy.className = "quiz-saved-result-copy";
+  copy.className = "quiz-tallennettu-tulos-copy";
 
   const title = document.createElement("strong");
   title.textContent = item.nimi;
@@ -322,14 +322,14 @@ function luoMuistiinpanoKortti(item: TutkintonimikeMuistiinpanoTieto): HTMLEleme
   meta.textContent = `${item.tutkinto_nimi} | Päivitetty ${muotoileAikaleima(item.updatedAt)}`;
 
   const note = document.createElement("p");
-  note.className = "saved-note-preview";
+  note.className = "muistiinpano-esikatselu";
   note.textContent = item.noteText;
 
   copy.append(title, meta, note);
 
   const action = document.createElement("a");
   action.href = "./tallennetut.html";
-  action.className = "tutkintonimike-link-action";
+  action.className = "tutkintonimike-linkki-toiminto";
   action.textContent = "Muokkaa";
 
   row.append(copy, action);

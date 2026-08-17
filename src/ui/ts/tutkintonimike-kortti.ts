@@ -26,18 +26,18 @@ export type TutkintonimikeCardElements = {
 function createImageElement(item: TutkintonimikeCardItem): HTMLElement {
   if (!item.img) {
     const placeholder = document.createElement("div");
-    placeholder.className = "tutkintonimike-image tutkintonimike-image--placeholder";
+    placeholder.className = "tutkintonimike-kuva tutkintonimike-kuva--paikanvaraaja";
     placeholder.setAttribute("aria-hidden", "true");
     return placeholder;
   }
 
   const image = document.createElement("img");
-  image.className = "tutkintonimike-image";
+  image.className = "tutkintonimike-kuva";
   image.src = item.img;
   image.alt = item.nimi;
   image.addEventListener("error", () => {
     const placeholder = document.createElement("div");
-    placeholder.className = "tutkintonimike-image tutkintonimike-image--placeholder";
+    placeholder.className = "tutkintonimike-kuva tutkintonimike-kuva--paikanvaraaja";
     placeholder.setAttribute("aria-hidden", "true");
     image.replaceWith(placeholder);
   });
@@ -50,7 +50,7 @@ export function createTutkintonimikeLinkAction(linkki: string | null): HTMLAncho
   }
 
   const linkAction = document.createElement("a");
-  linkAction.className = "tutkintonimike-link-action";
+  linkAction.className = "tutkintonimike-linkki-toiminto";
   linkAction.href = linkki;
   linkAction.target = "_blank";
   linkAction.rel = "noreferrer";
@@ -65,11 +65,11 @@ export function createTutkintonimikeCard(
   const { titleTag = "h3", allowLink = true, rootTag = "article", showLinkAction = true } = options;
 
   const root = document.createElement(rootTag);
-  root.className = "tutkintonimike-card";
+  root.className = "tutkintonimike-kortti";
 
   const media = createImageElement(item);
   const body = document.createElement("div");
-  body.className = "tutkintonimike-card-body";
+  body.className = "tutkintonimike-kortti-sisalto";
 
   const title = document.createElement(titleTag);
   const titleContent =
@@ -89,13 +89,13 @@ export function createTutkintonimikeCard(
   let meta: HTMLParagraphElement | null = null;
   if (item.tutkinto_nimi) {
     meta = document.createElement("p");
-    meta.className = "tutkintonimike-meta";
+    meta.className = "tutkintonimike-tiedot";
     meta.textContent = item.tutkinto_nimi;
     body.append(meta);
   }
 
   const actions = document.createElement("div");
-  actions.className = "tutkintonimike-card-actions";
+  actions.className = "tutkintonimike-kortti-toiminnot";
 
   const linkAction = showLinkAction ? createTutkintonimikeLinkAction(item.linkki) : null;
   if (linkAction) {

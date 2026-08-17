@@ -180,7 +180,6 @@ def set_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
     )
 
 def ensure_data(conn: sqlite3.Connection, paths: ProjectPaths) -> None:
-    '''Varmistaa, että tietokanta vastaa nykyistä lähde-JSONia ja skeemaa'''
 
     ensure_schema(conn)
     source_path = paths.lahde_json_path()
@@ -199,7 +198,6 @@ def ensure_data(conn: sqlite3.Connection, paths: ProjectPaths) -> None:
     current_hash = get_meta(conn, "ammatit_json_sha256")
 
     if total == 0 or current_hash != import_signature:
-        # Jos lähdedata tai importtiversio vaihtuu, rakennetaan tutkintosisältö uudelleen lähteestä, jotta tietokanta ei jää ristiriitaiseen tilaan
         with conn:
             conn.execute("DELETE FROM tutkintonimikkeet;")
             conn.execute("DELETE FROM tutkinnot;")

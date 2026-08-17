@@ -1,15 +1,11 @@
-'''Sisältödatan lukeminen JSON-lähteistä backendin käyttöön'''
-
 from __future__ import annotations
 from typing import Any
 from apu import parse_json_payload
 
 class SisaltoApiMixin:
     _paths: Any
-    '''Mixin, joka tarjoaa käyttöliittymälle staattisen sisältödatan'''
 
     def list_opiskelu_suunnat(self) -> list[dict[str, str | int]]:
-        '''Lukee opiskelusuunnat suoraan JSON-lähteestä käyttöliittymälle sopivassa muodossa'''
 
         source_path = self._paths.opiskelu_suunnat_json_path()
         if not source_path.exists():
@@ -48,7 +44,6 @@ class SisaltoApiMixin:
         return items
 
     def get_opintopolku_quiz(self) -> dict:
-        '''Palauttaa opintopolkuvisan koko datan sellaisenaan JSON-tiedostosta'''
 
         source_path = self._paths.opintopolku_quiz_json_path()
         if not source_path.exists():

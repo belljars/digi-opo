@@ -91,21 +91,21 @@ type SerializedQuizSession = {
   currentOrientation: PairOrientation;
 };
 
-const quizLeftEl = document.getElementById("quiz-vasen") as HTMLDivElement | null;
-const quizRightEl = document.getElementById("quiz-oikea") as HTMLDivElement | null;
-const quizCardsEl = document.getElementById("quiz-cards");
-const quizCountEl = document.getElementById("quiz-count");
-const quizStageEl = document.getElementById("quiz-stage");
+const quizLeftEl = document.getElementById("quiz-28") as HTMLDivElement | null;
+const quizRightEl = document.getElementById("quiz-30") as HTMLDivElement | null;
+const quizCardsEl = document.getElementById("quiz-27");
+const quizCountEl = document.getElementById("quiz-22");
+const quizStageEl = document.getElementById("quiz-23");
 const quizFeedbackEl = document.getElementById("quiz-feedback");
-const quizHelpEl = document.getElementById("quiz-help");
-const quizPromptEl = document.getElementById("quiz-prompt");
+const quizHelpEl = document.getElementById("quiz-38");
+const quizPromptEl = document.getElementById("quiz-26");
 const quizRestartEl = document.getElementById("quiz-04") as HTMLButtonElement | null;
-const quizFinishedEl = document.getElementById("quiz-valmis");
-const quizSummaryEl = document.getElementById("quiz-summary");
-const quizTop3El = document.getElementById("quiz-top3");
-const quizRankingListEl = document.getElementById("quiz-ranking-list");
-const quizStartPopupEl = document.getElementById("quiz-start-popup");
-const quizStartPopupCloseEl = document.getElementById("quiz-start-popup-close") as HTMLButtonElement | null;
+const quizFinishedEl = document.getElementById("quiz-31");
+const quizSummaryEl = document.getElementById("quiz-32");
+const quizTop3El = document.getElementById("quiz-35");
+const quizRankingListEl = document.getElementById("quiz-36");
+const quizStartPopupEl = document.getElementById("quiz-17");
+const quizStartPopupCloseEl = document.getElementById("quiz-21") as HTMLButtonElement | null;
 
 let allItems: TutkintonimikeItem[] = [];
 let itemMap = new Map<number, TutkintonimikeItem>();
@@ -179,7 +179,7 @@ function createCardContent(
 function createSaveButton(item: TutkintonimikeItem): HTMLButtonElement {
   const saveButton = document.createElement("button");
   saveButton.type = "button";
-  saveButton.className = "tutkintonimike-action";
+  saveButton.className = "tutkintonimike-toiminto";
   saveButton.textContent = savedIds.has(item.id) ? "Poista tallennus" : "Tallenna";
   saveButton.disabled = saveInFlightIds.has(item.id);
   saveButton.addEventListener("click", (event) => {
@@ -204,11 +204,11 @@ function renderChoiceSlot(slotEl: HTMLElement | null, item: TutkintonimikeItem |
   }
 
   const shell = document.createElement("div");
-  shell.className = "quiz-choice-shell";
+  shell.className = "quiz-39";
 
   const chooseButton = document.createElement("button");
   chooseButton.type = "button";
-  chooseButton.className = "quiz-choice-button";
+  chooseButton.className = "quiz-40";
   chooseButton.setAttribute("aria-label", `Valitse ${item.nimi}`);
   chooseButton.append(createCardContent(item, "h3", false, false));
   chooseButton.addEventListener("click", () => {
@@ -216,7 +216,7 @@ function renderChoiceSlot(slotEl: HTMLElement | null, item: TutkintonimikeItem |
   });
 
   const footer = document.createElement("div");
-  footer.className = "quiz-choice-footer";
+  footer.className = "quiz-41";
   const linkAction = createTutkintonimikeLinkAction(item.linkki);
   if (linkAction) {
     footer.append(linkAction);
@@ -236,7 +236,7 @@ function renderInactiveSlot(slotEl: HTMLElement | null, message: string): void {
   slotEl.classList.add("is-disabled");
 
   const shell = document.createElement("div");
-  shell.className = "quiz-choice-shell quiz-choice-shell--empty";
+  shell.className = "quiz-39 quiz-42";
   shell.textContent = message;
   slotEl.append(shell);
 }
@@ -366,16 +366,16 @@ function mapIdGroups(groups: unknown): TutkintonimikeItem[][] | null {
   return mappedGroups;
 }
 
-function mapIdList(list: unknown): TutkintonimikeItem[] | null | undefined {
-  if (list === null) {
+function mapIdList(lista: unknown): TutkintonimikeItem[] | null | undefined {
+  if (lista === null) {
     return null;
   }
-  if (!Array.isArray(list)) {
+  if (!Array.isArray(lista)) {
     return undefined;
   }
 
   const mappedList: TutkintonimikeItem[] = [];
-  for (const rawId of list) {
+  for (const rawId of lista) {
     if (typeof rawId !== "number") {
       return undefined;
     }
@@ -464,21 +464,21 @@ function clearSession(): Promise<void> {
 }
 
 function createResultCard(item: TutkintonimikeItem, label: string): HTMLElement {
-  const { root: card, body, actions } = createTutkintonimikeCard(item, {
+  const { root: kortti, body, actions } = createTutkintonimikeCard(item, {
     titleTag: "h4",
     allowLink: true,
     rootTag: "div",
     showLinkAction: true
   });
-  card.classList.add("quiz-result-card");
+  kortti.classList.add("quiz-tulos-kortti");
 
   const meta = document.createElement("span");
-  meta.className = "quiz-score";
+  meta.className = "quiz-pisteet";
   meta.textContent = label;
 
   body.insertBefore(meta, actions);
   actions.append(createSaveButton(item));
-  return card;
+  return kortti;
 }
 
 function renderTop3(): void {
@@ -506,11 +506,11 @@ function renderRankingList(): void {
     title.textContent = `${index + 1}. ${item.nimi}`;
 
     const meta = document.createElement("span");
-    meta.className = "quiz-score";
+    meta.className = "quiz-pisteet";
     meta.textContent = item.tutkinto_nimi;
 
     const footer = document.createElement("div");
-    footer.className = "quiz-result-footer";
+    footer.className = "quiz-tulos-alatunniste";
     footer.append(createSaveButton(item));
 
     li.append(title, meta, footer);
@@ -605,7 +605,7 @@ async function saveFinishedResult(ranking: TutkintonimikeItem[], comparisons: nu
     rankingNames: ranking.map((item) => item.nimi),
     comparisons,
     durationMs,
-    count: ranking.length
+    maara: ranking.length
   };
 
   await activeApi.save_quiz_result(QUIZ_ID, payload);

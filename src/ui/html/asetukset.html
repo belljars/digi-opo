@@ -29,167 +29,167 @@
         </script>
         <link rel="stylesheet" href="../css/init.css" />
     </head>
-    <a class="skip-link" href="#main-sisalto">Siirry sisältöön</a>
-    <main class="app" id="main-sisalto">
-        <section class="panel asetukset-page">
-            <section class="asetukset-section" aria-labelledby="asetukset-export-title">
+    <a class="ohita-linkki" href="#paa-sisalto">Siirry sisältöön</a>
+    <main class="app" id="paa-sisalto">
+        <section class="paneeli asetukset-sivu">
+            <section class="asetukset-01" aria-labelledby="asetukset-02">
                 <div>
-                    <h3 id="asetukset-export-title">PDF-vienti</h3>
-                    <p class="saved-page-copy">
+                    <h3 id="asetukset-02">PDF-vienti</h3>
+                    <p class="sivu-copy">
                         Vie tallennetut tutkintonimikkeet, suunnitelmat, muistiinpanot, piilotukset ja visatulokset yhteen PDF-tiedostoon.
                     </p>
                 </div>
                 </div>
-                <div class="asetukset-export-actions">
-                    <button id="asetukset-export-pdf-button" type="button" class="tutkintonimike-action">
+                <div class="asetukset-03">
+                    <button id="asetukset-04" type="button" class="tutkintonimike-toiminto">
                     Vie käyttäjätiedot PDF:nä
                     </button>
-                    <p id="asetukset-export-status" class="saved-page-copy" aria-live="polite"></p>
+                    <p id="asetukset-05" class="sivu-copy" aria-live="polite"></p>
                 </div>
             </section>
-            <div id="asetukset-feedback" class="saved-feedback saved-page-feedback" aria-live="polite" hidden></div>
-            <section class="asetukset-section" aria-labelledby="asetukset-tutkinnot-title">
-                <div class="asetukset-section-header">
+            <div id="asetukset-06" class="palaute sivu-palaute" aria-live="polite" hidden></div>
+            <section class="asetukset-01" aria-labelledby="asetukset-07">
+                <div class="asetukset-08">
                     <div>
-                        <h3 id="asetukset-tutkinnot-title">Tutkinnot</h3>
-                        <p class="saved-page-copy">Piilota kokonaisia tutkintoja tai palauta ne takaisin näkyviin.</p>
+                        <h3 id="asetukset-07">Tutkinnot</h3>
+                        <p class="sivu-copy">Piilota kokonaisia tutkintoja tai palauta ne takaisin näkyviin.</p>
                     </div>
                 </div>
-                <div class="asetukset-columns">
-                    <div class="asetukset-pane">
-                        <details class="asetukset-dropdown">
-                            <summary class="asetukset-dropdown-summary">
-                                <span class="asetukset-dropdown-title">Näkyvät tutkinnot</span>
-                                <span id="asetukset-visible-tutkinnot-count" class="count"></span>
+                <div class="asetukset-09">
+                    <div class="asetukset-10">
+                        <details class="asetukset-11">
+                            <summary class="asetukset-12">
+                                <span class="asetukset-13">Näkyvät tutkinnot</span>
+                                <span id="asetukset-14" class="maara"></span>
                             </summary>
-                            <div class="asetukset-dropdown-body">
-                                <div class="search">
-                                    <label for="asetukset-tutkinto-search">Hae näkyvää tutkintoa</label>
+                            <div class="asetukset-15">
+                                <div class="haku">
+                                    <label for="asetukset-16">Hae näkyvää tutkintoa</label>
                                     <input
-                                        id="asetukset-tutkinto-search"
-                                        type="search"
+                                        id="asetukset-16"
+                                        type="haku"
                                         placeholder="Hae tutkintoa nimellä"
                                         autocomplete="off"
                                         />
                                 </div>
-                                <div id="asetukset-visible-tutkinnot" class="asetukset-list"></div>
+                                <div id="asetukset-17" class="asetukset-18"></div>
                             </div>
                         </details>
                     </div>
-                    <div class="asetukset-pane asetukset-pane--hidden">
-                        <div class="asetukset-pane-heading">
+                    <div class="asetukset-10 asetukset-19">
+                        <div class="asetukset-20">
                             <div>
-                                <p class="asetukset-pane-label">Piilotetut tutkinnot</p>
-                                <div id="asetukset-hidden-tutkinnot-count" class="count"></div>
+                                <p class="asetukset-21">Piilotetut tutkinnot</p>
+                                <div id="asetukset-22" class="maara"></div>
                             </div>
                             <button
-                                id="asetukset-unhide-all-tutkinnot-button"
+                                id="asetukset-23"
                                 type="button"
-                                class="tutkintonimike-action"
+                                class="tutkintonimike-toiminto"
                                 disabled
                                 >
                             Palauta kaikki
                             </button>
                         </div>
-                        <div id="asetukset-hidden-tutkinnot" class="asetukset-list"></div>
+                        <div id="asetukset-24" class="asetukset-18"></div>
                     </div>
                 </div>
             </section>
-            <section class="asetukset-section" aria-labelledby="asetukset-nimikkeet-title">
-                <div class="asetukset-section-header">
+            <section class="asetukset-01" aria-labelledby="asetukset-25">
+                <div class="asetukset-08">
                     <div>
-                        <h3 id="asetukset-nimikkeet-title">Tutkintonimikkeet</h3>
-                        <p class="saved-page-copy">
+                        <h3 id="asetukset-25">Tutkintonimikkeet</h3>
+                        <p class="sivu-copy">
                             Yksittäisen tutkintonimikkeen piilotus vaikuttaa pankkiin, tallennettuihin ja amis-korttivertailuun.
                         </p>
                     </div>
                 </div>
-                <div class="asetukset-columns">
-                    <div class="asetukset-pane">
-                        <details class="asetukset-dropdown">
-                            <summary class="asetukset-dropdown-summary">
-                                <span class="asetukset-dropdown-title">Näkyvät tutkintonimikkeet</span>
-                                <span id="asetukset-visible-tutkintonimikkeet-count" class="count"></span>
+                <div class="asetukset-09">
+                    <div class="asetukset-10">
+                        <details class="asetukset-11">
+                            <summary class="asetukset-12">
+                                <span class="asetukset-13">Näkyvät tutkintonimikkeet</span>
+                                <span id="asetukset-26" class="maara"></span>
                             </summary>
-                            <div class="asetukset-dropdown-body">
-                                <div class="search">
-                                    <label for="asetukset-tutkintonimike-search">Hae näkyvää tutkintonimikettä</label>
+                            <div class="asetukset-15">
+                                <div class="haku">
+                                    <label for="asetukset-27">Hae näkyvää tutkintonimikettä</label>
                                     <input
-                                        id="asetukset-tutkintonimike-search"
-                                        type="search"
+                                        id="asetukset-27"
+                                        type="haku"
                                         placeholder="Hae tutkintonimikettä nimellä"
                                         autocomplete="off"
                                         />
                                 </div>
-                                <div id="asetukset-visible-tutkintonimikkeet" class="saved-grid"></div>
+                                <div id="asetukset-28" class="ruudukko"></div>
                             </div>
                         </details>
                     </div>
-                    <div class="asetukset-pane asetukset-pane--hidden">
-                        <div class="asetukset-pane-heading">
+                    <div class="asetukset-10 asetukset-19">
+                        <div class="asetukset-20">
                             <div>
-                                <p class="asetukset-pane-label">Piilotetut tutkintonimikkeet</p>
-                                <div id="asetukset-hidden-tutkintonimikkeet-count" class="count"></div>
+                                <p class="asetukset-21">Piilotetut tutkintonimikkeet</p>
+                                <div id="asetukset-29" class="maara"></div>
                             </div>
                             <button
-                                id="asetukset-unhide-all-tutkintonimikkeet-button"
+                                id="asetukset-30"
                                 type="button"
-                                class="tutkintonimike-action"
+                                class="tutkintonimike-toiminto"
                                 disabled
                                 >
                             Palauta kaikki
                             </button>
                         </div>
-                        <div id="asetukset-hidden-tutkintonimikkeet" class="saved-grid"></div>
+                        <div id="asetukset-31" class="ruudukko"></div>
                     </div>
                 </div>
             </section>
-            <section class="asetukset-section" aria-labelledby="asetukset-paikkakunnat-title">
-                <div class="asetukset-section-header">
+            <section class="asetukset-01" aria-labelledby="asetukset-32">
+                <div class="asetukset-08">
                     <div>
-                        <h3 id="asetukset-paikkakunnat-title">Paikkakunnat</h3>
-                        <p class="saved-page-copy">
+                        <h3 id="asetukset-32">Paikkakunnat</h3>
+                        <p class="sivu-copy">
                             Piilota paikkakunnat, joita et halua nähdä tutkintopankissa tai tallennetuissa vaihtoehdoissa.
                         </p>
                     </div>
                 </div>
-                <div class="asetukset-columns">
-                    <div class="asetukset-pane">
-                        <details class="asetukset-dropdown">
-                            <summary class="asetukset-dropdown-summary">
-                                <span class="asetukset-dropdown-title">Näkyvät paikkakunnat</span>
-                                <span id="asetukset-visible-paikkakunnat-count" class="count"></span>
+                <div class="asetukset-09">
+                    <div class="asetukset-10">
+                        <details class="asetukset-11">
+                            <summary class="asetukset-12">
+                                <span class="asetukset-13">Näkyvät paikkakunnat</span>
+                                <span id="asetukset-33" class="maara"></span>
                             </summary>
-                            <div class="asetukset-dropdown-body">
-                                <div class="search">
-                                    <label for="asetukset-paikkakunta-search">Hae näkyvää paikkakuntaa</label>
+                            <div class="asetukset-15">
+                                <div class="haku">
+                                    <label for="asetukset-34">Hae näkyvää paikkakuntaa</label>
                                     <input
-                                        id="asetukset-paikkakunta-search"
-                                        type="search"
+                                        id="asetukset-34"
+                                        type="haku"
                                         placeholder="Hae paikkakuntaa nimellä"
                                         autocomplete="off"
                                         />
                                 </div>
-                                <div id="asetukset-visible-paikkakunnat" class="asetukset-list"></div>
+                                <div id="asetukset-35" class="asetukset-18"></div>
                             </div>
                         </details>
                     </div>
-                    <div class="asetukset-pane asetukset-pane--hidden">
-                        <div class="asetukset-pane-heading">
+                    <div class="asetukset-10 asetukset-19">
+                        <div class="asetukset-20">
                             <div>
-                                <p class="asetukset-pane-label">Piilotetut paikkakunnat</p>
-                                <div id="asetukset-hidden-paikkakunnat-count" class="count"></div>
+                                <p class="asetukset-21">Piilotetut paikkakunnat</p>
+                                <div id="asetukset-36" class="maara"></div>
                             </div>
                             <button
-                                id="asetukset-unhide-all-paikkakunnat-button"
+                                id="asetukset-37"
                                 type="button"
-                                class="tutkintonimike-action"
+                                class="tutkintonimike-toiminto"
                                 disabled
                                 >
                             Palauta kaikki
                             </button>
                         </div>
-                        <div id="asetukset-hidden-paikkakunnat" class="asetukset-list"></div>
+                        <div id="asetukset-38" class="asetukset-18"></div>
                     </div>
                 </div>
             </section>
