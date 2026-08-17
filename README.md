@@ -12,7 +12,6 @@ Sovellus toimii kokonaan paikallisesti. Backend käynnistää HTTP-palvelimen os
 
 ```text
 digi-opo/
-├── data/ *
 ├── scripts/
 ├── src/
 │   ├── app/
@@ -22,9 +21,10 @@ digi-opo/
 │       ├── html/
 │       ├── ts/
 │       └── css/
+├── data/ *
 └── user/ *
 ```
-- `*` ajonaikainen
+- `*` tyhjät kansiot vanhalta ajalta ennen käyttäjädatan siirtoa käyttöjärjestelmän datahakemistoon (ks. [Käynnistys](#käynnistys)); eivät enää ajonaikaisessa käytössä
 
 ## Asennus
 
@@ -73,8 +73,9 @@ Skripti:
 - asentaa Python-riippuvuudet Nixin ulkopuolella
 - buildaa TypeScript-frontendin
 - tarkistaa odotetut `.js`-tulostiedostot
-- poistaa `user/*.json`- ja `data/*.db*`-tiedostot ennen käynnistystä
 - käynnistää `src/app/app.py`:n
+
+`src/app/app.py` tyhjentää käyttäjädatahakemiston (tietokanta, tallennukset, viennit) aina käynnistyksen yhteydessä — myös silloin kun sovellus käynnistetään suoraan (`python src/app/app.py`), ei vain paketoituna exe:nä. Sovellus ei siis koskaan säilytä edellisen ajon dataa.
 
 ### Windows
 
@@ -125,13 +126,11 @@ Huomioita paketoinnista:
 
 - Tämä projekti rakentaa tällä hetkellä `onedir`-jakelun, ei yksittäistä `onefile`-exeä.
 - Pakattu sovellus lukee staattiset resurssit paketista, mutta kirjoittaa käyttäjädatan erilliseen kirjoitettavaan hakemistoon.
-- winissa käyttäjädata tallennetaan pakatussa ajossa oletuksena polkuun `%LOCALAPPDATA%\digi-opo`.
-- Pakattu ajo tyhjentää käyttäjäkohtaisen sovellusdatan käynnistyksen yhteydessä.
+- Käyttäjädata (tietokanta, tallennukset, viennit) tallennetaan aina käyttöjärjestelmän omaan datahakemistoon, ei projektikansioon: winissä `%LOCALAPPDATA%\digi-opo`, macOS:ssä `~/Library/Application Support/digi-opo`, Linuxissa `$XDG_DATA_HOME/digi-opo` (tai `~/.local/share/digi-opo`).
+- Jokainen käynnistystapa — `run.sh`/`run.bat`, suora `python src/app/app.py` tai paketoitu `.exe` — tyhjentää tämän käyttäjädatahakemiston käynnistyksen yhteydessä. Sovellus ei säilytä edellisen ajon dataa missään käynnistystavassa.
 - `dist/digi-opo/` tulee jakaa kokonaisena kansiona, ei pelkkänä `.exe`-tiedostona.
 
 ### Manuaalinen käynnistys
-
-Manuaalinen käynnistys on käytännöllinen, kun haluat säilyttää ajonaikaisen datan käynnistysten välillä:
 
 ```bash
 source .venv/bin/activate
@@ -143,8 +142,7 @@ Huomio:
 
 - `npm run build` kääntää TypeScriptin suoraan hakemistoon `src/ui/ts/`
 - Erillistä frontend-`dist/`-hakemistoa ei ole
-- Lähdekoodista ajettaessa ajonaikainen data tallennetaan projektijuuren alle hakemistoihin `data/`, `user/` ja `exports/`
-- `scripts/linux/run.sh` ja `scripts/win/run.bat` ovat puhtaan aloituksen käynnistysskriptejä, eivät pysyvyyttä säilyttäviä kehityskomentoja
+- Tämä käynnistystapa nollaa käyttäjädatan siinä missä `run.sh`/`run.bat`-skriptitkin — se ei säilytä dataa ajokertojen välillä
 
 ## Kehitys
 
